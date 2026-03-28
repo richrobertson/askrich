@@ -30,6 +30,11 @@ class DocumentLoader:
             List of Document objects with parsed metadata and content
         """
         documents = []
+        if not self.content_root.exists() or not self.content_root.is_dir():
+            raise ValueError(
+                "Content root does not exist or is not a directory: "
+                f"{self.content_root}. Set CONTENT_ROOT to a valid path."
+            )
         markdown_files = self.content_root.rglob("*.md")
 
         for filepath in sorted(markdown_files):

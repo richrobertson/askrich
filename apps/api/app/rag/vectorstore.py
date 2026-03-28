@@ -21,7 +21,7 @@ class VectorStore(ABC):
         texts: List[str],
         embeddings: Optional[List[List[float]]] = None,
         metadatas: Optional[List[Dict[str, Any]]] = None,
-        ids: List[str] | None = None,
+        ids: Optional[List[str]] = None,
     ) -> List[str]:
         """Add texts to the vector store.
 
@@ -113,7 +113,7 @@ class ChromaVectorStore(VectorStore):
         texts: List[str],
         embeddings: Optional[List[List[float]]] = None,
         metadatas: Optional[List[Dict[str, Any]]] = None,
-        ids: List[str] | None = None,
+        ids: Optional[List[str]] = None,
     ) -> List[str]:
         """Add texts to Chroma collection.
 

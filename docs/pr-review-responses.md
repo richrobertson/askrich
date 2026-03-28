@@ -1,51 +1,17 @@
 # PR Review Responses: Pull Request #1
 
-This document records explicit replies and resolutions for each inline review comment from PR #1.
+This document tracks each inline review comment from PR #1, the reply, and the concrete resolution in this branch.
 
-## 1) `.editorconfig` should preserve Makefile tabs
+| Comment ID | File | Status | Resolution |
+|---|---|---|---|
+| `3004929316` | `docs/prompts/prompt-strategy.md` | ✅ Resolved | Added explicit TOON definition + expected syntax guidance. |
+| `3004929318` | `docs/diagrams/high-level-architecture.md` | ✅ Resolved | Re-aligned first ASCII architecture diagram for consistent borders. |
+| `3004929320` | `docs/deployment/cloudflare.md` | ✅ Resolved | Clarified Workers-compatible Next.js packaging and edge runtime constraints. |
+| `3004929322` | `README.md` | ✅ Resolved | Clarified Next.js packaging approach and runtime assumptions. |
+| `3004929324` | `.env.example` | ✅ Resolved | Defaulted `LANGSMITH_TRACING=false` and added cautionary comment. |
+| `3004929326` | `.editorconfig` | ✅ Resolved | Added `[Makefile*]` section with `indent_style = tab`. |
 
-**Reviewer comment:** Add a Makefile-specific EditorConfig override so tab-indented recipes are not accidentally converted to spaces.
+## Notes
 
-**Reply:** Great catch. We added a `[Makefile*]` section with `indent_style = tab`.
-
-**Resolution:** Updated `.editorconfig`.
-
-## 2) `.env.example` should default tracing to false
-
-**Reviewer comment:** `LANGSMITH_TRACING=true` can accidentally enable third-party prompt/content tracing in dev/staging.
-
-**Reply:** Agreed. We changed the default to `false` and added an explicit warning comment for opt-in enablement.
-
-**Resolution:** Updated `.env.example`.
-
-## 3) README should clarify Next.js Workers packaging approach
-
-**Reviewer comment:** “Next.js on Workers” is ambiguous and could be mistaken for a standard Node runtime deployment.
-
-**Reply:** Agreed. We now clarify packaging approach and edge-runtime constraints.
-
-**Resolution:** Updated README tech stack section.
-
-## 4) Cloudflare deployment doc should call out runtime constraints
-
-**Reviewer comment:** Add explicit guidance on Workers-compatible build tooling and edge-only runtime assumptions.
-
-**Reply:** Agreed. Added concrete guidance mentioning `@cloudflare/next-on-pages` / OpenNext-style packaging and Node-runtime limitations.
-
-**Resolution:** Updated `docs/deployment/cloudflare.md` frontend section.
-
-## 5) Prompt strategy should define TOON
-
-**Reviewer comment:** TOON was referenced but not defined.
-
-**Reply:** Agreed. Added a short repository-specific definition and expected usage/strictness.
-
-**Resolution:** Updated `docs/prompts/prompt-strategy.md`.
-
-## 6) High-level ASCII diagram alignment
-
-**Reviewer comment:** Box alignment in the first architecture diagram should be consistent for readability.
-
-**Reply:** Agreed. Reworked spacing and border alignment in the first diagram block.
-
-**Resolution:** Updated `docs/diagrams/high-level-architecture.md`.
+- Resolutions were implemented directly in repository files rather than posting placeholder acknowledgements.
+- This file exists to keep review context durable for future contributors and maintainers.

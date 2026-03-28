@@ -13,7 +13,7 @@ class ModelClient(ABC):
         question: str,
         evidence_snippets: list[dict[str, Any]],
         instructions: str,
-        toon: str | None = None,
+        tone: str | None = None,
     ) -> str:
         """Generate an answer from question + retrieved evidence."""
         raise NotImplementedError
@@ -27,7 +27,7 @@ class ExtractiveModelClient(ModelClient):
         question: str,
         evidence_snippets: list[dict[str, Any]],
         instructions: str,
-        toon: str | None = None,
+        tone: str | None = None,
     ) -> str:
         del instructions
 
@@ -53,8 +53,8 @@ class ExtractiveModelClient(ModelClient):
             )
             bullets.append(f"- {clipped} ({source_title})")
 
-        if toon:
-            bullets.append(f"- Tone note applied: {toon[:140].strip()}")
+        if tone:
+            bullets.append(f"- Tone note applied: {tone[:140].strip()}")
 
         if not bullets:
             bullets.append("- Unknown: Retrieved content was empty after formatting.")

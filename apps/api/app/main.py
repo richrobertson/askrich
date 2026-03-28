@@ -74,9 +74,9 @@ def chat(payload: ChatRequest):
         service = get_chat_service()
         result = service.answer(
             question=payload.question,
-            top_k=payload.top_k or settings.chat_top_k,
+            top_k=payload.top_k if payload.top_k is not None else settings.chat_top_k,
             filters=payload.filters,
-            toon=payload.toon,
+            tone=payload.tone,
         )
         response = ChatResponseEnvelope(
             success=True,

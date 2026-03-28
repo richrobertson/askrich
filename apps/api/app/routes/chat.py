@@ -1,6 +1,5 @@
 """Chat endpoint runtime service wiring."""
 
-import logging
 from functools import lru_cache
 
 from app.config import settings
@@ -8,9 +7,6 @@ from app.rag.chat import ChatService
 from app.rag.embeddings import get_embedding_client
 from app.rag.model import get_model_client
 from app.rag.vectorstore import ChromaVectorStore
-
-
-logger = logging.getLogger(__name__)
 
 
 @lru_cache(maxsize=1)

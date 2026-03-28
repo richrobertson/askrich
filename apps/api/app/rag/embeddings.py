@@ -10,8 +10,12 @@ Currently a placeholder; actual provider wiring deferred to Milestone 2.
 from abc import ABC, abstractmethod
 from typing import List
 import hashlib
+import logging
 import math
 import re
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_embedding_client(provider: str, dimension: int) -> "EmbeddingClient":
@@ -26,8 +30,9 @@ def get_embedding_client(provider: str, dimension: int) -> "EmbeddingClient":
     if normalized == "placeholder":
         return PlaceholderEmbeddingClient(dimension=dimension)
 
-    # Keep the runtime resilient until provider-specific clients are added.
-    return HashEmbeddingClient(dimension=dimension)
+    message = f"Unsupported embedding provider: {provider}"
+    logger.error(message)
+    raise ValueError(message)
 
 
 class EmbeddingClient(ABC):

@@ -35,7 +35,7 @@ class ChatService:
         question: str,
         top_k: int,
         filters: ChatFilters | None = None,
-        toon: str | None = None,
+        tone: str | None = None,
     ) -> dict[str, Any]:
         query_embedding = self.embedding_client.embed_text(question)
         raw_results = self.vector_store.similarity_search(query_embedding, k=max(top_k * 3, top_k))
@@ -47,10 +47,10 @@ class ChatService:
             question=question,
             evidence_snippets=bounded_evidence,
             instructions=DEFAULT_INSTRUCTIONS,
-            toon=toon,
+            tone=tone,
         )
 
-        citations = self._build_citations(selected)
+        citations = self._build_citations(bounded_evidence)
 
         return {
             "answer": answer_text,

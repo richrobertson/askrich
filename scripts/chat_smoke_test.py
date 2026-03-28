@@ -64,7 +64,7 @@ def main() -> int:
             question=item["question"],
             top_k=item["top_k"],
             filters=item["filters"],
-            toon="clear and recruiter-friendly",
+            tone="clear and recruiter-friendly",
         )
 
         answer = response.get("answer", "")

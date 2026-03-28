@@ -79,7 +79,7 @@ See `scripts/README.md` for ingestion and smoke testing guidance.
 {
   "question": "What migration work has Rich led?",
   "top_k": 5,
-  "toon": "clear and recruiter-friendly",
+  "tone": "clear and recruiter-friendly",
   "filters": {
     "doc_types": ["projects"],
     "tags": ["migration", "kubernetes"]

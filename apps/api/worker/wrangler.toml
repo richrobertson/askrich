@@ -25,5 +25,5 @@ ALLOWED_ORIGINS = "https://staging.myrobertson.com"
 name = "askrich-prod-api"
 
 [env.prod.vars]
-UPSTREAM_API_BASE = "https://api.myrobertson.com"
+UPSTREAM_API_BASE = "https://internal-chat.myrobertson.com"
 ALLOWED_ORIGINS = "https://www.myrobertson.com"

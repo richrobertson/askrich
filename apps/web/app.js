@@ -72,6 +72,26 @@ function getSafeCitationUrl(sourceUrl) {
   return null;
 }
 
+function extractApiErrorMessage(payload, status) {
+  if (payload && typeof payload.error === "string" && payload.error.trim() !== "") {
+    return payload.error;
+  }
+
+  if (payload && typeof payload.detail === "string" && payload.detail.trim() !== "") {
+    return payload.detail;
+  }
+
+  if (payload && payload.detail !== undefined) {
+    try {
+      return JSON.stringify(payload.detail);
+    } catch (_error) {
+      return `Request failed with status ${status}`;
+    }
+  }
+
+  return `Request failed with status ${status}`;
+}
+
 function pushEvent(type, payload = {}) {
   const event = { ts: nowIso(), type, payload };
   pushCapped(telemetry.events, event, MAX_TELEMETRY_EVENTS);
@@ -220,7 +240,7 @@ async function askQuestion(question) {
 
   const json = await response.json().catch(() => ({}));
   if (!response.ok || !json.success) {
-    const message = json?.error || `Request failed with status ${response.status}`;
+    const message = extractApiErrorMessage(json, response.status);
     throw new Error(message);
   }
 

@@ -78,6 +78,11 @@ data/
 
 See `docs/milestones/overview.md`.
 
+Milestone-1 planning details are expanded in:
+- `docs/milestones/milestone-01.md`
+- `docs/schemas-content.md`
+- `docs/ingestion-scaffold-plan.md`
+
 ## Local development intention
 
 Local development should remain lightweight:

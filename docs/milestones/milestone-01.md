@@ -22,6 +22,8 @@
 
 - `content/**` documents with YAML frontmatter
 - `docs/content-guide.md`
+- `docs/schemas-content.md`
+- `docs/ingestion-scaffold-plan.md`
 - `scripts/README.md`
 - `data/chroma/.gitkeep`
 

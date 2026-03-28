@@ -159,21 +159,70 @@ def extract_error_message(status: int, payload: dict[str, Any]) -> str:
     return f"Request failed with status {status} and body: {json.dumps(payload, ensure_ascii=False)}"
 
 
+def normalize_top_k(raw_top_k: Any, question_id: str) -> tuple[int | None, str | None]:
+    if raw_top_k is None:
+        return None, None
+
+    try:
+        value = int(raw_top_k)
+    except (TypeError, ValueError):
+        return (
+            None,
+            f"Invalid top_k value {raw_top_k!r} for question {question_id}; must be an integer between 1 and 20.",
+        )
+
+    if not 1 <= value <= 20:
+        return (
+            None,
+            f"Invalid top_k value {value} for question {question_id}; must be between 1 and 20.",
+        )
+
+    return value, None
+
+
 def run_eval(config: EvalConfig, questions: list[dict[str, Any]]) -> dict[str, Any]:
     run_started = datetime.now(timezone.utc)
     results: list[dict[str, Any]] = []
 
     for item in questions:
-        top_k = config.top_k if config.top_k is not None else item.get("top_k")
+        top_k_source = config.top_k if config.top_k is not None else item.get("top_k")
+        normalized_top_k, top_k_error = normalize_top_k(top_k_source, item["id"])
         body: dict[str, Any] = {
             "question": item["question"],
         }
-        if top_k is not None:
-            body["top_k"] = int(top_k)
+        if top_k_source is not None:
+            body["top_k"] = top_k_source
         if item.get("filters"):
             body["filters"] = item["filters"]
         if item.get("tone"):
             body["tone"] = item["tone"]
+
+        if top_k_error is not None:
+            result = {
+                "id": item["id"],
+                "category": item["category"],
+                "question": item["question"],
+                "request": body,
+                "status_code": 0,
+                "success": False,
+                "error": top_k_error,
+                "latency_ms": 0,
+                "answer": "",
+                "answer_chars": 0,
+                "citations": [],
+                "citation_count": 0,
+                "retrieved_chunks": 0,
+            }
+            results.append(result)
+
+            print(f"[error] {item['id']} ({item['category']}) 0ms")
+            print(f"  -> {result['error']}")
+            if config.fail_fast:
+                break
+            continue
+
+        if normalized_top_k is not None:
+            body["top_k"] = normalized_top_k
 
         started = time.perf_counter()
         status, payload = post_json(f"{config.api_base}/api/chat", body)

@@ -76,7 +76,7 @@ function pushEvent(type, payload = {}) {
   const event = { ts: nowIso(), type, payload };
   pushCapped(telemetry.events, event, MAX_TELEMETRY_EVENTS);
   try {
-    localStorage.setItem("askrich.telemetry", JSON.stringify(telemetry.events.slice(-100)));
+    localStorage.setItem("askrich.telemetry", JSON.stringify(telemetry.events));
   } catch (_error) {
     // Best-effort persistence only; continue even when storage is unavailable.
   }

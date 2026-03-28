@@ -49,6 +49,12 @@ def run_ingest():
     Returns:
         JSON with ingestion results
     """
+    if not settings.enable_ingest_endpoint:
+        return JSONResponse(
+            {"detail": "Ingestion endpoint is disabled in this environment."},
+            status_code=status.HTTP_403_FORBIDDEN,
+        )
+
     result = ingest.ingest()
     status_code = status.HTTP_200_OK if result.get("success") else status.HTTP_500_INTERNAL_SERVER_ERROR
     return JSONResponse(result, status_code=status_code)

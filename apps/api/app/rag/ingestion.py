@@ -84,20 +84,29 @@ class IngestionPipeline:
         Args:
             chunks: List of chunks to embed and index
         """
-        texts = [chunk.text for chunk in chunks]
-        metadatas = [chunk.metadata.to_dict() for chunk in chunks]
-        ids = [chunk.metadata.chunk_id for chunk in chunks]
+        batch_size = 256
+        total_indexed = 0
 
-        # Get placeholder embeddings
-        # In Milestone 2, this will call actual provider embeddings
-        embeddings = self.embedding_client.embed_texts(texts)
-        logger.info(f"Generated {len(embeddings)} embeddings")
+        for start in range(0, len(chunks), batch_size):
+            batch = chunks[start : start + batch_size]
+            texts = [chunk.text for chunk in batch]
+            metadatas = [chunk.metadata.to_dict() for chunk in batch]
+            ids = [chunk.metadata.chunk_id for chunk in batch]
 
-        # Add to vector store
-        added_ids = self.vector_store.add_texts(
-            texts=texts,
-            embeddings=embeddings,
-            metadatas=metadatas,
-            ids=ids,
-        )
-        logger.info(f"Indexed {len(added_ids)} chunks in vector store")
+            # In Milestone 2, this will call actual provider embeddings.
+            embeddings = self.embedding_client.embed_texts(texts)
+            logger.info(
+                "Generated %s embeddings for batch %s",
+                len(embeddings),
+                start // batch_size,
+            )
+
+            added_ids = self.vector_store.add_texts(
+                texts=texts,
+                embeddings=embeddings,
+                metadatas=metadatas,
+                ids=ids,
+            )
+            total_indexed += len(added_ids)
+
+        logger.info(f"Indexed {total_indexed} chunks in vector store")

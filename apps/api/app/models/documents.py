@@ -25,7 +25,7 @@ class DocumentMetadata:
         self.source_url = source_url
         self.tags = tags or []
         self.summary = summary
-        self.updated = updated or datetime.now(timezone.utc).isoformat()
+        self.updated = updated
         self.priority = priority
         self.extra = extra
 

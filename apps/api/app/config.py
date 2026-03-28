@@ -37,6 +37,9 @@ class Settings:
     app_name: str = "Ask Rich API"
     app_version: str = "0.1.0"
     debug: bool = os.getenv("DEBUG", "false").lower() == "true"
+    enable_ingest_endpoint: bool = os.getenv(
+        "ENABLE_INGEST_ENDPOINT", os.getenv("DEBUG", "false")
+    ).lower() == "true"
     cors_allowed_origins: list[str] = [
         origin.strip()
         for origin in os.getenv(

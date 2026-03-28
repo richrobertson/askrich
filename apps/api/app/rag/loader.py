@@ -56,7 +56,7 @@ class DocumentLoader:
             content = f.read()
 
         # Parse frontmatter
-        metadata_dict, body = self._parse_frontmatter(content)
+        metadata_dict, body = self._parse_frontmatter(content, filepath)
 
         # Prefer explicit frontmatter ids and fall back to a stable path-derived id.
         doc_id = metadata_dict.get("id") or self._build_fallback_id(filepath)
@@ -84,7 +84,9 @@ class DocumentLoader:
         relative_path = filepath.relative_to(self.content_root).with_suffix("")
         return "/".join(relative_path.parts)
 
-    def _parse_frontmatter(self, content: str) -> tuple[Dict[str, Any], str]:
+    def _parse_frontmatter(
+        self, content: str, filepath: Path
+    ) -> tuple[Dict[str, Any], str]:
         """Parse YAML frontmatter from markdown.
 
         Args:
@@ -107,6 +109,7 @@ class DocumentLoader:
         try:
             metadata = yaml.safe_load(frontmatter_text) or {}
         except yaml.YAMLError:
+            logger.warning("Failed to parse YAML frontmatter for %s", filepath)
             metadata = {}
 
         if not isinstance(metadata, dict):

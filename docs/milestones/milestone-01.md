@@ -6,7 +6,7 @@
 
 - Establish high-quality recruiter-facing corpus content.
 - Define consistent document schemas/frontmatter.
-- Design ingestion workflow and script skeletons.
+- Implement the ingestion workflow and runnable helper scripts.
 - Provide measurable acceptance criteria before runtime API build.
 
 ## Deliverables
@@ -17,7 +17,7 @@
   - `content/skills/`
   - `content/faq/`
 - Content guide with section standards.
-- Ingestion plan and placeholder script structure.
+- Ingestion scaffold and runnable helper scripts.
 - Documentation for architecture, deployment intent, and milestones.
 
 ## Exact folders/files intended
@@ -49,9 +49,9 @@ Each content doc should include frontmatter fields such as:
 Project docs may add:
 - `role`, `domain`, `technologies`, `outcomes`.
 
-## Ingestion plan
+## Ingestion scaffold
 
-Planned scaffold responsibilities:
+Current scaffold responsibilities:
 1. Parse markdown + frontmatter.
 2. Validate required fields by `type`.
 3. Chunk content with stable IDs.
@@ -61,10 +61,10 @@ Planned scaffold responsibilities:
 
 ## Test plan
 
-- Frontmatter schema validation tests.
-- Chunking determinism tests.
-- Ingestion smoke test over sample corpus.
-- Failure-path tests for malformed documents.
+- Smoke test script for frontmatter validation and chunking sanity.
+- Manual ingestion run via `scripts/ingest_all.py`.
+- Failure-path handling for malformed documents and vector store initialization.
+- Additional automated tests to be added in Milestone 2.
 
 ## Acceptance criteria
 
@@ -82,11 +82,11 @@ Planned scaffold responsibilities:
 - **Content guide:** `docs/content-guide.md` with quality bar
 - **Ingestion scaffold:** FastAPI app with full load → split → embed → index pipeline
   - `apps/api/app/main.py` — FastAPI application with `/health` and `/ingest` endpoints
-  - `apps/api/app/config.py` — Provider-agnostic settings 
+  - `apps/api/app/config.py` — Provider-agnostic settings
   - `apps/api/app/models/` — API response types and document models
   - `apps/api/app/rag/` — Complete RAG layer (loader, splitter, embeddings, vectorstore, orchestration)
   - `apps/api/app/routes/` — Health and ingest handlers
-- **Helper scripts:** 
+- **Helper scripts:**
   - `scripts/ingest_all.py` — Full ingestion with human-readable output
   - `scripts/smoke_test.py` — Quick validation of document load/chunk/vectorstore setup
 - **Documentation:** Updated README and API docs to reflect scaffold

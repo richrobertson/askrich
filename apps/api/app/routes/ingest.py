@@ -50,7 +50,7 @@ def ingest() -> dict:
         return response.to_dict()
 
     except Exception as e:
-        logger.error(f"Ingestion failed: {e}")
+        logger.exception("Ingestion failed")
         response = IngestResponse(
             success=False,
             documents_count=0,

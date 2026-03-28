@@ -1,12 +1,15 @@
 """Document loader for markdown content with frontmatter parsing."""
 
-import os
+import logging
 import re
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 import yaml
 
 from app.models.documents import Document, DocumentMetadata
+
+
+logger = logging.getLogger(__name__)
 
 
 class DocumentLoader:
@@ -35,7 +38,7 @@ class DocumentLoader:
                 if doc:
                     documents.append(doc)
             except Exception as e:
-                print(f"Error loading {filepath}: {e}")
+                logger.exception("Error loading %s", filepath)
                 continue
 
         return documents
@@ -55,8 +58,8 @@ class DocumentLoader:
         # Parse frontmatter
         metadata_dict, body = self._parse_frontmatter(content)
 
-        # Generate document ID from filename
-        doc_id = filepath.stem
+        # Prefer explicit frontmatter ids and fall back to a stable path-derived id.
+        doc_id = metadata_dict.get("id") or self._build_fallback_id(filepath)
 
         # Extract required fields
         title = metadata_dict.get("title", filepath.stem)
@@ -75,6 +78,11 @@ class DocumentLoader:
         )
 
         return Document(metadata=metadata, content=body)
+
+    def _build_fallback_id(self, filepath: Path) -> str:
+        """Build a stable fallback document id from the content-relative path."""
+        relative_path = filepath.relative_to(self.content_root).with_suffix("")
+        return "/".join(relative_path.parts)
 
     def _parse_frontmatter(self, content: str) -> tuple[Dict[str, Any], str]:
         """Parse YAML frontmatter from markdown.

@@ -1,6 +1,6 @@
 # apps/api
 
-FastAPI-based backend for Ask Rich. Deployed to Cloudflare Workers.
+FastAPI-based local development scaffold for Ask Rich. The production API target remains a Cloudflare Worker.
 
 ## Milestone 1: Current Implementation
 
@@ -42,7 +42,7 @@ app/
 ### Prerequisites
 
 ```bash
-pip install fastapi uvicorn pyyaml chromadb
+pip install -r requirements.txt
 ```
 
 ### Start the API
@@ -90,7 +90,7 @@ Settings are loaded from environment variables (with defaults):
 **Milestone 2 → Production:**
 1. Replace Chroma with Cloudflare Vectorize
 2. Wire D1 for session/evaluation metadata
-3. Optimize for Worker runtime constraints
+3. Port the runtime API path from the FastAPI scaffold to a Cloudflare Worker implementation
 4. Add comprehensive eval suite
 
 ## Next Steps

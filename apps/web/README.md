@@ -1,6 +1,6 @@
 # apps/web
 
-Milestone 3 frontend starter for the Ask Rich recruiter chat experience.
+Milestone 4 web starter for the Ask Rich recruiter chat experience.
 
 ## Current implementation
 

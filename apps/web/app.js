@@ -14,6 +14,8 @@ const telemetry = {
   events: [],
 };
 
+let isRequestInFlight = false;
+
 const els = {
   form: document.querySelector("#chat-form"),
   question: document.querySelector("#question"),
@@ -46,7 +48,11 @@ function average(numbers) {
 function pushEvent(type, payload = {}) {
   const event = { ts: nowIso(), type, payload };
   telemetry.events.push(event);
-  localStorage.setItem("askrich.telemetry", JSON.stringify(telemetry.events.slice(-100)));
+  try {
+    localStorage.setItem("askrich.telemetry", JSON.stringify(telemetry.events.slice(-100)));
+  } catch (_error) {
+    // Best-effort persistence only; continue even when storage is unavailable.
+  }
 }
 
 function renderMetrics() {
@@ -109,8 +115,13 @@ function appendMessage(role, text, citations = []) {
 }
 
 function getApiBase() {
-  const stored = localStorage.getItem("askrich.apiBase");
   const fallback = "http://127.0.0.1:8000";
+  let stored = null;
+  try {
+    stored = localStorage.getItem("askrich.apiBase");
+  } catch (_error) {
+    stored = null;
+  }
   return (stored || fallback).replace(/\/$/, "");
 }
 
@@ -119,7 +130,11 @@ function initApiBase() {
   els.apiBase.value = base;
   els.apiBase.addEventListener("change", () => {
     const trimmed = (els.apiBase.value || "").trim().replace(/\/$/, "");
-    localStorage.setItem("askrich.apiBase", trimmed || "http://127.0.0.1:8000");
+    try {
+      localStorage.setItem("askrich.apiBase", trimmed || "http://127.0.0.1:8000");
+    } catch (_error) {
+      // Keep working even if storage cannot be written.
+    }
   });
 }
 
@@ -195,6 +210,10 @@ function setFormBusy(isBusy) {
 
 async function onSubmit(event) {
   event.preventDefault();
+  if (isRequestInFlight) {
+    return;
+  }
+
   const question = (els.question.value || "").trim();
   if (question.length < 3) {
     appendMessage("system", "Question is too short. Please add a little more detail.");
@@ -207,6 +226,7 @@ async function onSubmit(event) {
   renderMetrics();
 
   els.question.value = "";
+  isRequestInFlight = true;
   setFormBusy(true);
 
   try {
@@ -230,6 +250,7 @@ async function onSubmit(event) {
       cards[cards.length - 1].classList.add("error-text");
     }
   } finally {
+    isRequestInFlight = false;
     setFormBusy(false);
     renderMetrics();
   }
@@ -238,6 +259,9 @@ async function onSubmit(event) {
 function bindComposerShortcuts() {
   els.question.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && !event.shiftKey) {
+      if (isRequestInFlight) {
+        return;
+      }
       event.preventDefault();
       els.form.requestSubmit();
     }

@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import socket
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -125,7 +126,12 @@ def post_json(url: str, body: dict[str, Any], timeout_seconds: float = 30.0) -> 
         with request.urlopen(req, timeout=timeout_seconds) as resp:
             status = resp.getcode() or 0
             raw = resp.read().decode("utf-8")
-            return status, json.loads(raw) if raw else {}
+            if not raw:
+                return status, {}
+            try:
+                return status, json.loads(raw)
+            except json.JSONDecodeError:
+                return status, {"error": f"Non-JSON response body: {raw}"}
     except error.HTTPError as exc:
         raw = exc.read().decode("utf-8", errors="replace")
         try:
@@ -133,6 +139,24 @@ def post_json(url: str, body: dict[str, Any], timeout_seconds: float = 30.0) -> 
         except json.JSONDecodeError:
             parsed = {"error": raw}
         return exc.code, parsed
+    except (error.URLError, TimeoutError, socket.timeout) as exc:
+        reason = getattr(exc, "reason", None)
+        detail = str(reason if reason is not None else exc)
+        return 0, {"error": f"Transport error: {detail}"}
+
+
+def extract_error_message(status: int, payload: dict[str, Any]) -> str:
+    err = payload.get("error")
+    if isinstance(err, str) and err.strip():
+        return err
+
+    detail = payload.get("detail")
+    if isinstance(detail, str) and detail.strip():
+        return detail
+    if detail is not None:
+        return json.dumps(detail, ensure_ascii=False)
+
+    return f"Request failed with status {status} and body: {json.dumps(payload, ensure_ascii=False)}"
 
 
 def run_eval(config: EvalConfig, questions: list[dict[str, Any]]) -> dict[str, Any]:
@@ -167,7 +191,7 @@ def run_eval(config: EvalConfig, questions: list[dict[str, Any]]) -> dict[str, A
             "request": body,
             "status_code": status,
             "success": success,
-            "error": None if success else payload.get("error", "Request failed"),
+            "error": None if success else extract_error_message(status, payload),
             "latency_ms": latency_ms,
             "answer": answer,
             "answer_chars": len(answer),

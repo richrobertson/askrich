@@ -4,8 +4,12 @@ For now, provides a minimal wrapper around Chroma for local development.
 Cloudflare Vectorize integration deferred to Milestone 2.
 """
 
+import logging
 from typing import Any, Dict, List, Optional
 from abc import ABC, abstractmethod
+
+
+logger = logging.getLogger(__name__)
 
 
 class VectorStore(ABC):
@@ -125,6 +129,14 @@ class ChromaVectorStore(VectorStore):
         if not texts:
             return []
 
+        expected_length = len(texts)
+        if embeddings is not None and len(embeddings) != expected_length:
+            raise ValueError("embeddings must have the same length as texts")
+        if metadatas is not None and len(metadatas) != expected_length:
+            raise ValueError("metadatas must have the same length as texts")
+        if ids is not None and len(ids) != expected_length:
+            raise ValueError("ids must have the same length as texts")
+
         collection = self._require_collection()
         collection.add(
             documents=texts,
@@ -181,4 +193,5 @@ class ChromaVectorStore(VectorStore):
             collection.delete(ids=ids)
             return True
         except Exception:
+            logger.exception("Failed to delete ids from vector store")
             return False

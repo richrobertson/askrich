@@ -1,6 +1,6 @@
 """Ask Rich API - FastAPI application."""
 
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import logging
@@ -50,7 +50,8 @@ def run_ingest():
         JSON with ingestion results
     """
     result = ingest.ingest()
-    return JSONResponse(result)
+    status_code = status.HTTP_200_OK if result.get("success") else status.HTTP_500_INTERNAL_SERVER_ERROR
+    return JSONResponse(result, status_code=status_code)
 
 
 @app.get("/")

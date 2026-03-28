@@ -1,6 +1,7 @@
 """Ingestion endpoint."""
 
 import logging
+from functools import lru_cache
 
 from app.models.api import IngestResponse
 from app.rag.ingestion import IngestionPipeline
@@ -14,6 +15,24 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 
+@lru_cache(maxsize=1)
+def get_ingestion_pipeline() -> IngestionPipeline:
+    """Build and cache the ingestion pipeline for reuse across requests."""
+    loader = DocumentLoader(content_root=settings.content_root)
+    splitter = TextSplitter(chunk_size=512, chunk_overlap=128)
+    embedding_client = PlaceholderEmbeddingClient(dimension=1536)
+    vector_store = ChromaVectorStore(
+        persist_directory=settings.chroma_persist_directory
+    )
+
+    return IngestionPipeline(
+        loader=loader,
+        splitter=splitter,
+        embedding_client=embedding_client,
+        vector_store=vector_store,
+    )
+
+
 def ingest() -> dict:
     """Run ingestion pipeline and return results.
 
@@ -21,23 +40,7 @@ def ingest() -> dict:
         IngestResponse as dictionary
     """
     try:
-        # Initialize components
-        loader = DocumentLoader(content_root=settings.content_root)
-        splitter = TextSplitter(chunk_size=512, chunk_overlap=128)
-        embedding_client = PlaceholderEmbeddingClient(dimension=1536)
-        vector_store = ChromaVectorStore(
-            persist_directory=settings.chroma_persist_directory
-        )
-
-        # Create pipeline
-        pipeline = IngestionPipeline(
-            loader=loader,
-            splitter=splitter,
-            embedding_client=embedding_client,
-            vector_store=vector_store,
-        )
-
-        # Run ingestion
+        pipeline = get_ingestion_pipeline()
         doc_count, chunk_count = pipeline.run()
 
         response = IngestResponse(

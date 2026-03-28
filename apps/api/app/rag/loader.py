@@ -97,8 +97,8 @@ class DocumentLoader:
         if not content.startswith("---"):
             return {}, content
 
-        # Find the closing ---
-        match = re.match(r"^---\n(.*?)\n---\n(.*)", content, re.DOTALL)
+        # Find the closing --- while tolerating LF and CRLF newlines.
+        match = re.match(r"^---\r?\n(.*?)\r?\n---\r?\n?(.*)", content, re.DOTALL)
         if not match:
             return {}, content
 

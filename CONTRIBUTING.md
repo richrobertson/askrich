@@ -66,4 +66,4 @@ When addressing PR feedback:
 - Mark each thread resolved only after the matching change is committed.
 - If no code/doc change is needed, explain why and still close the loop in writing.
 
-For this repository, use `docs/pr-review-responses.md` to keep a durable record of substantial review resolutions.
+Keep the resolution history on the PR itself by replying on each thread before resolving it.

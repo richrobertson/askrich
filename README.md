@@ -25,16 +25,25 @@ The system retrieves relevant documents, assembles context, and returns concise 
 
 ## Current status
 
-**Milestone 1 in progress**: Documentation complete, corpus established, ingestion scaffold added.
+Milestone status as of 2026-03-28:
+- ✅ Milestone 1 completed (corpus + schemas + ingestion scaffold)
+- ✅ Milestone 2 completed (MVP retrieval + `/api/chat` + citations)
+- ✅ Milestone 3 completed (web chat integration + embeddable widget)
+- ✅ Milestone 4 completed (eval harness + quality loop)
+- ✅ Milestone 5 completed (Cloudflare deployment + production hardening docs and runbooks)
 
 ## Implementation status
 
-Milestone 1 deliverables now in place:
+Core deliverables now in place:
 - ✅ Curated content corpus with consistent frontmatter (`content/`)
 - ✅ Document and chunk schemas (`docs/schemas-content.md`)
 - ✅ Ingestion scaffold (`apps/api/`, `scripts/ingest_all.py`, `scripts/smoke_test.py`)
+- ✅ Retrieval runtime with `/api/chat` and citation-aware responses
+- ✅ API and eval smoke helpers (`scripts/chat_smoke_test.py`, `scripts/run_eval_bank.py`)
 - ✅ Architecture and deployment documentation
-- ⏳ **Milestone 2 coming:** Chat retrieval runtime and prompt assembly
+- ✅ Cloudflare deployment and integration runbooks
+- ✅ Cloudflare deployable artifacts (`apps/api/worker/`, `apps/web/wrangler.toml`, `.github/workflows/deploy-cloudflare.yml`)
+- ✅ Website integration widget (`apps/web/embed/askrich-widget.js`)
 
 ## High-level architecture summary
 
@@ -65,15 +74,20 @@ Ask Rich is a **RAG application**, not a generic freeform chatbot:
 
 See `docs/deployment/cloudflare.md` for details.
 
+Additional deployment docs:
+- `docs/deployment/cloudflare-config-and-deploy.md`
+- `docs/deployment/myrobertson-website-integration.md`
+- `docs/deployment/costs.md`
+
 ## Repository structure
 
 ```text
 apps/
-  api/               # Future Worker API implementation
-  web/               # Future Next.js frontend
+  api/               # Local FastAPI runtime scaffold (retrieval + chat + ingestion)
+  web/               # Recruiter chat UI + embeddable website widget + worker assets config
 content/             # Curated recruiter-facing corpus
 docs/                # Architecture, ADRs, milestones, deployment, prompts, evals
-scripts/             # Future ingestion/eval/deploy helper scripts
+scripts/             # Ingestion, smoke, and eval helper scripts
 data/
   chroma/            # Local vector persistence (dev only)
 ```
@@ -87,6 +101,13 @@ data/
 - **M5:** Cloudflare deployment and production hardening
 
 See `docs/milestones/overview.md`.
+
+Milestone detail pages:
+- `docs/milestones/milestone-01.md`
+- `docs/milestones/milestone-02.md`
+- `docs/milestones/milestone-03.md`
+- `docs/milestones/milestone-04.md`
+- `docs/milestones/milestone-05.md`
 
 Milestone-1 planning details are expanded in:
 - `docs/milestones/milestone-01.md`
@@ -122,3 +143,15 @@ Ask Rich is explicitly designed to demonstrate practical open-source LLM integra
 ## License
 
 MIT. See `LICENSE`.
+
+## Security and Quality Automation
+
+This repository includes automated static analysis and dependency checks for pull requests and main-branch pushes:
+
+- CodeQL analysis for Python and JavaScript
+- Dependency review for pull requests
+- Secret scanning with Gitleaks
+- Python lint/security checks (Ruff + Bandit)
+- Dependabot updates for pip and GitHub Actions
+
+Workflow files are in `.github/workflows/` and dependency update policy is in `.github/dependabot.yml`.

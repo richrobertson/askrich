@@ -17,3 +17,14 @@ Do not open public issues for sensitive findings.
 - Rotate exposed credentials immediately.
 - Use scoped, least-privilege tokens where possible.
 - Prefer separate credentials per environment (dev/staging/prod).
+
+## Automated security controls
+
+The repository runs automated checks via GitHub Actions:
+
+- CodeQL static code analysis
+- Dependency Review on pull requests
+- Secret scanning via Gitleaks
+- Python static analysis via Ruff and Bandit
+
+Dependabot is enabled for pip and GitHub Actions dependency updates.

@@ -1,6 +1,6 @@
 # apps/web
 
-Milestone 4 web starter for the Ask Rich recruiter chat experience.
+Milestone 3/4 web implementation for the Ask Rich recruiter chat experience.
 
 ## Current implementation
 
@@ -9,6 +9,8 @@ Milestone 4 web starter for the Ask Rich recruiter chat experience.
 - Citation rendering per assistant message
 - Client-side interaction telemetry (sent/received/error counts and latency)
 - API integration with `POST /api/chat`
+- Cloudflare asset deployment config via `wrangler.toml`
+- Embeddable site widget at `embed/askrich-widget.js`
 
 ## Run locally
 
@@ -25,4 +27,18 @@ python -m http.server 3000
 ## Notes
 
 - API base URL is editable in the UI and persisted in local storage.
-- This is a milestone starter implementation. A Next.js + Cloudflare Workers app can replace this static shell in later milestone steps.
+- This static shell can be deployed as Worker assets while a future Next.js migration remains optional.
+
+## Embedding on www.myrobertson.com
+
+Include the widget script on any page:
+
+```html
+<script
+	src="/apps/web/embed/askrich-widget.js"
+	data-api-base="https://api.myrobertson.com"
+	data-title="Ask Rich"
+></script>
+```
+
+The widget opens a recruiter-focused chat panel and calls `POST /api/chat` on the configured API base.

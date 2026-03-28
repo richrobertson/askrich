@@ -20,10 +20,10 @@ API_ROOT = REPO_ROOT / "apps" / "api"
 # Add the API package root so scripts work from the repository root.
 sys.path.insert(0, str(API_ROOT))
 
-from app.rag.loader import DocumentLoader
-from app.rag.splitter import TextSplitter
-from app.rag.vectorstore import ChromaVectorStore
-from app.config import settings
+from app.rag.loader import DocumentLoader  # noqa: E402
+from app.rag.splitter import TextSplitter  # noqa: E402
+from app.rag.vectorstore import ChromaVectorStore  # noqa: E402
+from app.config import settings  # noqa: E402
 
 
 def main():
@@ -79,7 +79,7 @@ def main():
         # Test 5: Vector store initialization
         print("TEST 5: Testing vector store initialization...")
         try:
-            vector_store = ChromaVectorStore(
+            _vector_store = ChromaVectorStore(
                 persist_directory=settings.chroma_persist_directory
             )
             print(f"✓ Vector store initialized at {settings.chroma_persist_directory}")

@@ -80,3 +80,9 @@ Model and embedding calls will go through adapter interfaces. Cloudflare-hosted 
 ## Open-source model infrastructure position
 
 Ask Rich intends to use open-source model infrastructure for inference and embeddings and must not depend on OpenAI to function.
+
+## Related deployment guides
+
+- [Cloudflare configuration and deployment runbook](cloudflare-config-and-deploy.md)
+- [www.myrobertson.com integration guide](myrobertson-website-integration.md)
+- [Cloudflare cost estimate notes](costs.md)

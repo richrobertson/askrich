@@ -1,6 +1,6 @@
 # Milestone 02: Retrieval and Chat API
 
-**Status: In Progress**
+**Status: Completed (MVP)**
 
 ## Objectives
 
@@ -67,3 +67,14 @@ Vector store logic should remain unchanged when swapping providers.
 - ✅ Added provider-agnostic adapter factories for embeddings and model generation.
 - ✅ Added deterministic local defaults for Milestone 2 smoke testing (hash embeddings + extractive answer generator).
 - ✅ Added `scripts/chat_smoke_test.py` for representative recruiter question checks.
+
+## Next steps
+
+- Continue Milestone 3 website integration against the current `/api/chat` response contract.
+- Maintain eval regression cadence and tune retrieval/prompt behavior as new corpus updates land.
+
+## Navigation
+
+- Overview: [Milestone Overview](overview.md)
+- Previous: [Milestone 01](milestone-01.md)
+- Next: [Milestone 03](milestone-03.md)

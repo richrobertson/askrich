@@ -1,6 +1,6 @@
 # Milestone 01: Corpus, Schemas, and Ingestion Scaffold
 
-**Status: In Progress**
+**Status: Completed**
 
 ## Goals
 
@@ -91,10 +91,12 @@ Current scaffold responsibilities:
   - `scripts/smoke_test.py` — Quick validation of document load/chunk/vectorstore setup
 - **Documentation:** Updated README and API docs to reflect scaffold
 
-### ⏳ Next Steps (Milestone 2)
+### Handoff outcome
 
-- Wire real embeddings (replace `PlaceholderEmbeddingClient`)
-- Implement `ModelClient` adapter for retrieval-aware chat
-- Add `/api/chat` endpoint with retrieval and prompt assembly
-- Add citation formatting
-- Begin Cloudflare Workers runtime integration
+- Milestone 2 started from this scaffold without repository restructuring.
+- Ingestion and schema foundations are now treated as baseline platform capabilities.
+
+## Navigation
+
+- Overview: [Milestone Overview](overview.md)
+- Next: [Milestone 02](milestone-02.md)

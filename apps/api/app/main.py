@@ -11,7 +11,6 @@ from app.routes import health, ingest
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # Create FastAPI app
 app = FastAPI(
@@ -24,7 +23,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Restrict in production
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -42,7 +41,7 @@ async def get_health():
 
 
 @app.post("/ingest")
-async def run_ingest():
+def run_ingest():
     """Ingestion endpoint.
 
     Loads documents, chunks them, embeds, and indexes.
@@ -50,7 +49,7 @@ async def run_ingest():
     Returns:
         JSON with ingestion results
     """
-    result = await ingest.ingest()
+    result = ingest.ingest()
     return JSONResponse(result)
 
 

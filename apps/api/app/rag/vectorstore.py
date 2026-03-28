@@ -4,7 +4,7 @@ For now, provides a minimal wrapper around Chroma for local development.
 Cloudflare Vectorize integration deferred to Milestone 2.
 """
 
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 from abc import ABC, abstractmethod
 
 
@@ -15,6 +15,7 @@ class VectorStore(ABC):
     def add_texts(
         self,
         texts: List[str],
+        embeddings: Optional[List[List[float]]] = None,
         metadatas: Optional[List[Dict[str, Any]]] = None,
         ids: Optional[List[str]] = None,
     ) -> List[str]:
@@ -22,6 +23,7 @@ class VectorStore(ABC):
 
         Args:
             texts: List of text strings
+            embeddings: Optional list of embedding vectors (one per text)
             metadatas: Optional list of metadata dicts (one per text)
             ids: Optional list of unique IDs (one per text)
 
@@ -92,9 +94,20 @@ class ChromaVectorStore(VectorStore):
                 "For local development, run: pip install chromadb"
             )
 
+    def _require_collection(self):
+        """Return the initialized Chroma collection.
+
+        Raises:
+            RuntimeError: If initialization failed and no collection is available.
+        """
+        if self.collection is None:
+            raise RuntimeError("Chroma collection is not initialized")
+        return self.collection
+
     def add_texts(
         self,
         texts: List[str],
+        embeddings: Optional[List[List[float]]] = None,
         metadatas: Optional[List[Dict[str, Any]]] = None,
         ids: Optional[List[str]] = None,
     ) -> List[str]:
@@ -102,6 +115,7 @@ class ChromaVectorStore(VectorStore):
 
         Args:
             texts: List of text strings
+            embeddings: Optional list of embedding vectors
             metadatas: Optional list of metadata dicts
             ids: Optional list of unique IDs
 
@@ -111,8 +125,10 @@ class ChromaVectorStore(VectorStore):
         if not texts:
             return []
 
-        self.collection.add(
+        collection = self._require_collection()
+        collection.add(
             documents=texts,
+            embeddings=embeddings,
             ids=ids or [f"id_{i}" for i in range(len(texts))],
             metadatas=metadatas or [{} for _ in texts],
         )
@@ -130,7 +146,8 @@ class ChromaVectorStore(VectorStore):
         Returns:
             List of result dicts with 'text', 'metadata', and 'distance'
         """
-        results = self.collection.query(
+        collection = self._require_collection()
+        results = collection.query(
             query_texts=[query],
             n_results=k,
             include=["documents", "metadatas", "distances"]
@@ -160,7 +177,8 @@ class ChromaVectorStore(VectorStore):
             True if successful
         """
         try:
-            self.collection.delete(ids=ids)
+            collection = self._require_collection()
+            collection.delete(ids=ids)
             return True
         except Exception:
             return False

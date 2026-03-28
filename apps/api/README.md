@@ -68,16 +68,16 @@ See `scripts/README.md` for ingestion and smoke testing guidance.
 
 Settings are loaded from environment variables (with defaults):
 
-- `LLM_PROVIDER` (default: `"openai"`)
+- `LLM_PROVIDER` (default: `""`)
 - `LLM_API_BASE` (default: `""`)
 - `LLM_API_KEY` (default: `""`)
-- `LLM_MODEL` (default: `"gpt-4"`)
-- `EMBEDDING_PROVIDER` (default: `"openai"`)
+- `LLM_MODEL` (default: `""`)
+- `EMBEDDING_PROVIDER` (default: `""`)
 - `EMBEDDING_API_BASE` (default: `""`)
 - `EMBEDDING_API_KEY` (default: `""`)
-- `EMBEDDING_MODEL` (default: `"text-embedding-3-small"`)
-- `CHROMA_PERSIST_DIRECTORY` (default: `"data/chroma"`)
-- `CONTENT_ROOT` (default: `"content"`)
+- `EMBEDDING_MODEL` (default: `""`)
+- `CHROMA_PERSIST_DIRECTORY` (default: repo-root `data/chroma`)
+- `CONTENT_ROOT` (default: repo-root `content`)
 
 ## Migration Path
 

@@ -96,6 +96,7 @@ class IngestionPipeline:
         # Add to vector store
         added_ids = self.vector_store.add_texts(
             texts=texts,
+            embeddings=embeddings,
             metadatas=metadatas,
             ids=ids,
         )

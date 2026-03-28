@@ -1,7 +1,6 @@
 """Text chunking utilities with metadata preservation."""
 
 from typing import List
-import hashlib
 
 from app.models.documents import Document, Chunk, ChunkMetadata
 
@@ -90,10 +89,14 @@ class TextSplitter:
                 chunks.append(chunk)
                 chunk_index += 1
 
-            # Move start position for next chunk (with overlap)
-            start = end - self.chunk_overlap
-            if start >= end:  # Prevent infinite loop
+            if end >= len(text):
                 break
+
+            # Guarantee forward progress even with pathological overlap values.
+            next_start = max(end - self.chunk_overlap, start + 1)
+            if next_start <= start:
+                break
+            start = next_start
 
         return chunks
 

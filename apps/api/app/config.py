@@ -7,28 +7,31 @@ import os
 from pathlib import Path
 
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
 class Settings:
     """Application settings loaded from environment."""
 
     # LLM Provider (abstract)
-    llm_provider: str = os.getenv("LLM_PROVIDER", "openai")
+    llm_provider: str = os.getenv("LLM_PROVIDER", "")
     llm_api_base: str = os.getenv("LLM_API_BASE", "")
     llm_api_key: str = os.getenv("LLM_API_KEY", "")
-    llm_model: str = os.getenv("LLM_MODEL", "gpt-4")
+    llm_model: str = os.getenv("LLM_MODEL", "")
 
     # Embedding Provider (abstract)
-    embedding_provider: str = os.getenv("EMBEDDING_PROVIDER", "openai")
+    embedding_provider: str = os.getenv("EMBEDDING_PROVIDER", "")
     embedding_api_base: str = os.getenv("EMBEDDING_API_BASE", "")
     embedding_api_key: str = os.getenv("EMBEDDING_API_KEY", "")
-    embedding_model: str = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
+    embedding_model: str = os.getenv("EMBEDDING_MODEL", "")
 
     # Vector Store (local dev)
     chroma_persist_directory: str = os.getenv(
-        "CHROMA_PERSIST_DIRECTORY", "data/chroma"
+        "CHROMA_PERSIST_DIRECTORY", str(REPO_ROOT / "data" / "chroma")
     )
 
     # Content Root
-    content_root: str = os.getenv("CONTENT_ROOT", "content")
+    content_root: str = os.getenv("CONTENT_ROOT", str(REPO_ROOT / "content"))
 
     # FastAPI
     app_name: str = "Ask Rich API"

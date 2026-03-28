@@ -1,7 +1,6 @@
 """Ingestion endpoint."""
 
 import logging
-from typing import Optional
 
 from app.models.api import IngestResponse
 from app.rag.ingestion import IngestionPipeline
@@ -15,7 +14,7 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 
-async def ingest() -> dict:
+def ingest() -> dict:
     """Run ingestion pipeline and return results.
 
     Returns:

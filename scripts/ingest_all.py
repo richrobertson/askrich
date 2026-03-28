@@ -12,11 +12,13 @@ Usage:
 """
 
 import sys
-import os
 from pathlib import Path
 
-# Add parent directory to path so we can import app modules
-sys.path.insert(0, str(Path(__file__).parent.parent))
+REPO_ROOT = Path(__file__).resolve().parents[1]
+API_ROOT = REPO_ROOT / "apps" / "api"
+
+# Add the API package root so scripts work from the repository root.
+sys.path.insert(0, str(API_ROOT))
 
 from app.rag.loader import DocumentLoader
 from app.rag.splitter import TextSplitter

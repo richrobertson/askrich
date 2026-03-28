@@ -56,3 +56,14 @@ Contributions that add model integrations must:
 - support replacing model/embedding backends with minimal changes.
 
 Do not introduce dependencies that make OpenAI mandatory for inference or embeddings.
+
+
+## PR review comment workflow
+
+When addressing PR feedback:
+- Reply to each review comment with a short **what changed** summary.
+- Include file paths for where the change was made.
+- Mark each thread resolved only after the matching change is committed.
+- If no code/doc change is needed, explain why and still close the loop in writing.
+
+For this repository, use `docs/pr-review-responses.md` to keep a durable record of substantial review resolutions.

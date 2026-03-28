@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ask Rich Recruiter Chat</title>
+    <meta
+      name="description"
+      content="Recruiter-friendly Ask Rich chat UI with source-backed answers and citations."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-bg" aria-hidden="true"></div>
+    <main class="layout">
+      <header class="hero">
+        <p class="eyebrow">Ask Rich • Milestone 4 Starter</p>
+        <h1>Recruiter chat grounded in real project evidence.</h1>
+        <p class="hero-copy">
+          Ask impact-focused questions and review source citations immediately.
+        </p>
+      </header>
+
+      <section class="chat-shell" aria-label="Recruiter chat interface">
+        <aside class="sidebar" aria-label="Prompt starters and settings">
+          <div class="panel">
+            <h2>Starter prompts</h2>
+            <p class="muted">
+              Shortcuts designed for recruiter screening and technical fit checks.
+            </p>
+            <div id="prompt-list" class="prompt-list"></div>
+          </div>
+
+          <div class="panel">
+            <h2>Session settings</h2>
+            <label for="api-base">API base URL</label>
+            <input id="api-base" type="url" placeholder="http://127.0.0.1:8000" />
+
+            <label for="top-k">Top K</label>
+            <input id="top-k" type="number" min="1" max="20" value="5" />
+
+            <label for="tone">Tone note (optional)</label>
+            <textarea
+              id="tone"
+              rows="3"
+              maxlength="3000"
+              placeholder="Example: Focus on outcomes and leadership decisions."
+            ></textarea>
+          </div>
+
+          <div class="panel telemetry" aria-live="polite">
+            <h2>Interaction telemetry</h2>
+            <ul>
+              <li><span>Messages sent</span><strong id="metric-sent">0</strong></li>
+              <li><span>Responses received</span><strong id="metric-received">0</strong></li>
+              <li><span>Errors</span><strong id="metric-errors">0</strong></li>
+              <li><span>Avg latency (ms)</span><strong id="metric-latency">0</strong></li>
+            </ul>
+          </div>
+        </aside>
+
+        <section class="conversation" aria-label="Conversation panel">
+          <div id="messages" class="messages" role="log" aria-live="polite"></div>
+
+          <form id="chat-form" class="composer">
+            <label class="sr-only" for="question">Ask a question</label>
+            <textarea
+              id="question"
+              rows="3"
+              maxlength="2000"
+              required
+              placeholder="Ask about migrations, platform ownership, architecture decisions, and measurable outcomes."
+            ></textarea>
+            <div class="composer-row">
+              <p class="hint">Shift+Enter for newline</p>
+              <button id="send-btn" type="submit">Send question</button>
+            </div>
+          </form>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

@@ -23,6 +23,8 @@ coverage/
 # Local data and vector stores
 data/chroma/**
 !data/chroma/.gitkeep
+data/evals/**
+!data/evals/.gitkeep
 *.sqlite
 *.db
 

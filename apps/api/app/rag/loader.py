@@ -109,6 +109,12 @@ class DocumentLoader:
         except yaml.YAMLError:
             metadata = {}
 
+        if not isinstance(metadata, dict):
+            logger.warning(
+                "Frontmatter is not a mapping; ignoring metadata: %r", metadata
+            )
+            metadata = {}
+
         return metadata, body.strip()
 
     def _infer_type(self, filepath: Path) -> str:

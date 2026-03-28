@@ -37,6 +37,14 @@ class Settings:
     app_name: str = "Ask Rich API"
     app_version: str = "0.1.0"
     debug: bool = os.getenv("DEBUG", "false").lower() == "true"
+    cors_allowed_origins: list[str] = [
+        origin.strip()
+        for origin in os.getenv(
+            "CORS_ALLOWED_ORIGINS",
+            "http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000",
+        ).split(",")
+        if origin.strip()
+    ]
 
 
 settings = Settings()

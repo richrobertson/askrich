@@ -1,7 +1,7 @@
 """Document and chunk data models."""
 
 from typing import Any, Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class DocumentMetadata:
@@ -25,7 +25,7 @@ class DocumentMetadata:
         self.source_url = source_url
         self.tags = tags or []
         self.summary = summary
-        self.updated = updated or datetime.utcnow().isoformat()
+        self.updated = updated or datetime.now(timezone.utc).isoformat()
         self.priority = priority
         self.extra = extra
 

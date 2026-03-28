@@ -61,9 +61,9 @@ class TextSplitter:
 
             # Try to break at a sentence boundary if possible
             if end < len(text):
-                # Look back for a period or newline
-                for i in range(end, max(start, end - 100), -1):
-                    if i < len(text) and text[i] in ".?!\n":
+                # Look back for a period or newline within the current chunk.
+                for i in range(end - 1, max(start, end - 100) - 1, -1):
+                    if text[i] in ".?!\n":
                         end = i + 1
                         break
 

@@ -128,6 +128,8 @@ class ChromaVectorStore(VectorStore):
         """
         if not texts:
             return []
+        if ids is None:
+            raise ValueError("ids must be provided and stable across ingestion runs")
 
         expected_length = len(texts)
         if embeddings is not None and len(embeddings) != expected_length:
@@ -141,10 +143,10 @@ class ChromaVectorStore(VectorStore):
         collection.add(
             documents=texts,
             embeddings=embeddings,
-            ids=ids or [f"id_{i}" for i in range(len(texts))],
+            ids=ids,
             metadatas=metadatas or [{} for _ in texts],
         )
-        return ids or [f"id_{i}" for i in range(len(texts))]
+        return ids
 
     def similarity_search(
         self, query: str, k: int = 5

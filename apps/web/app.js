@@ -176,7 +176,8 @@ function getApiBase() {
 function initApiBase() {
   const base = getApiBase();
   els.apiBase.value = base;
-  els.apiBase.addEventListener("change", () => {
+  // Persist on 'input' event so localStorage always stays in sync with the field value
+  els.apiBase.addEventListener("input", () => {
     const trimmed = (els.apiBase.value || "").trim().replace(/\/$/, "");
     try {
       localStorage.setItem("askrich.apiBase", trimmed || "http://127.0.0.1:8000");
@@ -210,7 +211,8 @@ function parseTopK() {
 }
 
 async function askQuestion(question) {
-  const base = getApiBase();
+  // Use the current input field value (which is always in sync with localStorage via the input event listener)
+  const base = (els.apiBase.value || "").trim().replace(/\/$/, "") || "http://127.0.0.1:8000";
   const endpoint = `${base}/api/chat`;
 
   const body = {

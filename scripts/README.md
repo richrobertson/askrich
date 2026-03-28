@@ -52,11 +52,34 @@ Useful for:
 - Checking citation formatting
 - Sanity-checking prompt/answer structure and runtime pipeline without external model dependencies
 
-## Future Script Categories (Milestone 2+)
+## Milestone 4: Evaluation Helpers
 
-- **Evaluation helpers**
-  - run question bank
-  - record rubric scores and regression comparisons
+### `run_eval_bank.py`
+
+Run the recruiter question bank against `POST /api/chat` and emit review artifacts.
+
+```bash
+python scripts/run_eval_bank.py
+```
+
+Optional flags:
+
+```bash
+python scripts/run_eval_bank.py \
+  --api-base http://127.0.0.1:8000 \
+  --question-bank docs/evals/question_bank.json \
+  --output-dir data/evals \
+  --top-k 5
+```
+
+Outputs:
+
+- `data/evals/eval_run_<timestamp>.json` with full responses and citations
+- `data/evals/eval_rubric_<timestamp>.csv` with blank rubric columns for scoring
+
+The question bank is stored at `docs/evals/question_bank.json` and is designed to be portable across model providers.
+
+## Future Script Categories
 
 - **Deployment helpers**
   - pre-deploy checks

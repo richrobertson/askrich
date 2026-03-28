@@ -125,7 +125,7 @@ def post_json(url: str, body: dict[str, Any], timeout_seconds: float = 30.0) -> 
     try:
         with request.urlopen(req, timeout=timeout_seconds) as resp:
             status = resp.getcode() or 0
-            raw = resp.read().decode("utf-8")
+            raw = resp.read().decode("utf-8", errors="replace")
             if not raw:
                 return status, {}
             try:

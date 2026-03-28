@@ -5,12 +5,15 @@
 **Scope**
 - Define corpus structure and source document quality bar
 - Establish metadata/frontmatter conventions
-- Create ingestion scaffold plan and initial scripts placeholders
+- Implement ingestion scaffold with runnable pipeline
 
 **Deliverables**
 - Baseline `content/` corpus documents
 - Documentation for schemas and ingestion flow
-- Milestone acceptance criteria
+- Working API with health and ingestion endpoints
+- Helper scripts for corpus management
+
+**Status**: In progress — core scaffold in place, refinements ongoing
 
 **Non-goals**
 - Production chat API

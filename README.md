@@ -25,7 +25,16 @@ The system retrieves relevant documents, assembles context, and returns concise 
 
 ## Current status
 
-**Planning / Milestone 1**: project foundation, corpus planning, schemas, ingestion scaffold planning, and architecture documentation.
+**Milestone 1 in progress**: Documentation complete, corpus established, ingestion scaffold added.
+
+## Implementation status
+
+Milestone 1 deliverables now in place:
+- ✅ Curated content corpus with consistent frontmatter (`content/`)
+- ✅ Document and chunk schemas (`docs/schemas-content.md`)
+- ✅ Ingestion scaffold (`apps/api/`, `scripts/ingest_all.py`, `scripts/smoke_test.py`)
+- ✅ Architecture and deployment documentation
+- ⏳ **Milestone 2 coming:** Chat retrieval runtime and prompt assembly
 
 ## High-level architecture summary
 
@@ -39,7 +48,7 @@ Ask Rich is a **RAG application**, not a generic freeform chatbot:
 
 ## Planned tech stack
 
-- **Frontend:** Next.js packaged for Cloudflare Pages/Workers runtime (for example `@cloudflare/next-on-pages` or OpenNext-style output), not a traditional Node.js server
+- **Frontend:** Next.js deployed to Cloudflare Workers
 - **Backend API:** Cloudflare Worker API (`/api/chat` target)
 - **Workers edge runtime constraints:** Prefer Edge-compatible APIs; avoid Node-only runtime assumptions
 - **RAG framework:** LangChain first

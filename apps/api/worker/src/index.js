@@ -34,7 +34,8 @@ export default {
         );
       }
 
-      const upstreamUrl = `${env.UPSTREAM_API_BASE.replace(/\/$/, "")}/api/chat`;
+      const upstreamPath = normalizeUpstreamPath(env.UPSTREAM_CHAT_PATH || "/api/chat");
+      const upstreamUrl = `${env.UPSTREAM_API_BASE.replace(/\/$/, "")}${upstreamPath}`;
       let upstreamResponse;
 
       try {
@@ -76,6 +77,19 @@ export default {
     return withCors(json({ success: false, error: "Not found" }, 404), request, env);
   },
 };
+
+function normalizeUpstreamPath(path) {
+  if (!path || typeof path !== "string") {
+    return "/api/chat";
+  }
+
+  const trimmed = path.trim();
+  if (!trimmed) {
+    return "/api/chat";
+  }
+
+  return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+}
 
 function json(payload, status = 200) {
   return new Response(JSON.stringify(payload), {

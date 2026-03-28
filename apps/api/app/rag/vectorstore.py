@@ -19,9 +19,9 @@ class VectorStore(ABC):
     def add_texts(
         self,
         texts: List[str],
+        ids: List[str],
         embeddings: Optional[List[List[float]]] = None,
         metadatas: Optional[List[Dict[str, Any]]] = None,
-        ids: Optional[List[str]] = None,
     ) -> List[str]:
         """Add texts to the vector store.
 
@@ -111,9 +111,9 @@ class ChromaVectorStore(VectorStore):
     def add_texts(
         self,
         texts: List[str],
+        ids: List[str],
         embeddings: Optional[List[List[float]]] = None,
         metadatas: Optional[List[Dict[str, Any]]] = None,
-        ids: Optional[List[str]] = None,
     ) -> List[str]:
         """Add texts to Chroma collection.
 
@@ -128,15 +128,13 @@ class ChromaVectorStore(VectorStore):
         """
         if not texts:
             return []
-        if ids is None:
-            raise ValueError("ids must be provided and stable across ingestion runs")
 
         expected_length = len(texts)
         if embeddings is not None and len(embeddings) != expected_length:
             raise ValueError("embeddings must have the same length as texts")
         if metadatas is not None and len(metadatas) != expected_length:
             raise ValueError("metadatas must have the same length as texts")
-        if ids is not None and len(ids) != expected_length:
+        if len(ids) != expected_length:
             raise ValueError("ids must have the same length as texts")
 
         collection = self._require_collection()

@@ -2,6 +2,7 @@
 
 import logging
 import re
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 import yaml
@@ -63,23 +64,41 @@ class DocumentLoader:
         # Parse frontmatter
         metadata_dict, body = self._parse_frontmatter(content, filepath)
 
+        raw_id = metadata_dict.get("id")
+        raw_title = metadata_dict.get("title")
+        raw_type = metadata_dict.get("type")
+
         # Prefer explicit frontmatter ids and fall back to a stable path-derived id.
-        doc_id = metadata_dict.get("id") or self._build_fallback_id(filepath)
+        doc_id = raw_id or self._build_fallback_id(filepath)
 
         # Extract required fields
-        title = metadata_dict.get("title", filepath.stem)
-        doc_type = metadata_dict.get("type", self._infer_type(filepath))
+        title = raw_title or filepath.stem
+        doc_type = raw_type or self._infer_type(filepath)
+
+        missing_required_frontmatter = [
+            field
+            for field, value in {
+                "id": raw_id,
+                "title": raw_title,
+                "type": raw_type,
+                "summary": metadata_dict.get("summary"),
+                "tags": metadata_dict.get("tags"),
+                "updated": metadata_dict.get("updated"),
+            }.items()
+            if value in (None, "", [])
+        ]
 
         # Build metadata
         metadata = DocumentMetadata(
             id=doc_id,
             title=title,
             doc_type=doc_type,
-            source_url=metadata_dict.get("canonical_url"),
+            source_url=metadata_dict.get("source_url") or metadata_dict.get("canonical_url"),
             tags=metadata_dict.get("tags", []),
             summary=metadata_dict.get("summary"),
             updated=metadata_dict.get("updated"),
             priority=metadata_dict.get("priority", 1),
+            missing_required_frontmatter=missing_required_frontmatter,
         )
 
         return Document(metadata=metadata, content=body)
@@ -151,6 +170,12 @@ class DocumentLoader:
         errors = []
 
         for doc in documents:
+            missing = doc.metadata.extra.get("missing_required_frontmatter", [])
+            if missing:
+                errors.append(
+                    f"Document missing required frontmatter ({', '.join(missing)}): {doc.metadata.id}"
+                )
+
             # Check required fields
             if not doc.metadata.id:
                 errors.append(f"Document missing id: {doc.metadata.title}")
@@ -161,4 +186,27 @@ class DocumentLoader:
             if not doc.content or not doc.content.strip():
                 errors.append(f"Document has empty content: {doc.metadata.id}")
 
+            if not isinstance(doc.metadata.tags, list) or len(doc.metadata.tags) == 0:
+                errors.append(f"Document tags must include at least one value: {doc.metadata.id}")
+
+            if not self._is_iso_date(doc.metadata.updated):
+                errors.append(
+                    f"Document updated must be ISO date (YYYY-MM-DD): {doc.metadata.id}"
+                )
+
+            if not re.search(r"^#{1,6}\s+.+", doc.content, re.MULTILINE):
+                errors.append(
+                    f"Document body must include at least one markdown heading: {doc.metadata.id}"
+                )
+
         return len(errors) == 0, errors
+
+    def _is_iso_date(self, value: Optional[str]) -> bool:
+        """Return True when value matches YYYY-MM-DD."""
+        if not value or not isinstance(value, str):
+            return False
+        try:
+            datetime.strptime(value, "%Y-%m-%d")
+        except ValueError:
+            return False
+        return True

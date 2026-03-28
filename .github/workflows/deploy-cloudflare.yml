@@ -24,6 +24,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Verify Cloudflare secrets
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CF_API_TOKEN" ] || [ -z "$CF_ACCOUNT_ID" ]; then
+            echo "Missing Cloudflare secrets. Configure CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in repository secrets."
+            exit 1
+          fi
+
       - name: Deploy API Worker
         uses: cloudflare/wrangler-action@v3
         with:
@@ -42,6 +52,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Verify Cloudflare secrets
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CF_API_TOKEN" ] || [ -z "$CF_ACCOUNT_ID" ]; then
+            echo "Missing Cloudflare secrets. Configure CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in repository secrets."
+            exit 1
+          fi
 
       - name: Deploy Web Worker Assets
         uses: cloudflare/wrangler-action@v3

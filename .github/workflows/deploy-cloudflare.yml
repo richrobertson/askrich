@@ -17,9 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    defaults:
-      run:
-        working-directory: apps/api/worker
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,8 +34,7 @@ jobs:
       - name: Deploy API Worker
         uses: cloudflare/wrangler-action@v3
         with:
-          workingDirectory: apps/api/worker
-          command: deploy --env ${{ github.event.inputs.environment }}
+          command: deploy --config apps/api/worker/wrangler.toml --env ${{ github.event.inputs.environment }}
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
@@ -46,9 +42,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    defaults:
-      run:
-        working-directory: apps/web
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -66,7 +59,6 @@ jobs:
       - name: Deploy Web Worker Assets
         uses: cloudflare/wrangler-action@v3
         with:
-          workingDirectory: apps/web
-          command: deploy --env ${{ github.event.inputs.environment }}
+          command: deploy --config apps/web/wrangler.toml --env ${{ github.event.inputs.environment }}
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

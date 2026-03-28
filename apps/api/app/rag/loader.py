@@ -37,7 +37,7 @@ class DocumentLoader:
                 doc = self._load_file(filepath)
                 if doc:
                     documents.append(doc)
-            except Exception as e:
+            except Exception:
                 logger.exception("Error loading %s", filepath)
                 continue
 

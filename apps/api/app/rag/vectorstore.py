@@ -38,12 +38,12 @@ class VectorStore(ABC):
 
     @abstractmethod
     def similarity_search(
-        self, query: str, k: int = 5
+        self, query_embedding: List[float], k: int = 5
     ) -> List[Dict[str, Any]]:
         """Search for similar texts.
 
         Args:
-            query: Query text
+            query_embedding: Embedded query vector
             k: Number of results
 
         Returns:
@@ -140,7 +140,7 @@ class ChromaVectorStore(VectorStore):
             raise ValueError("ids must have the same length as texts")
 
         collection = self._require_collection()
-        collection.add(
+        collection.upsert(
             documents=texts,
             embeddings=embeddings,
             ids=ids,
@@ -149,12 +149,12 @@ class ChromaVectorStore(VectorStore):
         return ids
 
     def similarity_search(
-        self, query: str, k: int = 5
+        self, query_embedding: List[float], k: int = 5
     ) -> List[Dict[str, Any]]:
         """Search for similar documents in Chroma.
 
         Args:
-            query: Query text
+            query_embedding: Embedded query vector
             k: Number of results
 
         Returns:
@@ -162,7 +162,7 @@ class ChromaVectorStore(VectorStore):
         """
         collection = self._require_collection()
         results = collection.query(
-            query_texts=[query],
+            query_embeddings=[query_embedding],
             n_results=k,
             include=["documents", "metadatas", "distances"]
         )

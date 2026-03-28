@@ -1,7 +1,6 @@
 """Document and chunk data models."""
 
 from typing import Any, Dict, List, Optional
-from datetime import datetime, timezone
 
 
 class DocumentMetadata:

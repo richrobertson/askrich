@@ -3,29 +3,29 @@
 ## 1) End-to-end high-level system
 
 ```text
-+---------------------------+        +-----------------------------+
-| Recruiter / Hiring Manager| -----> | Next.js Web (Cloudflare)    |
-+---------------------------+        +--------------+--------------+
-                                                   |
-                                                   v
-                                    +--------------+--------------+
-                                    | Worker API (/api/chat)      |
-                                    | - retrieval + prompt assembly|
-                                    +------+-----------------------+
-                                           |
-              +----------------------------+------------------------------+
-              |                                                           |
-              v                                                           v
-+-------------+--------------+                           +----------------+----------------+
-| Vector Store (Vectorize)   |                           | Model Adapter (provider-agnostic)|
-| Retrieved evidence chunks  |                           | + Embeddings Adapter              |
-+-------------+--------------+                           +----------------+----------------+
-              ^                                                           |
-              |                                                           v
-+-------------+--------------+                           +----------------+----------------+
-| Ingestion Pipeline         | <-------------------------| Curated Content (Markdown)       |
-| parse/chunk/embed/index    |                           | bio/resume/projects/skills/faq   |
-+----------------------------+                           +----------------------------------+
++----------------------------+        +------------------------------+
+| Recruiter / Hiring Manager | -----> | Next.js Web (Cloudflare)     |
++----------------------------+        +--------------+---------------+
+                                                    |
+                                                    v
+                                    +---------------+---------------+
+                                    | Worker API (/api/chat)        |
+                                    | - retrieval + prompt assembly |
+                                    +-------+-----------------------+
+                                            |
+              +-----------------------------+------------------------------+
+              |                                                            |
+              v                                                            v
++-------------+---------------+                           +----------------+-----------------+
+| Vector Store (Vectorize)    |                           | Model Adapter (provider-agnostic)|
+| Retrieved evidence chunks   |                           | + Embeddings Adapter              |
++-------------+---------------+                           +----------------+-----------------+
+              ^                                                            |
+              |                                                            v
++-------------+---------------+                           +----------------+-----------------+
+| Ingestion Pipeline          | <-------------------------| Curated Content (Markdown)        |
+| parse/chunk/embed/index     |                           | bio/resume/projects/skills/faq    |
++-----------------------------+                           +------------------------------------+
 ```
 
 ## 2) Runtime request path

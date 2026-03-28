@@ -1,39 +1,51 @@
-# PR Review Responses: Initial Project Scaffold
+# PR Review Responses: Pull Request #1
 
-This file captures explicit replies to review comments for the initial scaffold PR and the concrete resolution made in-repo.
+This document records explicit replies and resolutions for each inline review comment from PR #1.
 
-## Comment 1: “Milestone 1 needs a concrete schema contract, not only narrative docs.”
+## 1) `.editorconfig` should preserve Makefile tabs
 
-**Reply:** Agreed. We added a dedicated schema contract doc with required fields, type-specific guidance, and validation rules.
+**Reviewer comment:** Add a Makefile-specific EditorConfig override so tab-indented recipes are not accidentally converted to spaces.
 
-**Resolution:** Added `docs/schemas-content.md` and linked it from Milestone 1 and README.
+**Reply:** Great catch. We added a `[Makefile*]` section with `indent_style = tab`.
 
-## Comment 2: “Ingestion planning should include pipeline stages and adapter boundaries.”
+**Resolution:** Updated `.editorconfig`.
 
-**Reply:** Agreed. We documented a stage-by-stage ingestion scaffold and adapter contracts.
+## 2) `.env.example` should default tracing to false
 
-**Resolution:** Added `docs/ingestion-scaffold-plan.md` with objectives, stages, outputs, tests, and non-goals.
+**Reviewer comment:** `LANGSMITH_TRACING=true` can accidentally enable third-party prompt/content tracing in dev/staging.
 
-## Comment 3: “README should point directly to detailed Milestone 1 artifacts.”
+**Reply:** Agreed. We changed the default to `false` and added an explicit warning comment for opt-in enablement.
 
-**Reply:** Agreed. Top-level navigation now links to specific Milestone 1 execution docs.
+**Resolution:** Updated `.env.example`.
 
-**Resolution:** Updated `README.md` Milestone section with links to schema and ingestion planning docs.
+## 3) README should clarify Next.js Workers packaging approach
 
-## Comment 4: “Milestone doc should list exact artifacts expected for completion.”
+**Reviewer comment:** “Next.js on Workers” is ambiguous and could be mistaken for a standard Node runtime deployment.
 
-**Reply:** Agreed. We expanded the explicit file list to include schema and ingestion plan docs.
+**Reply:** Agreed. We now clarify packaging approach and edge-runtime constraints.
 
-**Resolution:** Updated `docs/milestones/milestone-01.md` intended files list.
+**Resolution:** Updated README tech stack section.
 
-## Comment 5: “Keep provider assumptions portable across model backends.”
+## 4) Cloudflare deployment doc should call out runtime constraints
 
-**Reply:** Agreed. This remains an explicit project guardrail and review criterion.
+**Reviewer comment:** Add explicit guidance on Workers-compatible build tooling and edge-only runtime assumptions.
 
-**Resolution:** Confirmed and retained provider-agnostic adapter requirements in architecture, deployment, milestone, and ADR docs.
+**Reply:** Agreed. Added concrete guidance mentioning `@cloudflare/next-on-pages` / OpenNext-style packaging and Node-runtime limitations.
 
-## Comment 6: “Track review replies in-repo so future contributors understand rationale.”
+**Resolution:** Updated `docs/deployment/cloudflare.md` frontend section.
 
-**Reply:** Agreed. This document serves as traceable response history for this PR.
+## 5) Prompt strategy should define TOON
 
-**Resolution:** Added `docs/pr-review-responses.md` and referenced it in contributor guidance.
+**Reviewer comment:** TOON was referenced but not defined.
+
+**Reply:** Agreed. Added a short repository-specific definition and expected usage/strictness.
+
+**Resolution:** Updated `docs/prompts/prompt-strategy.md`.
+
+## 6) High-level ASCII diagram alignment
+
+**Reviewer comment:** Box alignment in the first architecture diagram should be consistent for readability.
+
+**Reply:** Agreed. Reworked spacing and border alignment in the first diagram block.
+
+**Resolution:** Updated `docs/diagrams/high-level-architecture.md`.

@@ -13,7 +13,8 @@ Benefits for this project:
 
 ### Frontend: Next.js on Workers
 
-- Host recruiter-facing site as a Next.js application on Cloudflare Workers.
+- Host recruiter-facing site as a Next.js application packaged for Cloudflare Pages/Workers runtime (for example via `@cloudflare/next-on-pages` or an OpenNext-style build), not a traditional Node.js server.
+- Assume Cloudflare Workers edge runtime constraints (Edge APIs only; avoid direct Node.js-specific APIs, native modules, or full Node process assumptions).
 - Keep UI latency low and deployment pipeline straightforward.
 
 ### Backend: Worker API

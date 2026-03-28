@@ -39,8 +39,9 @@ Ask Rich is a **RAG application**, not a generic freeform chatbot:
 
 ## Planned tech stack
 
-- **Frontend:** Next.js (deployed to Cloudflare Workers)
+- **Frontend:** Next.js packaged for Cloudflare Pages/Workers runtime (for example `@cloudflare/next-on-pages` or OpenNext-style output), not a traditional Node.js server
 - **Backend API:** Cloudflare Worker API (`/api/chat` target)
+- **Workers edge runtime constraints:** Prefer Edge-compatible APIs; avoid Node-only runtime assumptions
 - **RAG framework:** LangChain first
 - **Orchestration (later):** LangGraph when/if workflow complexity justifies it
 - **Vector store:** Cloudflare Vectorize (production target), Chroma (local dev)

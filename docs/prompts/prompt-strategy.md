@@ -7,6 +7,14 @@
 3. **TOON-style structured blocks are supportive, not dominant.**
 4. **Prompt contracts should stay model-provider agnostic.**
 
+## What TOON means in this repo
+
+TOON is used here as a **Typed Object-Oriented Notation** style block: a compact, structured key/value context payload embedded in prompts.
+
+- It is intentionally lightweight and human-readable (JSON-like structure).
+- It is not treated as a strict universal standard for all prompt logic.
+- Parsing can be tolerant in early milestones (schema checks over strict parser coupling).
+
 ## Why a hybrid prompt design
 
 Ask Rich needs both nuance and structure:

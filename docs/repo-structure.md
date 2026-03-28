@@ -2,7 +2,7 @@
 
 ## Overview
 
-Ask Rich is organized as a planning-first monorepo that will evolve into an implementation monorepo.
+Ask Rich is organized as an implementation-focused monorepo with local runnable scaffolds and a Cloudflare production target.
 
 ```text
 apps/
@@ -16,11 +16,11 @@ data/
 
 ## `apps/web`
 
-Future Next.js frontend for recruiter-facing chat UI, prompt starters, and citation rendering.
+Recruiter-facing chat UI scaffold with prompt starters, citation rendering, and local API integration.
 
 ## `apps/api`
 
-Future Cloudflare Worker API for retrieval, prompt assembly, model/embedding adapters, and response formatting.
+FastAPI local runtime for ingestion and retrieval-backed chat (`/ingest`, `/api/chat`) using provider-agnostic adapters.
 
 ## `content`
 
@@ -42,11 +42,11 @@ Project documentation:
 
 ## `scripts`
 
-Automation helpers planned for:
+Automation helpers for:
 - ingestion pipeline tasks,
 - smoke tests,
 - eval execution,
-- deployment support tasks.
+- deployment support tasks (later expansion).
 
 ## `data`
 

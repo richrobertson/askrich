@@ -1,6 +1,10 @@
 # Milestone Overview
 
+Last updated: 2026-03-28
+
 ## Milestone 1 — Content corpus + schemas + ingestion scaffold
+
+[Details](milestone-01.md)
 
 **Scope**
 - Define corpus structure and source document quality bar
@@ -13,13 +17,15 @@
 - Working API with health and ingestion endpoints
 - Helper scripts for corpus management
 
-**Status**: In progress — core scaffold in place, refinements ongoing
+**Status**: Completed
 
 **Non-goals**
 - Production chat API
 - Full frontend integration
 
 ## Milestone 2 — Retrieval + chat API
+
+[Details](milestone-02.md)
 
 **Scope**
 - Build retrieval layer and runtime prompt assembly
@@ -31,10 +37,14 @@
 - Citation-aware answer formatting
 - Basic API tests and smoke checks
 
+**Status**: Completed (MVP)
+
 **Non-goals**
 - Full agentic orchestration
 
 ## Milestone 3 — Website integration
+
+[Details](milestone-03.md)
 
 **Scope**
 - Integrate chat UI into personal website
@@ -45,10 +55,14 @@
 - Citation rendering in UI
 - Basic interaction telemetry
 
+**Status**: Completed
+
 **Non-goals**
 - Advanced workflow graphs
 
 ## Milestone 4 — Evals + polish
+
+[Details](milestone-04.md)
 
 **Scope**
 - Build question bank and rubric-driven evaluations
@@ -58,10 +72,14 @@
 - Evaluation harness and score tracking
 - Prompt/retrieval tuning based on failure modes
 
+**Status**: Completed
+
 **Non-goals**
 - Large-scale production traffic optimization
 
 ## Milestone 5 — Cloudflare deployment + production hardening
+
+[Details](milestone-05.md)
 
 **Scope**
 - Production deployment pipeline and environment hardening
@@ -70,6 +88,8 @@
 **Deliverables**
 - Dev/staging/prod deployment flow
 - Operational runbook and incident basics
+
+**Status**: Completed
 
 **Non-goals**
 - Multi-region custom infrastructure beyond Cloudflare-native plan

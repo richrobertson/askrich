@@ -2,7 +2,7 @@
 
 Automation helpers for ingestion, testing, and deployment.
 
-## Milestone 1: Current Scripts
+## Implemented Scripts
 
 ### `ingest_all.py`
 
@@ -84,3 +84,31 @@ The question bank is stored at `docs/evals/question_bank.json` and is designed t
 - **Deployment helpers**
   - pre-deploy checks
   - post-deploy smoke validation
+
+## Repository Security Rollout
+
+### `rollout_security_baseline.sh`
+
+Roll out this repository's GitHub security workflow baseline to other repositories.
+
+Default behavior is dry-run. Add `--execute` to apply changes.
+
+```bash
+scripts/rollout_security_baseline.sh --owner richrobertson --repos askrich
+scripts/rollout_security_baseline.sh --owner richrobertson --repos askrich --execute
+```
+
+Apply to all public repos for an owner:
+
+```bash
+scripts/rollout_security_baseline.sh --owner richrobertson --all-public --execute
+```
+
+This copies:
+- `.github/workflows/codeql.yml`
+- `.github/workflows/dependency-review.yml`
+- `.github/workflows/secret-scan.yml`
+- `.github/workflows/static-analysis.yml`
+- `.github/dependabot.yml`
+
+Then commits, pushes a branch, and opens a PR per repository.

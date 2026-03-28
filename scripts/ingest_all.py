@@ -20,12 +20,12 @@ API_ROOT = REPO_ROOT / "apps" / "api"
 # Add the API package root so scripts work from the repository root.
 sys.path.insert(0, str(API_ROOT))
 
-from app.rag.loader import DocumentLoader
-from app.rag.splitter import TextSplitter
-from app.rag.embeddings import PlaceholderEmbeddingClient
-from app.rag.vectorstore import ChromaVectorStore
-from app.rag.ingestion import IngestionPipeline
-from app.config import settings
+from app.rag.loader import DocumentLoader  # noqa: E402
+from app.rag.splitter import TextSplitter  # noqa: E402
+from app.rag.embeddings import PlaceholderEmbeddingClient  # noqa: E402
+from app.rag.vectorstore import ChromaVectorStore  # noqa: E402
+from app.rag.ingestion import IngestionPipeline  # noqa: E402
+from app.config import settings  # noqa: E402
 
 
 def main():

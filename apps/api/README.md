@@ -1,29 +1,39 @@
 # apps/api
 
-FastAPI-based local development scaffold for Ask Rich. The production API target remains a Cloudflare Worker.
+FastAPI-based local development API for Ask Rich. This repository includes Milestone 1 + Milestone 2 runtime capabilities locally, while Cloudflare Worker deployment remains the production target.
 
-## Milestone 1: Current Implementation
+## Milestone status
 
-This is the **Milestone 1** scaffold, providing:
+### Milestone 1 (completed)
+
 - Document loading and chunking (Markdown with YAML frontmatter)
 - Vector store integration (Chroma for local dev, Vectorize production target)
 - Health check endpoint (`/health`)
 - Ingestion scaffold endpoint (`/ingest`)
 - Provider-agnostic configuration for LLM and embeddings
 
-**Milestone 2** will add:
+### Milestone 2 (completed MVP)
+
 - `/api/chat` retrieval-aware endpoint
-- Real embeddings wiring (OpenAI, Ollama, or other provider)
+- Retrieval with top-k and optional metadata filters
 - Prompt assembly and citation formatting
-- Model adapter implementations
+- Provider-agnostic adapter factories for embeddings and model generation
+- Local deterministic fallback adapters for smoke testing
 
-## Milestone 2: In Progress
+## Current implementation
 
-The scaffold now includes an initial `/api/chat` runtime path with:
+This API currently provides:
+- Document loading and chunking (Markdown with YAML frontmatter)
+- Vector store integration (Chroma for local dev, Vectorize production target)
+- Health check endpoint (`/health`)
+- Ingestion scaffold endpoint (`/ingest`)
+- `/api/chat` retrieval-aware endpoint
 - Retrieval over Chroma (`top_k` + optional metadata filters)
 - Provider-agnostic embedding and model adapter contracts
 - Local deterministic fallback adapters for smoke testing (`hash` embeddings + extractive answerer)
 - Structured response envelope with citations
+- Cloudflare Worker API edge entrypoint in `worker/src/index.js` with CORS/origin controls
+- Environment-specific Worker deployment config in `worker/wrangler.toml`
 
 ## Project Structure
 
@@ -43,6 +53,10 @@ app/
     embeddings.py   # Provider-agnostic embedding interface
     vectorstore.py  # Chroma integration for local dev
     ingestion.py    # Orchestration pipeline
+worker/
+  src/
+    index.js        # Cloudflare Worker API entrypoint (/health, /api/chat proxy)
+  wrangler.toml     # Environment-aware Worker deployment configuration
 ```
 
 ## Running Locally (Development)
@@ -66,7 +80,7 @@ The API will be available at `http://localhost:8000`.
 
 See `scripts/README.md` for ingestion and smoke testing guidance.
 
-## Endpoints (Milestone 1)
+## Endpoints
 
 - **GET** `/` — Welcome and endpoint listing
 - **GET** `/health` — Health status (`{ "status": "ok" }`)
@@ -105,23 +119,19 @@ Settings are loaded from environment variables (with defaults):
 - `CHAT_TOP_K` (default: `5`)
 - `CHAT_MAX_EVIDENCE_CHARS` (default: `1800`)
 
-## Migration Path
+## Ongoing hardening path
 
-**Milestone 1 → Milestone 2:**
-1. Wire real embeddings (replace `PlaceholderEmbeddingClient`)
-2. Implement `ModelClient` adapter for LLM calls
-3. Add `/api/chat` endpoint with retrieval and prompt assembly
-4. Implement citation formatting
-
-**Milestone 2 → Production:**
-1. Replace Chroma with Cloudflare Vectorize
-2. Wire D1 for session/evaluation metadata
-3. Port the runtime API path from the FastAPI scaffold to a Cloudflare Worker implementation
-4. Add comprehensive eval suite
+1. Replace upstream dependency with direct Cloudflare-native retrieval/runtime path when ready.
+2. Wire production Vectorize and D1 bindings for Worker-native operation.
+3. Expand API-level tests and deployment smoke checks.
 
 ## Next Steps
 
 - [Milestone 1 details](../../docs/milestones/milestone-01.md)
+- [Milestone 2 details](../../docs/milestones/milestone-02.md)
+- [Milestone 3 details](../../docs/milestones/milestone-03.md)
+- [Milestone 5 details](../../docs/milestones/milestone-05.md)
+- [Milestone overview](../../docs/milestones/overview.md)
 - [Ingestion plan](../../docs/ingestion-scaffold-plan.md)
 - [Content guide](../../docs/content-guide.md)
 - [Architecture](../../docs/architecture.md)

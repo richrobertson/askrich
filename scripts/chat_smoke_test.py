@@ -15,10 +15,10 @@ API_ROOT = REPO_ROOT / "apps" / "api"
 
 sys.path.insert(0, str(API_ROOT))
 
-from app.config import settings
-from app.routes.ingest import ingest
-from app.routes.chat import get_chat_service
-from app.models.api import ChatFilters
+from app.config import settings  # noqa: E402
+from app.routes.ingest import ingest  # noqa: E402
+from app.routes.chat import get_chat_service  # noqa: E402
+from app.models.api import ChatFilters  # noqa: E402
 
 
 QUESTIONS = [

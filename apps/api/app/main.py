@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
     uvicorn.run(
         "app.main:app",
-        host="0.0.0.0",
+        host="0.0.0.0",  # nosec B104 -- intentional for containerised deployment
         port=8000,
         reload=settings.debug,
     )

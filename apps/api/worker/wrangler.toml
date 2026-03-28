@@ -27,4 +27,5 @@ name = "askrich-prod-api"
 [env.prod.vars]
 UPSTREAM_API_BASE = "https://internal-chat.myrobertson.com"
 UPSTREAM_CHAT_PATH = "/v1/chat"
+CHAT_BACKEND_MODE = "local"
 ALLOWED_ORIGINS = "https://www.myrobertson.com"

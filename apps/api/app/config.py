@@ -1,0 +1,53 @@
+"""Configuration for Ask Rich API.
+
+Provider-agnostic settings for model, embedding, and vector store backends.
+"""
+
+import os
+from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
+class Settings:
+    """Application settings loaded from environment."""
+
+    # LLM Provider (abstract)
+    llm_provider: str = os.getenv("LLM_PROVIDER", "")
+    llm_api_base: str = os.getenv("LLM_API_BASE", "")
+    llm_api_key: str = os.getenv("LLM_API_KEY", "")
+    llm_model: str = os.getenv("LLM_MODEL", "")
+
+    # Embedding Provider (abstract)
+    embedding_provider: str = os.getenv("EMBEDDING_PROVIDER", "")
+    embedding_api_base: str = os.getenv("EMBEDDING_API_BASE", "")
+    embedding_api_key: str = os.getenv("EMBEDDING_API_KEY", "")
+    embedding_model: str = os.getenv("EMBEDDING_MODEL", "")
+
+    # Vector Store (local dev)
+    chroma_persist_directory: str = os.getenv(
+        "CHROMA_PERSIST_DIRECTORY", str(REPO_ROOT / "data" / "chroma")
+    )
+
+    # Content Root
+    content_root: str = os.getenv("CONTENT_ROOT", str(REPO_ROOT / "content"))
+
+    # FastAPI
+    app_name: str = "Ask Rich API"
+    app_version: str = "0.1.0"
+    debug: bool = os.getenv("DEBUG", "false").lower() == "true"
+    enable_ingest_endpoint: bool = os.getenv(
+        "ENABLE_INGEST_ENDPOINT", os.getenv("DEBUG", "false")
+    ).lower() == "true"
+    cors_allowed_origins: list[str] = [
+        origin.strip()
+        for origin in os.getenv(
+            "CORS_ALLOWED_ORIGINS",
+            "http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000",
+        ).split(",")
+        if origin.strip()
+    ]
+
+
+settings = Settings()

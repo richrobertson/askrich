@@ -16,6 +16,9 @@ const telemetry = {
 
 let isRequestInFlight = false;
 
+const MAX_TELEMETRY_LATENCIES = 100;
+const MAX_TELEMETRY_EVENTS = 100;
+
 const els = {
   form: document.querySelector("#chat-form"),
   question: document.querySelector("#question"),
@@ -45,9 +48,33 @@ function average(numbers) {
   return Math.round(sum / numbers.length);
 }
 
+function pushCapped(items, value, maxItems) {
+  items.push(value);
+  if (items.length > maxItems) {
+    items.splice(0, items.length - maxItems);
+  }
+}
+
+function getSafeCitationUrl(sourceUrl) {
+  if (typeof sourceUrl !== "string" || sourceUrl.trim() === "") {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(sourceUrl, window.location.href);
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+      return parsed.href;
+    }
+  } catch (_error) {
+    return null;
+  }
+
+  return null;
+}
+
 function pushEvent(type, payload = {}) {
   const event = { ts: nowIso(), type, payload };
-  telemetry.events.push(event);
+  pushCapped(telemetry.events, event, MAX_TELEMETRY_EVENTS);
   try {
     localStorage.setItem("askrich.telemetry", JSON.stringify(telemetry.events.slice(-100)));
   } catch (_error) {
@@ -87,9 +114,10 @@ function appendMessage(role, text, citations = []) {
     for (const citation of citations) {
       const li = document.createElement("li");
       const label = citation.title || citation.id || "Untitled source";
-      if (citation.source_url) {
+      const safeUrl = getSafeCitationUrl(citation.source_url);
+      if (safeUrl) {
         const link = document.createElement("a");
-        link.href = citation.source_url;
+        link.href = safeUrl;
         link.target = "_blank";
         link.rel = "noopener noreferrer";
         link.textContent = label;
@@ -187,7 +215,7 @@ async function askQuestion(question) {
   });
 
   const latencyMs = Math.round(performance.now() - start);
-  telemetry.latencies.push(latencyMs);
+  pushCapped(telemetry.latencies, latencyMs, MAX_TELEMETRY_LATENCIES);
   pushEvent("request_finished", { status: response.status, latencyMs });
 
   const json = await response.json().catch(() => ({}));

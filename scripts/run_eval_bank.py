@@ -237,7 +237,7 @@ def run_eval(config: EvalConfig, questions: list[dict[str, Any]]) -> dict[str, A
 def write_outputs(config: EvalConfig, report: dict[str, Any]) -> tuple[Path, Path]:
     config.output_dir.mkdir(parents=True, exist_ok=True)
 
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     json_path = config.output_dir / f"eval_run_{stamp}.json"
     csv_path = config.output_dir / f"eval_rubric_{stamp}.csv"
 

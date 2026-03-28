@@ -18,12 +18,18 @@ class Settings:
     llm_api_base: str = os.getenv("LLM_API_BASE", "")
     llm_api_key: str = os.getenv("LLM_API_KEY", "")
     llm_model: str = os.getenv("LLM_MODEL", "")
+    llm_temperature: float = float(os.getenv("LLM_TEMPERATURE", "0.0"))
 
     # Embedding Provider (abstract)
     embedding_provider: str = os.getenv("EMBEDDING_PROVIDER", "")
     embedding_api_base: str = os.getenv("EMBEDDING_API_BASE", "")
     embedding_api_key: str = os.getenv("EMBEDDING_API_KEY", "")
     embedding_model: str = os.getenv("EMBEDDING_MODEL", "")
+    embedding_dimension: int = int(os.getenv("EMBEDDING_DIMENSION", "1536"))
+
+    # Chat Runtime
+    chat_top_k: int = int(os.getenv("CHAT_TOP_K", "5"))
+    chat_max_evidence_chars: int = int(os.getenv("CHAT_MAX_EVIDENCE_CHARS", "1800"))
 
     # Vector Store (local dev)
     chroma_persist_directory: str = os.getenv(

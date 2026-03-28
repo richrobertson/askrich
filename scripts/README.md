@@ -34,6 +34,24 @@ Useful for:
 - Debugging document structure
 - Confirming content is parsed correctly
 
+### `chat_smoke_test.py`
+
+Quick Milestone 2 runtime check for retrieval-backed chat output.
+
+```bash
+python scripts/chat_smoke_test.py
+```
+
+Tests:
+1. Run ingestion
+2. Ask representative recruiter questions
+3. Print answer previews and citation mappings
+
+Useful for:
+- Verifying `/api/chat` retrieval behavior
+- Checking citation formatting
+- Sanity-checking prompt/answer structure without external model dependencies
+
 ## Future Script Categories (Milestone 2+)
 
 - **Evaluation helpers**

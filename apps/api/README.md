@@ -17,6 +17,14 @@ This is the **Milestone 1** scaffold, providing:
 - Prompt assembly and citation formatting
 - Model adapter implementations
 
+## Milestone 2: In Progress
+
+The scaffold now includes an initial `/api/chat` runtime path with:
+- Retrieval over Chroma (`top_k` + optional metadata filters)
+- Provider-agnostic embedding and model adapter contracts
+- Local deterministic fallback adapters for smoke testing (`hash` embeddings + extractive answerer)
+- Structured response envelope with citations
+
 ## Project Structure
 
 ```
@@ -63,6 +71,21 @@ See `scripts/README.md` for ingestion and smoke testing guidance.
 - **GET** `/` — Welcome and endpoint listing
 - **GET** `/health` — Health status (`{ "status": "ok" }`)
 - **POST** `/ingest` — Run document ingestion pipeline (see `scripts/ingest_all.py`)
+- **POST** `/api/chat` — Retrieval-backed recruiter answers with citations
+
+### `/api/chat` request example
+
+```json
+{
+  "question": "What migration work has Rich led?",
+  "top_k": 5,
+  "toon": "clear and recruiter-friendly",
+  "filters": {
+    "doc_types": ["projects"],
+    "tags": ["migration", "kubernetes"]
+  }
+}
+```
 
 ## Configuration
 
@@ -76,8 +99,11 @@ Settings are loaded from environment variables (with defaults):
 - `EMBEDDING_API_BASE` (default: `""`)
 - `EMBEDDING_API_KEY` (default: `""`)
 - `EMBEDDING_MODEL` (default: `""`)
+- `EMBEDDING_DIMENSION` (default: `1536`)
 - `CHROMA_PERSIST_DIRECTORY` (default: repo-root `data/chroma`)
 - `CONTENT_ROOT` (default: repo-root `content`)
+- `CHAT_TOP_K` (default: `5`)
+- `CHAT_MAX_EVIDENCE_CHARS` (default: `1800`)
 
 ## Migration Path
 

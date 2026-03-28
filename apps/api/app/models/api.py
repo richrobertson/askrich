@@ -1,6 +1,7 @@
 """API response models."""
 
 from typing import Optional
+from pydantic import BaseModel, Field, ConfigDict, AliasChoices
 
 
 class Citation:
@@ -54,3 +55,56 @@ class IngestResponse:
             "message": self.message,
             "error": self.error,
         }
+
+
+class ChatFilters(BaseModel):
+    """Optional retrieval filters for chat requests."""
+
+    doc_types: list[str] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
+
+
+class ChatRequest(BaseModel):
+    """Validated payload for /api/chat requests."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    question: str = Field(min_length=3, max_length=2000)
+    top_k: Optional[int] = Field(default=None, ge=1, le=20)
+    tone: Optional[str] = Field(
+        default=None,
+        max_length=3000,
+        validation_alias=AliasChoices("tone", "toon"),
+    )
+    filters: Optional[ChatFilters] = None
+
+
+class ChatCitation(BaseModel):
+    """Citation payload item for chat responses."""
+
+    id: str
+    title: str
+    source_url: Optional[str] = None
+    chunk_index: Optional[int] = None
+
+
+class ChatResponseData(BaseModel):
+    """Success data envelope for /api/chat responses."""
+
+    answer: str
+    citations: list[ChatCitation]
+    retrieved_chunks: int
+
+
+class ChatResponseEnvelope(BaseModel):
+    """Top-level response envelope for successful requests."""
+
+    success: bool = True
+    data: ChatResponseData
+
+
+class ErrorResponseEnvelope(BaseModel):
+    """Top-level response envelope for failed requests."""
+
+    success: bool = False
+    error: str

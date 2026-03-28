@@ -1,5 +1,7 @@
 # Milestone 02: Retrieval and Chat API
 
+**Status: In Progress**
+
 ## Objectives
 
 Implement the first end-to-end runtime answer path with evidence-based output.
@@ -56,3 +58,12 @@ Vector store logic should remain unchanged when swapping providers.
 - `/api/chat` returns grounded answers with citations.
 - Model and embedding providers are configurable through adapters.
 - Basic smoke/evaluation checks pass for representative recruiter questions.
+
+## Initial implementation progress
+
+- ✅ Added `/api/chat` endpoint with validated request payload and structured response envelope.
+- ✅ Added retrieval runtime service with top-k search and optional metadata filters (`doc_types`, `tags`).
+- ✅ Added citation mapping from retrieved chunk metadata (`chunk_id`, `doc_title`, `source_url`, `chunk_index`).
+- ✅ Added provider-agnostic adapter factories for embeddings and model generation.
+- ✅ Added deterministic local defaults for Milestone 2 smoke testing (hash embeddings + extractive answer generator).
+- ✅ Added `scripts/chat_smoke_test.py` for representative recruiter question checks.

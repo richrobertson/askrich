@@ -7,7 +7,7 @@ from app.models.api import IngestResponse
 from app.rag.ingestion import IngestionPipeline
 from app.rag.loader import DocumentLoader
 from app.rag.splitter import TextSplitter
-from app.rag.embeddings import PlaceholderEmbeddingClient
+from app.rag.embeddings import get_embedding_client
 from app.rag.vectorstore import ChromaVectorStore
 from app.config import settings
 
@@ -20,7 +20,10 @@ def get_ingestion_pipeline() -> IngestionPipeline:
     """Build and cache the ingestion pipeline for reuse across requests."""
     loader = DocumentLoader(content_root=settings.content_root)
     splitter = TextSplitter(chunk_size=512, chunk_overlap=128)
-    embedding_client = PlaceholderEmbeddingClient(dimension=1536)
+    embedding_client = get_embedding_client(
+        provider=settings.embedding_provider,
+        dimension=settings.embedding_dimension,
+    )
     vector_store = ChromaVectorStore(
         persist_directory=settings.chroma_persist_directory
     )

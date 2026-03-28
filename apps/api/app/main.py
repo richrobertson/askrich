@@ -7,6 +7,13 @@ import logging
 
 from app.config import settings
 from app.routes import health, ingest
+from app.routes.chat import get_chat_service
+from app.models.api import (
+    ChatRequest,
+    ChatResponseData,
+    ChatResponseEnvelope,
+    ErrorResponseEnvelope,
+)
 
 
 # Configure logging
@@ -60,6 +67,33 @@ def run_ingest():
     return JSONResponse(result, status_code=status_code)
 
 
+@app.post("/api/chat")
+def chat(payload: ChatRequest):
+    """Answer a recruiter question using retrieval-backed evidence."""
+    try:
+        service = get_chat_service()
+        result = service.answer(
+            question=payload.question,
+            top_k=payload.top_k if payload.top_k is not None else settings.chat_top_k,
+            filters=payload.filters,
+            tone=payload.tone,
+        )
+        response = ChatResponseEnvelope(
+            success=True,
+            data=ChatResponseData(**result),
+        )
+        return JSONResponse(response.model_dump(), status_code=status.HTTP_200_OK)
+    except Exception:
+        logging.exception("/api/chat failed")
+        error = (
+            "Chat request failed due to an internal error."
+            if not settings.debug
+            else "Chat request failed due to an internal error. Check server logs for details."
+        )
+        response = ErrorResponseEnvelope(success=False, error=error)
+        return JSONResponse(response.model_dump(), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 @app.get("/")
 async def root():
     """Root endpoint.
@@ -73,6 +107,7 @@ async def root():
         "endpoints": {
             "health": "/health (GET)",
             "ingest": "/ingest (POST)",
+            "chat": "/api/chat (POST)",
         },
     }
 

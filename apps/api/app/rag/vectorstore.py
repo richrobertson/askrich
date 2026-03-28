@@ -5,6 +5,7 @@ Cloudflare Vectorize integration deferred to Milestone 2.
 """
 
 import logging
+import json
 from typing import Any, Dict, List, Optional
 from abc import ABC, abstractmethod
 
@@ -138,11 +139,12 @@ class ChromaVectorStore(VectorStore):
             raise ValueError("ids must have the same length as texts")
 
         collection = self._require_collection()
+        normalized_metadatas = [self._normalize_metadata(meta) for meta in (metadatas or [{} for _ in texts])]
         collection.upsert(
             documents=texts,
             embeddings=embeddings,
             ids=ids,
-            metadatas=metadatas or [{} for _ in texts],
+            metadatas=normalized_metadatas,
         )
         return ids
 
@@ -172,9 +174,10 @@ class ChromaVectorStore(VectorStore):
                 results["metadatas"][0],
                 results["distances"][0]
             ):
+                restored_metadata = self._restore_metadata(meta or {})
                 output.append({
                     "text": doc,
-                    "metadata": meta,
+                    "metadata": restored_metadata,
                     "distance": dist,
                 })
         return output
@@ -195,3 +198,41 @@ class ChromaVectorStore(VectorStore):
         except Exception:
             logger.exception("Failed to delete ids from vector store")
             return False
+
+    def _normalize_metadata(self, metadata: Dict[str, Any]) -> Dict[str, Any]:
+        """Convert metadata values to Chroma-supported scalar types."""
+        normalized: Dict[str, Any] = {}
+        for key, value in metadata.items():
+            if value is None:
+                continue
+
+            if isinstance(value, (str, int, float, bool)):
+                normalized[key] = value
+                continue
+
+            # Preserve structured values by serializing to JSON.
+            normalized[key] = json.dumps(value, separators=(",", ":"))
+
+        return normalized
+
+    def _restore_metadata(self, metadata: Dict[str, Any]) -> Dict[str, Any]:
+        """Best-effort restoration of JSON-encoded metadata values."""
+        restored: Dict[str, Any] = {}
+        for key, value in metadata.items():
+            if not isinstance(value, str):
+                restored[key] = value
+                continue
+
+            text = value.strip()
+            if (text.startswith("[") and text.endswith("]")) or (
+                text.startswith("{") and text.endswith("}")
+            ):
+                try:
+                    restored[key] = json.loads(text)
+                    continue
+                except json.JSONDecodeError:
+                    pass
+
+            restored[key] = value
+
+        return restored

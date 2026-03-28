@@ -54,7 +54,7 @@ class ChatService:
 
         return {
             "answer": answer_text,
-            "citations": [citation.model_dump() for citation in citations],
+            "citations": citations,
             "retrieved_chunks": len(selected),
         }
 

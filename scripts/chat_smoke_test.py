@@ -72,6 +72,8 @@ def main() -> int:
         print(answer[:500] + ("..." if len(answer) > 500 else ""))
         print("Citations:")
         for citation in response.get("citations", []):
+            if hasattr(citation, "model_dump"):
+                citation = citation.model_dump()
             print(
                 f"- {citation.get('id')} | {citation.get('title')} "
                 f"(chunk {citation.get('chunk_index')})"

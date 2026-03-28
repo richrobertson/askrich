@@ -1,7 +1,7 @@
 """API response models."""
 
 from typing import Optional
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, AliasChoices
 
 
 class Citation:
@@ -71,7 +71,11 @@ class ChatRequest(BaseModel):
 
     question: str = Field(min_length=3, max_length=2000)
     top_k: Optional[int] = Field(default=None, ge=1, le=20)
-    tone: Optional[str] = Field(default=None, max_length=3000, alias="toon")
+    tone: Optional[str] = Field(
+        default=None,
+        max_length=3000,
+        validation_alias=AliasChoices("tone", "toon"),
+    )
     filters: Optional[ChatFilters] = None
 
 

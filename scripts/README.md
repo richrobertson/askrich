@@ -48,9 +48,9 @@ Tests:
 3. Print answer previews and citation mappings
 
 Useful for:
-- Verifying `/api/chat` retrieval behavior
+- Verifying retrieval behavior of the chat service used by `/api/chat` (service wiring, not HTTP schema)
 - Checking citation formatting
-- Sanity-checking prompt/answer structure without external model dependencies
+- Sanity-checking prompt/answer structure and runtime pipeline without external model dependencies
 
 ## Future Script Categories (Milestone 2+)
 

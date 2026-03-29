@@ -16,7 +16,7 @@ class Settings:
     # LLM Provider (abstract)
     # Default to local extractive fallback; set LLM_PROVIDER + LLM_API_BASE + LLM_MODEL
     # to enable an external LLM (e.g. Ollama, OpenAI-compatible). See .env.example.
-    llm_provider: str = os.getenv("LLM_PROVIDER", "local")
+    llm_provider: str = os.getenv("LLM_PROVIDER", "")
     llm_api_base: str = os.getenv("LLM_API_BASE", "")
     llm_api_key: str = os.getenv("LLM_API_KEY", "")
     llm_model: str = os.getenv("LLM_MODEL", "")
@@ -25,11 +25,11 @@ class Settings:
     # Embedding Provider (abstract)
     # Default to local hash-based embeddings; set EMBEDDING_PROVIDER + EMBEDDING_API_BASE
     # + EMBEDDING_MODEL to enable an external embedding service. See .env.example.
-    embedding_provider: str = os.getenv("EMBEDDING_PROVIDER", "hash")
+    embedding_provider: str = os.getenv("EMBEDDING_PROVIDER", "")
     embedding_api_base: str = os.getenv("EMBEDDING_API_BASE", "")
     embedding_api_key: str = os.getenv("EMBEDDING_API_KEY", "")
     embedding_model: str = os.getenv("EMBEDDING_MODEL", "")
-    embedding_dimension: int = int(os.getenv("EMBEDDING_DIMENSION", "768"))
+    embedding_dimension: int = int(os.getenv("EMBEDDING_DIMENSION", "1536"))
 
     # Chat Runtime
     chat_top_k: int = int(os.getenv("CHAT_TOP_K", "5"))

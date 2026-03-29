@@ -214,6 +214,7 @@ class OpenAICompatibleEmbeddingClient(EmbeddingClient):
         }
         if self._api_key:
             headers["Authorization"] = f"Bearer {self._api_key}"
+
         payload = {"model": self._model, "input": texts}
         try:
             with httpx.Client(timeout=self._TIMEOUT) as client:

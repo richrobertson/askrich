@@ -11,6 +11,32 @@ updated: 2026-03-28
 
 Senior Software Engineer with 15+ years of experience across backend systems, distributed systems, cloud/platform engineering, APIs, Kubernetes, Terraform, and migration/modernization programs.
 
+## LinkedIn Profile Snapshot
+
+- Public profile: https://www.linkedin.com/in/royrobertson
+- Facebook profile: https://www.facebook.com/rich.r.robertson/
+- LinkedIn headline signal: Rich Robertson - Oracle
+- Location: Seattle, WA
+- Current focus: Senior software engineering across distributed cloud services, backend platforms, and modernization programs.
+- Public network snapshot: 217 followers, 203 connections.
+
+## LinkedIn Public Highlights
+
+- About snippet (public): Senior software engineer with 15+ years of experience building and operating large-scale systems.
+- Publications: Backpressure in Distributed Systems: Stability, Correctness, and Graceful Degradation (dev.to, 2026-03-23).
+- Public recommendation themes: leadership, coaching, and technical depth across global teams.
+- Recommendations received snapshot: 2 public recommendations visible.
+
+## Education
+
+- Purdue University, Krannert School of Management, Bachelor of Science in Management (2007)
+- Purdue University, College of Technology, Bachelor of Science in Computer & Information Technology (2007)
+
+## Certifications
+
+- MCPD: Enterprise Application Developer
+- MCTS: Team Foundation Server - Configuration and Development
+
 ## Core Strengths
 
 - Backend and distributed systems architecture
@@ -20,25 +46,87 @@ Senior Software Engineer with 15+ years of experience across backend systems, di
 - Terraform-based infrastructure management
 - Legacy modernization with measurable risk reduction
 
-## Representative Experience Highlights
+## Work History
 
-### Oracle CNS Migration to OCI
+### Oracle Senior Software Engineer (2/2020 – 11/2024)
+**Customer Notification Service (CNS) Cloud Migration**
+- Led migration architecture using Kubernetes and Istio L7 routing for controlled traffic management.
+- Established observability and migration safety controls with Prometheus metrics and GoldenGate-informed safeguards.
+- Executed phased migration with reliability-first approach, enabling Oracle Fusion apps to win a $2M deal.
 
-- Contributed to migration architecture using Kubernetes and Istio L7 routing.
-- Helped establish observability and migration safety controls with Prometheus metrics and GoldenGate-informed migration safeguards.
-- Supported phased migration execution with a reliability-first approach.
+**Oracle Resource Query Service (RQS) Modernization**
+- Delivered Java 8 to Java 17 upgrade across 32 data centers with AMD to ARM transition in under 3 months.
+- Led technical debt reduction initiatives: onboarded codebase to OCI Internal and dependency management, reducing security compliance issues by 60%.
+- Consolidated service client code into unit-tested providers, enabling timely certificate and ca-bundle auto-reloading.
+- Mentored team on unit testing, dependency injection, and pull request best practices.
 
-### Oracle RQS Modernization
+### Starbucks Engineer Lead (9/2016 – 2/2020)
+**Platform Leadership & Architecture**
+- Guided technical vision and execution of multiple backend API development teams supporting the Starbucks app (17M+ active customers).
+- Set technical direction, implementation choices, coding styles, and technical standards for Account, Loyalty, Mobile Order and Pay, and Payment teams.
+- Credited for architecture changes enabling seamless migration of My Starbucks Rewards platform from Oracle to Starbucks Unified Commerce Platform (US & Canada).
 
-- Participated in modernization spanning Java 8 to Java 17 upgrades.
-- Contributed to platform/architecture updates including AMD to ARM transitions, dependency cleanup, and provider consolidation.
-- Supported security and compliance improvements while reducing maintenance burden.
+**Cost Optimization & Strategic Initiatives**
+- Responsible for $200K annual software licensing cost reduction by replacing third-party identity provider with custom-built SAML token generator for Chase bank redirect flow.
+- Led development of digital cart management cloud services, new member onboarding CQRS microservice, address verification cloud service, and OData search API for customer support teams.
 
-### Starbucks Licensee Rewards/Receipt Integration
-
-- Worked on backend integrations supporting reward and receipt flows for licensee stores.
+**Licensee Integration Program**
+- Developed backend integrations supporting reward and receipt flows for licensee stores.
 - Used abstraction patterns (dependency injection + strategy-based routing) to support multiple backend providers.
 - Improved maintainability and integration flexibility across evolving partner requirements.
+
+### Slalom, Inc. Senior Consultant (8/2014 – 9/2016)
+**Cloud Services Development**
+- Provided technical leadership on multiple client projects around the Puget Sound region including Microsoft and Starbucks.
+- Developed Azure Pipelines and Cosmos Scope scripts for Microsoft's internal big-data analysis platform processing Azure usage metrics for Azure operations teams.
+- Built REST APIs used by thousands of Starbucks licensee locations enabling customers to earn and redeem Stars for products.
+- Project work focused on Microsoft Azure cloud services, ASP.NET web services, Apigee proxies, and Microsoft SQL Server databases.
+
+### Avanade Senior Consultant & Delivery Tools Lead (6/2007 – 8/2014)
+**Strategic Consulting & ALM Leadership**
+- Joint venture between Microsoft and Accenture; consulted on projects at several Fortune 500 companies in banking, retail, and healthcare industries.
+- Initiated, planned, and executed Application Lifecycle Management (ALM) tools training course certifying over 300 development team leads across global delivery centers in India and Philippines.
+- Led teams on multiple high-impact client engagements delivering complex enterprise solutions.
+
+**Cardinal Health Nuclear Pharmacy Management Application**
+- Led team of developers tasked with developing nuclear medicine pharmacy management application.
+- Established development architecture supporting large team ramp-up with complex parallel development streams.
+
+**Industry Leading Personal Care Products Company**
+- Assessed and remediated third-party testing tool integration challenges, integrating UAT testing into Team Foundation Server (TFS).
+- Built automated UAT testing capability across multiple application groups enabling company-wide UAT automation.
+- Introduced TFS 2010 Lab Management features enabling on-demand test environment provisioning with limited testing resources.
+- Company purchased new host systems to establish QA environments under TFS Lab Management based on success.
+
+**Large Nuclear Pharmacy Services Company (Phase II)**
+- Led development team of 4-8 developers (onshore and offshore) managing parallel development streams.
+- Provided deep understanding of existing application architecture and codebase to UX experts.
+- Led functional WPF prototype development and migration of existing application from Windows Forms to WPF.
+- Phase II delivered more stable application and prototype with user experience improvements informed by UX research team.
+
+**Large Nuclear Pharmacy Services Company (Phase I)**
+- Application stabilization effort between customer's IT group and Avanade during formal testing through final deployment to live customers.
+- Created development architecture to support ramping up large development team.
+- Quickly understood complex application architecture and served as go-to technical resource for developers.
+- Directly managed development effort of team of 3 developers.
+
+**Care Management & Analytic Services (Leading Healthcare Company)**
+- Delivered most critical .NET custom development project pieces ahead of schedule, removing need for additional developers.
+- Designed and created wellness scoring engine evaluating individual wellness scores from survey responses and profile information using XML-based scoring model.
+- Designed and built scoring engine with editable XML models allowing updates outside developer environment (InfoPath, Visual Studio, etc.).
+- Developed system to internationalize content using ASP.NET resource file system with custom external resource provider.
+- Utilized test-driven development (TDD) achieving >95% code coverage on developed assemblies.
+- Work completed two weeks ahead of schedule, significantly reducing project risk.
+
+**Entertainment Lighting Software Startup**
+- Served as Project Manager for creation of library cataloging lighting instruments used by entertainment industry.
+- Initiated market research project identifying most popular lighting instruments and tools.
+- Led interview and training process for two market research interns; collected data on 6,000+ lighting systems.
+- Developed custom data entry tools using Microsoft InfoPath and Microsoft Access.
+- Utilized relational database design to develop complex data model for manufacturer and consumer relationships.
+- Created automated testing system using Microsoft Virtual PC and TestComplete for multi-OS verification.
+- Managed company network reconfiguration and Active Directory restructuring for security role-based access and email distribution groups.
+- Created group policy settings increasing network security and robustness; documented management procedures for administrators.
 
 ## Leadership and Delivery Signals
 

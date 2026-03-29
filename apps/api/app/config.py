@@ -5,9 +5,20 @@ Provider-agnostic settings for model, embedding, and vector store backends.
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
+
+# Load environment variables from .env.local (if exists) and .env
+# .env.local takes precedence over .env
+env_local_path = REPO_ROOT / ".env.local"
+env_path = REPO_ROOT / ".env"
+
+if env_local_path.exists():
+    load_dotenv(env_local_path, override=True)
+if env_path.exists():
+    load_dotenv(env_path, override=False)
 
 
 class Settings:

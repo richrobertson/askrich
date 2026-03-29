@@ -144,6 +144,12 @@ const CORPUS = [
     text: "Academic history highlights Purdue University coursework and degree completion in both management and computer/information technology disciplines, completed in 2007.",
   },
   {
+    id: "profile-internship-sfi",
+    title: "Internship Experience",
+    source_url: "https://www.linkedin.com/in/royrobertson",
+    text: "Rich completed an internship with SFI through the Interns for Indiana program.",
+  },
+  {
     id: "profile-public-links",
     title: "Public Profiles",
     source_url: "https://www.linkedin.com/in/royrobertson",
@@ -653,6 +659,67 @@ function isTechnologyPassionQuestion(questionLower) {
 }
 
 /**
+ * Intent detection: short factual question.
+ *
+ * These questions should return a direct summary answer only and avoid
+ * retrieval bullets that can introduce unrelated context.
+ *
+ * Examples:
+ *   - "where did you go to school?"
+ *   - "what is your educational background"
+ *   - "what is your tech stack"
+ *
+ * @param {string} questionLower - Lowercased question text
+ * @returns {boolean} - True when question is likely short factual intent
+ */
+function isShortFactualQuestion(questionLower) {
+  const normalized = String(questionLower || "").replace(/\s+/g, " ").trim();
+  if (!normalized) {
+    return false;
+  }
+
+  const shortPrefixes = [
+    "what",
+    "where",
+    "when",
+    "which",
+    "who",
+    "did",
+    "does",
+    "was",
+    "were",
+    "has",
+    "have",
+  ];
+
+  const firstToken = normalized.split(" ")[0];
+  if (!shortPrefixes.includes(firstToken)) {
+    return false;
+  }
+
+  const disqualifyingSignals = [
+    "tell me about",
+    "describe",
+    "why",
+    "how",
+    "example",
+    "a time",
+    "challenge",
+    "outcome",
+    "outcomes",
+    "result",
+    "results",
+    "impact",
+  ];
+  if (includesAny(normalized, disqualifyingSignals)) {
+    return false;
+  }
+
+  const tokenCount = normalized.split(" ").filter(Boolean).length;
+  return tokenCount <= 12;
+}
+
+/**
  * Primary answer builder for local chat mode.
  *
  * Routes questions based on detected intent:
@@ -752,6 +819,7 @@ function buildAnswer(question, rankedDocs) {
     "tfs",
   ];
   const cloudPlatformSignals = ["cloud", "platform", "control plane", "control-plane", "oci"];
+  const internshipSignals = ["internship", "intern", "interns for indiana", "sfi"];
 
   // CRITICAL: Classify intent based on USER'S QUESTION, not retrieved document text.
   // This prevents misrouting. Example: if a doc happens to mention "LinkedIn" in passing,
@@ -764,6 +832,8 @@ function buildAnswer(question, rankedDocs) {
   const isEducationQuery = includesAny(q, educationSignals);
   const isTechnologyQuery = includesAny(q, technologySignals);
   const isCloudPlatformQuery = includesAny(q, cloudPlatformSignals);
+  const isInternshipQuery = includesAny(q, internshipSignals);
+  const isShortFactual = isShortFactualQuestion(q);
 
   let summary = "Rich's strongest evidence points to distributed systems, cloud modernization, and reliable backend platform delivery.";
   if (isProfileQuery) {
@@ -788,6 +858,14 @@ function buildAnswer(question, rankedDocs) {
     summary = "Rich has used a broad technology stack across modern cloud/distributed platforms and earlier Microsoft enterprise technologies.";
   } else if (isCloudPlatformQuery) {
     summary = "Rich is highly relevant for cloud platform and control-plane roles, with OCI migration leadership, Kubernetes platform operations, and reusable multitenant control-plane architecture experience.";
+  } else if (isInternshipQuery) {
+    summary = "Yes. Rich completed an internship with SFI through the Interns for Indiana program.";
+  }
+
+  // Short factual prompts should return only the direct summary answer.
+  // This avoids unrelated retrieval spillover for simple questions.
+  if (isShortFactual) {
+    return summary;
   }
 
   // Fallback: return summary + top 2 bullets, each clipped to 180 characters.
@@ -1093,6 +1171,7 @@ export {
   isBehavioralQuestion,
   isOracleCnsOutcomesQuestion,
   isTechnologyPassionQuestion,
+  isShortFactualQuestion,
   isProfileLinksQuery,
   isContactQuery,
   isSensitiveContactQuery,

@@ -138,7 +138,6 @@ The `.env` file in the repository contains placeholder values and is tracked in 
 3. **Start the API** — environment variables from `.env.local` will be loaded automatically, overriding `.env`:
    ```bash
    source .venv/bin/activate
-   source .env.local  # Override .env with local credentials
    PYTHONPATH=apps/api uvicorn app.main:app --host 127.0.0.1 --port 8000
    ```
 

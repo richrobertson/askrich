@@ -190,8 +190,14 @@ def get_model_client(
     Falls back to ExtractiveModelClient for local/stub operation.
     """
     normalized = (provider or "").strip().lower()
-    logger.info("get_model_client: provider=%s (normalized=%s), api_base=%s, model=%s, api_key_prefix=%s", 
-                provider, normalized, api_base, model, api_key[:20] if api_key else "(none)")
+    logger.info(
+        "get_model_client: provider=%s (normalized=%s), api_base=%s, model=%s, api_key_configured=%s",
+        provider,
+        normalized,
+        api_base,
+        model,
+        bool(api_key),
+    )
     
     if normalized in {"openai", "openai-compatible", "together", "groq", "ollama"} and api_base and model:
         logger.info("Instantiating OpenAICompatibleModelClient")

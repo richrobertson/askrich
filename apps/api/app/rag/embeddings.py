@@ -238,13 +238,19 @@ class OpenAICompatibleEmbeddingClient(EmbeddingClient):
                 return embeddings
         except (httpx.HTTPError, KeyError, json.JSONDecodeError, IndexError, ValueError) as exc:
             if isinstance(exc, httpx.HTTPStatusError) and exc.response is not None:
-                body_snippet = exc.response.text[:500]
+                status_code = exc.response.status_code
                 logger.error(
-                    "Embedding API call failed with HTTP %s: %s; response body snippet: %r",
-                    exc.response.status_code,
+                    "Embedding API call failed with HTTP %s: %s",
+                    status_code,
                     exc,
-                    body_snippet,
                 )
+                if logger.isEnabledFor(logging.DEBUG):
+                    body_snippet = exc.response.text[:500]
+                    logger.debug(
+                        "Embedding API response body snippet (truncated to 500 chars) for HTTP %s: %r",
+                        status_code,
+                        body_snippet,
+                    )
             else:
                 logger.error("Embedding API call failed (%s): %s", type(exc).__name__, exc)
             raise RuntimeError("Embedding API call failed") from exc

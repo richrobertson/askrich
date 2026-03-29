@@ -119,6 +119,31 @@ Settings are loaded from environment variables (with defaults):
 - `CHAT_TOP_K` (default: `5`)
 - `CHAT_MAX_EVIDENCE_CHARS` (default: `1800`)
 
+### Setting Up API Keys Securely
+
+The `.env` file in the repository contains placeholder values and is tracked in git. To use real API keys locally:
+
+1. **Create a local `.env.local` file** (not committed to git):
+   ```bash
+   cp .env .env.local
+   ```
+
+2. **Edit `.env.local` and replace placeholder values with actual API keys**:
+   ```bash
+   # Replace sk-... with your actual OpenAI API key
+   LLM_API_KEY=sk-your-actual-key-here
+   EMBEDDING_API_KEY=sk-your-actual-key-here
+   ```
+
+3. **Start the API** — environment variables from `.env.local` will be loaded automatically, overriding `.env`:
+   ```bash
+   source .venv/bin/activate
+   source .env.local  # Override .env with local credentials
+   PYTHONPATH=apps/api uvicorn app.main:app --host 127.0.0.1 --port 8000
+   ```
+
+`.env.local` is listed in `.gitignore` and will never be committed to the repository.
+
 ## Ongoing hardening path
 
 1. Replace upstream dependency with direct Cloudflare-native retrieval/runtime path when ready.

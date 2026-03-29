@@ -108,6 +108,7 @@ class OpenAICompatibleModelClient(ModelClient):
         instructions: str,
         tone: str | None = None,
     ) -> str:
+        logger.info("OpenAICompatibleModelClient.generate_answer called with model=%s, api_base=%s", self._model, self._api_base)
         system_content = self._build_system_prompt(instructions, evidence_snippets, tone)
         payload = {
             "model": self._model,
@@ -131,11 +132,14 @@ class OpenAICompatibleModelClient(ModelClient):
                 )
                 response.raise_for_status()
                 data = response.json()
-                return data["choices"][0]["message"]["content"]
+                answer = data["choices"][0]["message"]["content"]
+                logger.info("OpenAI API returned successfully")
+                return answer
         except (httpx.HTTPError, KeyError, json.JSONDecodeError, IndexError) as exc:
-            logger.warning(
-                "LLM inference call failed (%s); falling back to extractive mode.",
+            logger.error(
+                "LLM inference call failed (%s): %s; falling back to extractive mode.",
                 type(exc).__name__,
+                exc,
             )
             return ExtractiveModelClient().generate_answer(
                 question=question,
@@ -186,11 +190,16 @@ def get_model_client(
     Falls back to ExtractiveModelClient for local/stub operation.
     """
     normalized = (provider or "").strip().lower()
+    logger.info("get_model_client: provider=%s (normalized=%s), api_base=%s, model=%s, api_key_prefix=%s", 
+                provider, normalized, api_base, model, api_key[:20] if api_key else "(none)")
+    
     if normalized in {"openai", "openai-compatible", "together", "groq", "ollama"} and api_base and model:
+        logger.info("Instantiating OpenAICompatibleModelClient")
         return OpenAICompatibleModelClient(
             api_base=api_base,
             api_key=api_key,
             model=model,
             temperature=temperature,
         )
+    logger.info("Falling back to ExtractiveModelClient")
     return ExtractiveModelClient()

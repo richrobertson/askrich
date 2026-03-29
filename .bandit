@@ -1,0 +1,5 @@
+exclude_dirs:
+  - apps/api/.venv
+  - data
+  - .venv
+skips: []

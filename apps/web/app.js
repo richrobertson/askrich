@@ -72,6 +72,17 @@ function getSafeCitationUrl(sourceUrl) {
   return null;
 }
 
+function normalizeApiBase(value) {
+  const fallback = "http://127.0.0.1:8000";
+  const trimmed = String(value || "").trim();
+  if (!trimmed) {
+    return fallback;
+  }
+
+  const withoutTrailingSlash = trimmed.replace(/\/$/, "");
+  return withoutTrailingSlash.replace(/\/api\/chat$/, "") || fallback;
+}
+
 function extractApiErrorMessage(payload, status) {
   if (payload && typeof payload.error === "string" && payload.error.trim() !== "") {
     return payload.error;
@@ -170,7 +181,7 @@ function getApiBase() {
   } catch (_error) {
     stored = null;
   }
-  return (stored || fallback).replace(/\/$/, "");
+  return normalizeApiBase(stored || fallback);
 }
 
 function initApiBase() {
@@ -178,7 +189,7 @@ function initApiBase() {
   els.apiBase.value = base;
   // Persist on 'input' event so localStorage always stays in sync with the field value
   els.apiBase.addEventListener("input", () => {
-    const trimmed = (els.apiBase.value || "").trim().replace(/\/$/, "");
+    const trimmed = normalizeApiBase(els.apiBase.value);
     try {
       localStorage.setItem("askrich.apiBase", trimmed || "http://127.0.0.1:8000");
     } catch (_error) {
@@ -212,7 +223,7 @@ function parseTopK() {
 
 async function askQuestion(question) {
   // Use the current input field value (which is always in sync with localStorage via the input event listener)
-  const base = (els.apiBase.value || "").trim().replace(/\/$/, "") || "http://127.0.0.1:8000";
+  const base = normalizeApiBase(els.apiBase.value);
   const endpoint = `${base}/api/chat`;
 
   const body = {

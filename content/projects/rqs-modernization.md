@@ -49,3 +49,8 @@ Java upgrade path (8→17), platform architecture updates (including ARM targets
 - Balanced modernization ambition with production stability.
 - Helped sequence changes to avoid avoidable regressions.
 - Communicated implementation tradeoffs across teams.
+
+## My Story
+I was brought in to help Resource Query Service migrate 15 libraries and services from Java 8 to Java 17, and then transition from AMD to ARM compute under tight deadlines. As I worked through compatibility issues, I identified deeper systemic problems — inconsistent dependency versioning, ad hoc dependency injection patterns, and duplicated client providers, especially around mTLS certificate handling.
+Rather than apply isolated fixes just to get the migration over the line, I took the initiative to standardize the dependency model using OCI BOM governance and consolidate client instantiation into unit-tested Guice providers within a shared library. This allowed us to centralize certificate and CA bundle auto-reloading logic and eliminate duplicated infrastructure code.
+The result was not only a successful Java 17 and ARM migration, but a significantly more maintainable and secure codebase. We reduced security compliance issues by about 60% and made future upgrades materially easier.

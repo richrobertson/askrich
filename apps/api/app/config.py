@@ -14,6 +14,8 @@ class Settings:
     """Application settings loaded from environment."""
 
     # LLM Provider (abstract)
+    # Default to local extractive fallback; set LLM_PROVIDER + LLM_API_BASE + LLM_MODEL
+    # to enable an external LLM (e.g. Ollama, OpenAI-compatible). See .env.example.
     llm_provider: str = os.getenv("LLM_PROVIDER", "")
     llm_api_base: str = os.getenv("LLM_API_BASE", "")
     llm_api_key: str = os.getenv("LLM_API_KEY", "")
@@ -21,6 +23,8 @@ class Settings:
     llm_temperature: float = float(os.getenv("LLM_TEMPERATURE", "0.0"))
 
     # Embedding Provider (abstract)
+    # Default to local hash-based embeddings; set EMBEDDING_PROVIDER + EMBEDDING_API_BASE
+    # + EMBEDDING_MODEL to enable an external embedding service. See .env.example.
     embedding_provider: str = os.getenv("EMBEDDING_PROVIDER", "")
     embedding_api_base: str = os.getenv("EMBEDDING_API_BASE", "")
     embedding_api_key: str = os.getenv("EMBEDDING_API_KEY", "")

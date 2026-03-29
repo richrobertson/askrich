@@ -49,3 +49,11 @@ Kubernetes, Istio service mesh, Prometheus metrics stack, OCI platform component
 - Drove practical reliability tradeoffs in a migration setting.
 - Collaborated across platform, service, and operations stakeholders.
 - Focused team execution on measurable safety criteria.
+
+## My Story
+I led the full migration of Oracle’s Customer Notification Service from a legacy WebLogic VM-based deployment to an OCI-native architecture. This service was critical to Oracle Fusion Applications and was required to close a $2M enterprise deal. When I was assigned the project, the only directive was “move CNS to OCI” — there was no defined plan.
+The existing system was tightly coupled to WebLogic and deployed manually on VMs, which made it difficult to scale, observe, or automate. I owned defining the migration strategy end-to-end — architecture, database transition, traffic cutover, and cross-team coordination.
+Architecturally, I designed a Kubernetes-based deployment running WebLogic in containers, introduced Istio for L7 routing and observability, and migrated the database from Exadata to Autonomous DB. To ensure zero data loss during cutover, I led the setup of bidirectional replication using Oracle GoldenGate and identified which tables could safely replicate versus partition.
+One of the biggest risks was customer traffic migration. Many dependent services were calling CNS over internal IPs and plain HTTP. I designed a cohort-based migration strategy using Istio routing and controlled 307→308 redirects, allowing incremental traffic migration with immediate rollback capability.
+I also implemented custom Prometheus metrics and dashboards to monitor endpoint-level SLAs, latency, and failure rates before, during, and after cutover. This gave leadership real-time visibility into risk.
+The result was a successful production cutover after ~1 year, with zero data loss and no major service disruptions. The same architecture was later used to migrate 16 additional legacy datacenters. We achieved FedRAMP certification and fully transitioned CNS to OCI-native infrastructure — without forking the codebase.

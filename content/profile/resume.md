@@ -4,7 +4,7 @@ title: Rich Robertson Resume (Normalized)
 type: resume
 summary: Resume-style summary of experience, strengths, and representative project outcomes.
 tags: [profile, resume, experience]
-updated: 2026-03-28
+updated: 2026-03-29
 ---
 
 ## Summary
@@ -19,6 +19,12 @@ Senior Software Engineer with 15+ years of experience across backend systems, di
 - Location: Seattle, WA
 - Current focus: Senior software engineering across distributed cloud services, backend platforms, and modernization programs.
 - Public network snapshot: 217 followers, 203 connections.
+
+## GitHub Profile Snapshot
+
+- Public profile: https://github.com/richrobertson
+- Current activity theme: practical engineering write-ups, architecture-first project scaffolding, and implementation-focused documentation.
+- Evidence of recent output: published technical article on backpressure in distributed systems (dev.to, 2026-03-23) and active delivery of the Ask Rich monorepo scaffold and milestones.
 
 ## LinkedIn Public Highlights
 
@@ -47,6 +53,12 @@ Senior Software Engineer with 15+ years of experience across backend systems, di
 - Legacy modernization with measurable risk reduction
 
 ## Work History
+
+### Independent / Public Engineering Work (2025 – Present)
+**GitHub and Technical Writing Activity**
+- Built and iterated on the Ask Rich monorepo, including retrieval-first architecture docs, deployment guidance, milestone-based execution plans, and ingestion/evaluation scaffolding.
+- Produced implementation-oriented documentation covering architecture decisions (ADRs), deployment runbooks, and prompt strategy designed to support maintainable AI-assisted engineering workflows.
+- Published technical writing focused on distributed-systems reliability patterns, including backpressure stability and graceful degradation.
 
 ### Oracle Senior Software Engineer (2/2020 – 11/2024)
 **Customer Notification Service (CNS) Cloud Migration**
@@ -133,3 +145,10 @@ Senior Software Engineer with 15+ years of experience across backend systems, di
 - Operates effectively in ambiguous modernization and migration contexts.
 - Balances long-term architecture quality with short-term delivery constraints.
 - Communicates tradeoffs clearly across engineering and stakeholder groups.
+
+## Examples of Technical Work (GitHub)
+
+- Ask Rich monorepo architecture and delivery artifacts: ADRs, milestone plans, deployment guides, and implementation scaffolding for API + web integration.
+- Retrieval and ingestion scaffolding: document loading/splitting, vector store pipeline, and chat orchestration modules.
+- Cloudflare deployment shape: worker configuration and environment-oriented deploy documentation.
+- Prompt and content strategy assets: structured system-prompt examples and content normalization for profile/project retrieval.

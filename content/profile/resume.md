@@ -47,7 +47,7 @@ Senior Software Engineer with 15+ years of experience across backend systems, di
 
 The following items were merged from the 2010 resume archive to preserve earlier career context and capability signals.
 
-### Technical Skills Snapshot (2010)
+### Appendix A: Technical Skills Snapshot (2010)
 
 - Microsoft stack: C#, VB.NET, SharePoint Services, .NET Compact Framework, InfoPath (2003/2007), Access (2003/2007), Team Foundation Server (2005/2008/2010)
 - Infrastructure/tools: System Center Virtual Machine Manager, Hyper-V, PowerShell, Microsoft Project Professional
@@ -78,7 +78,7 @@ The following items were merged from the 2010 resume archive to preserve earlier
 - Terraform-based infrastructure management
 - Legacy modernization with measurable risk reduction
 
-## Technical Skills Snapshot
+## Technical Skills Snapshot (Current)
 
 - Expert languages: Java, C#
 - Prior languages and scripting: JavaScript, Scala, Python, PowerShell, Bash

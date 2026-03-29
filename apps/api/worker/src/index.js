@@ -204,6 +204,18 @@ async function handleOpenAIChat(request, env) {
   const apiBase = String(env.LLM_API_BASE || "https://api.openai.com/v1").replace(/\/$/, "");
 
   if (!ranked.length) {
+    if (isGreetingOrIdentityQuestion(question)) {
+      return json(
+        buildResponse(
+          "Hi, I'm Ask Rich. I can answer recruiter-focused questions about Rich Robertson's projects, architecture decisions, modernization work, and leadership impact. Try: What has Rich worked on?",
+          [],
+          0,
+          buildResponseMeta("openai", "worker-openai", "openai-compatible", "openai", model),
+        ),
+        200,
+      );
+    }
+
     return json(
       buildResponse(
         "I do not have enough evidence in the deployed corpus to answer confidently yet. Try asking about Oracle migration, Java modernization, control planes, or Starbucks platform work.",
@@ -276,6 +288,24 @@ async function handleOpenAIChat(request, env) {
       buildResponseMeta("openai", "worker-openai", "openai-compatible", "openai", model),
     ),
     200,
+  );
+}
+
+function isGreetingOrIdentityQuestion(question) {
+  const normalized = String(question || "").trim().toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+
+  const greetings = new Set(["hello", "hi", "hey", "yo", "greetings"]);
+  if (greetings.has(normalized)) {
+    return true;
+  }
+
+  return (
+    normalized.includes("what is your name") ||
+    normalized.includes("who are you") ||
+    normalized.includes("your name")
   );
 }
 

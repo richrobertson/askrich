@@ -163,6 +163,12 @@ const CORPUS = [
   },
 ];
 
+const PROFILE_LINKS = {
+  github: "https://github.com/richrobertson",
+  linkedin: "https://www.linkedin.com/in/royrobertson",
+  facebook: "https://www.facebook.com/rich.r.robertson/",
+};
+
 function getBackendMode(env) {
   return String(env.CHAT_BACKEND_MODE || "local").trim().toLowerCase();
 }
@@ -179,6 +185,32 @@ async function handleLocalChat(request) {
   const topK = clampTopK(payload?.top_k);
   if (question.length < 3) {
     return json({ success: false, error: "Question must be at least 3 characters" }, 400);
+  }
+
+  if (isProfileLinksQuery(question)) {
+    return json(
+      {
+        success: true,
+        data: {
+          answer: [
+            "Here are Rich's public profile links:",
+            `- GitHub: ${PROFILE_LINKS.github}`,
+            `- LinkedIn: ${PROFILE_LINKS.linkedin}`,
+            `- Facebook: ${PROFILE_LINKS.facebook}`,
+          ].join("\n"),
+          citations: [
+            {
+              id: "profile-public-links",
+              title: "Public Profiles",
+              source_url: PROFILE_LINKS.linkedin,
+              chunk_index: 0,
+            },
+          ],
+          retrieved_chunks: 1,
+        },
+      },
+      200,
+    );
   }
 
   const ranked = rankCorpus(question).slice(0, topK);
@@ -247,6 +279,24 @@ function tokenize(text) {
     .toLowerCase()
     .match(/[a-z0-9]+/g);
   return new Set(matches || []);
+}
+
+function isProfileLinksQuery(question) {
+  const q = String(question || "").toLowerCase();
+  const signals = [
+    "github",
+    "linkedin",
+    "facebook",
+    "social",
+    "profile",
+    "profiles",
+    "link",
+    "links",
+    "url",
+    "urls",
+  ];
+
+  return signals.some((signal) => q.includes(signal));
 }
 
 function buildAnswer(rankedDocs) {

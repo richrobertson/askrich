@@ -119,8 +119,9 @@ class OpenAICompatibleModelClient(ModelClient):
         }
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {self._api_key}",
         }
+        if self._api_key:
+            headers["Authorization"] = f"Bearer {self._api_key}"
         try:
             with httpx.Client(timeout=self._TIMEOUT) as client:
                 response = client.post(

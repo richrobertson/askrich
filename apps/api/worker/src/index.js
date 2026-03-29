@@ -612,44 +612,148 @@ function isBehavioralQuestion(questionLower) {
   return hasBehavioralTopic && hasStoryIntent;
 }
 
+function wantsConciseBehavioralAnswer(questionLower) {
+  const conciseSignals = [
+    "brief",
+    "concise",
+    "short",
+    "quick",
+    "30 second",
+    "60 second",
+    "one minute",
+    "1 minute",
+  ];
+  return conciseSignals.some((signal) => questionLower.includes(signal));
+}
+
+function wantsDetailedBehavioralAnswer(questionLower) {
+  const detailedSignals = [
+    "detailed",
+    "in detail",
+    "deep dive",
+    "full answer",
+    "long version",
+    "elaborate",
+  ];
+  return detailedSignals.some((signal) => questionLower.includes(signal));
+}
+
+function formatStarAnswer({ situation, task, action, result, reflection, includeReflection, chatMode }) {
+  if (chatMode) {
+    const stLine = `${String(situation || "").trim()} ${String(task || "").trim()}`.replace(/\s+/g, " ").trim();
+    const lines = [`S/T: ${stLine}`, `A: ${action}`, `R: ${result}`];
+    if (includeReflection && reflection) {
+      lines.push(`Why it worked: ${reflection}`);
+    }
+    return lines.join("\n");
+  }
+
+  const lines = [
+    `Situation: ${situation}`,
+    `Task: ${task}`,
+    `Action: ${action}`,
+    `Result: ${result}`,
+  ];
+
+  if (includeReflection && reflection) {
+    lines.push(`Reflection: ${reflection}`);
+  }
+
+  return lines.join("\n");
+}
+
 function buildBehavioralAnswer(questionLower, rankedDocs) {
   const docIds = new Set(rankedDocs.map((doc) => doc.id));
+  const concise = wantsConciseBehavioralAnswer(questionLower);
+  const detailed = wantsDetailedBehavioralAnswer(questionLower);
+  const chatMode = !detailed;
   const persuasionPrompt = ["convince", "persuade", "influence", "stakeholder"].some((signal) =>
     questionLower.includes(signal),
   );
+  const adversityPrompt = [
+    "adversity",
+    "setback",
+    "challenge",
+    "hardship",
+    "difficult",
+    "tough",
+    "resilience",
+    "overcame",
+    "overcome",
+    "failure",
+  ].some((signal) => questionLower.includes(signal));
 
   if (persuasionPrompt && docIds.has("project-oracle-cns")) {
-    return [
-      "Situation: At Oracle, the Customer Notification Service needed to move to an OCI-native architecture while supporting a $2M enterprise deal timeline.",
-      "Task: I needed to get cross-functional stakeholders aligned on a migration approach that improved reliability without risking delivery commitments.",
-      "Action: I proposed a phased migration plan with explicit rollout checkpoints, reliability safeguards, and clear communication on tradeoffs and risk reduction.",
-      "Result: We completed the migration with stronger scalability and operational readiness while staying aligned to the deal timeline.",
-      "Reflection: When I need to convince people, I focus on concrete risk controls, phased execution, and business impact rather than abstract technical arguments.",
-    ].join("\n");
+    return formatStarAnswer({
+      situation:
+        "At Oracle, the Customer Notification Service had to move to an OCI-native architecture while supporting a $2M enterprise deal timeline.",
+      task:
+        "I needed cross-functional alignment on a migration approach that improved reliability without risking delivery commitments.",
+      action:
+        "I proposed a phased plan with rollout checkpoints, reliability safeguards, and clear communication of tradeoffs.",
+      result:
+        "We completed the migration with stronger scalability and operational readiness while staying aligned to the timeline.",
+      reflection:
+        "I get the best alignment when I pair technical decisions with concrete risk controls and business impact.",
+      includeReflection: !concise && detailed,
+      chatMode,
+    });
   }
 
   if (persuasionPrompt && docIds.has("project-java17")) {
-    return [
-      "Situation: I led a Java 8 to Java 17 modernization with rollout across 32 global data centers under a tight timeline.",
-      "Task: I had to align teams on a controlled migration strategy that balanced speed with production safety.",
-      "Action: I drove agreement on staged rollout gates, architecture-specific validation, and reliability safeguards before each expansion step.",
-      "Result: We completed the rollout in under three months with controlled delivery and operational stability.",
-      "Reflection: Persuasion works best when you pair urgency with a concrete safety model and measurable checkpoints.",
-    ].join("\n");
+    return formatStarAnswer({
+      situation:
+        "I led a Java 8 to Java 17 modernization with rollout across 32 global data centers under a tight timeline.",
+      task:
+        "I had to align teams on a migration strategy that balanced delivery speed with production safety.",
+      action:
+        "I set staged rollout gates, architecture-specific validation, and reliability checks before each expansion step.",
+      result:
+        "We completed the rollout in under three months with controlled delivery and operational stability.",
+      reflection:
+        "Urgency is most persuasive when the safety model and checkpoints are explicit from day one.",
+      includeReflection: !concise && detailed,
+      chatMode,
+    });
+  }
+
+  if (adversityPrompt && docIds.has("profile-career-transition-rif")) {
+    const action = docIds.has("projects-post-oracle-github")
+      ? "I treated that period like a structured rebuild, balancing family priorities while maintaining technical momentum through shipped projects, infrastructure work, and published writing."
+      : "I balanced family priorities while maintaining technical momentum through disciplined daily execution, project work, and continued learning.";
+
+    return formatStarAnswer({
+      situation: "My Oracle role was eliminated in November 2024 as part of a broader reduction in force.",
+      task:
+        "I needed to navigate a personal and professional transition without losing momentum or clarity on my long-term direction.",
+      action,
+      result:
+        "I stayed productive, expanded my portfolio with visible work, and came out of the transition with stronger focus and readiness for impact.",
+      reflection:
+        "In adversity, I focus on controllables, execute consistently, and turn uncertainty into forward progress.",
+      includeReflection: !concise && detailed,
+      chatMode,
+    });
   }
 
   const primary = rankedDocs[0];
-  const secondary = rankedDocs[1];
   const primaryText = primary ? toFirstPerson(clipSentence(primary.text, 180)) : "I do not have enough evidence to provide a strong example yet.";
-  const secondaryText = secondary ? toFirstPerson(clipSentence(secondary.text, 180)) : "I focused on stakeholder alignment and execution clarity.";
+  const genericAction = adversityPrompt
+    ? "I created a concrete plan, kept communication clear, and executed in small, reliable increments to maintain momentum."
+    : "I aligned stakeholders on a clear plan, defined execution checkpoints, and reduced delivery risk through staged rollout steps.";
+  const genericResult = adversityPrompt
+    ? "The approach turned a difficult situation into measurable progress and improved confidence for next steps."
+    : "The work improved delivery confidence, execution reliability, and stakeholder alignment.";
 
-  return [
-    `Situation: ${primaryText}`,
-    "Task: I needed to align people around a clear path to delivery while managing risk.",
-    `Action: ${secondaryText}`,
-    "Result: The work improved delivery confidence and execution reliability.",
-    "Reflection: I am most effective when I combine clear communication, staged execution, and ownership of outcomes.",
-  ].join("\n");
+  return formatStarAnswer({
+    situation: primaryText,
+    task: "I needed to align people around a clear path to delivery while managing risk.",
+    action: genericAction,
+    result: genericResult,
+    reflection: "I am most effective when I combine clear communication, staged execution, and ownership of outcomes.",
+    includeReflection: !concise && detailed,
+    chatMode,
+  });
 }
 
 function clipSentence(text, maxLen) {

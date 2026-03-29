@@ -300,20 +300,33 @@ function tokenize(text) {
 
 function isProfileLinksQuery(question) {
   const q = String(question || "").toLowerCase();
-  const signals = [
+  const platformSignals = [
     "github",
     "linkedin",
     "facebook",
-    "social",
-    "profile",
-    "profiles",
+  ];
+  const linkSignals = [
     "link",
     "links",
     "url",
     "urls",
   ];
+  const profileLinkPhrases = [
+    "profile link",
+    "profile links",
+    "public profile",
+    "public profiles",
+    "social profile",
+    "social profiles",
+    "social links",
+    "portfolio links",
+  ];
 
-  return signals.some((signal) => q.includes(signal));
+  const hasPlatformMention = platformSignals.some((signal) => q.includes(signal));
+  const hasLinkIntent = linkSignals.some((signal) => q.includes(signal));
+  const hasProfileLinkPhrase = profileLinkPhrases.some((signal) => q.includes(signal));
+
+  return hasPlatformMention || hasProfileLinkPhrase || hasLinkIntent;
 }
 
 function isAllProfilesQuery(question) {
@@ -518,7 +531,7 @@ function buildAnswer(rankedDocs) {
     const details = profileDetails.length
       ? profileDetails.join(", ")
       : `LinkedIn ${PROFILE_LINKS.linkedin} (primary contact point)`;
-    summary = `Based on the strongest matching evidence, Rich's profile contact details include ${details}.`;
+    summary = `Based on the strongest matching evidence, Rich's public profile links include ${details}.`;
   } else if (isEducationQuery) {
     summary = "Based on the strongest matching evidence, Rich completed two Purdue University bachelor's degrees in 2007, spanning both management and computer/information technology.";
   } else if (isTechnologyQuery) {

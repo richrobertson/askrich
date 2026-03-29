@@ -21,7 +21,7 @@ He is strongest in roles that require both architecture judgment and day-to-day 
 
 ## Representative impact
 
-- **Oracle (Senior Software Engineer):** Led major migration/modernization efforts including CNS migration patterns in OCI and RQS modernization across 32 data centers (Java 8 → 17 and AMD → ARM), including initiatives that reduced security/compliance issues.
+- **Oracle (Senior Software Engineer):** Led major migration/modernization efforts including CNS migration patterns in OCI and RQS modernization across 32 data centers (Java 8 -> 17 and AMD -> ARM), including initiatives that reduced security/compliance issues.
 - **Starbucks (Engineer Lead):** Helped lead backend API platforms supporting high-scale customer workflows and enabled architecture transitions for rewards/commerce systems.
 - **Consulting (Slalom / Avanade):** Delivered enterprise software and platform solutions across retail, healthcare, and financial domains, with recurring ownership in architecture, delivery quality, and team enablement.
 

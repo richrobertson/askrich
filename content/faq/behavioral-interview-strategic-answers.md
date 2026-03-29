@@ -10,7 +10,7 @@ updated: 2026-03-29
 
 ## Grouped Behavioral Q&A Files
 
-The behavioral interview questions and strategic answers are grouped by intent to improve retrieval quality and answer consistency.
+The must-know behavioral interview questions and strategic answers are now grouped by intent to improve retrieval quality and answer consistency.
 
 - Foundation and role fit: `content/faq/behavioral/foundation-and-fit.md`
 - Leadership and ownership: `content/faq/behavioral/leadership-and-ownership.md`
@@ -20,9 +20,9 @@ The behavioral interview questions and strategic answers are grouped by intent t
 
 ## STAR usage guidance
 
-For behavioral interview questions, structure responses as **Situation → Task → Action → Result**, then add a brief reflection when useful.
+For behavioral interview questions, structure responses as **Situation -> Task -> Action -> Result**, then add a brief reflection when useful.
 
 ## Notes
 
-- Grouped files preserve the strategic behavioral answer bank while improving retrieval precision.
-- This file acts as an index to reduce duplicate chunks during retrieval.
+- The grouped files retain all original behavioral questions and strategic answers while improving retrieval precision.
+- This file acts as an index to prevent duplicate chunks during retrieval.

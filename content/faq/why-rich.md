@@ -10,7 +10,7 @@ updated: 2026-03-29
 
 ## Positioning
 
-Rich combines deep backend/platform engineering with strong execution in complex real-world environments.
+Rich combines deep backend/platform engineering skill with practical execution on complex migration and modernization programs.
 
 He is especially valuable when teams need someone who can:
 - turn ambiguous requirements into an actionable delivery plan,

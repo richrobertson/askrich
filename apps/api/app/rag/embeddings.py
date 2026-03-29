@@ -236,7 +236,7 @@ class OpenAICompatibleEmbeddingClient(EmbeddingClient):
                         )
                     embeddings.append(embedding)
                 return embeddings
-        except (httpx.HTTPError, KeyError, json.JSONDecodeError, IndexError) as exc:
+        except (httpx.HTTPError, KeyError, json.JSONDecodeError, IndexError, ValueError) as exc:
             if isinstance(exc, httpx.HTTPStatusError) and exc.response is not None:
                 body_snippet = exc.response.text[:500]
                 logger.error(

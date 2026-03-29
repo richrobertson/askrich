@@ -59,6 +59,8 @@ jobs:
           printf "%s" "$OPENAI_API_KEY" | npx wrangler secret put OPENAI_API_KEY --config apps/api/worker/wrangler.toml --env $DEPLOY_ENV
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-web-worker-assets:
     runs-on: ubuntu-latest

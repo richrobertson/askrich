@@ -11,6 +11,8 @@ updated: "2026-03-29"
 ## Grouped Behavioral Q&A Files
 
 The must-know behavioral interview questions and strategic answers are now grouped by intent to improve retrieval quality and answer consistency.
+Use each answer in a concise **Situation -> Task -> Action -> Result -> Reflection** (STAR + Reflection) format.
+For best impact in live interviews: start with scope and stakes, describe your decision process, close with measurable or operational outcomes, and finish with what you would repeat (or change) next time.
 
 - Foundation and role fit: `content/faq/behavioral/foundation-and-fit.md`
 - Leadership and ownership: `content/faq/behavioral/leadership-and-ownership.md`

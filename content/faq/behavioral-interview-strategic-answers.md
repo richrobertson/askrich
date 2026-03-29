@@ -10,7 +10,7 @@ updated: 2026-03-29
 
 ## How to use these answers
 
-Use each answer in a concise **Situation → Action → Result → Reflection** format.
+Use each answer in a concise **Situation → Task → Action → Result → Reflection** (STAR + Reflection) format.
 For best impact in live interviews:
 - start with scope and stakes,
 - describe your decision process,

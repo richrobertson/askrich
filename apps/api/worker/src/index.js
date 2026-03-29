@@ -297,16 +297,23 @@ function isGreetingOrIdentityQuestion(question) {
     return false;
   }
 
-  const greetings = new Set(["hello", "hi", "hey", "yo", "greetings"]);
-  if (greetings.has(normalized)) {
-    return true;
+  const tokens = normalized.match(/[a-z0-9]+/g) || [];
+  if (tokens.length > 0) {
+    const greetings = new Set(["hello", "hi", "hey", "yo", "greetings"]);
+    if (greetings.has(tokens[0]) && tokens.length <= 3) {
+      return true;
+    }
   }
 
-  return (
+  if (
     normalized.includes("what is your name") ||
     normalized.includes("who are you") ||
     normalized.includes("your name")
-  );
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 function clampTopK(value) {

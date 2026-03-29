@@ -5,7 +5,7 @@ type: faq
 summary: Positioning statement on why Rich is a strong candidate for senior and staff-level engineering roles.
 audience: recruiter
 tags: [faq, positioning, hiring]
-updated: 2026-03-29
+updated: "2026-03-29"
 ---
 
 ## Positioning

@@ -14,6 +14,10 @@ Create a curated bank across categories:
 
 Include both straightforward and adversarial prompts.
 
+Behavioral interview track:
+- Test plan: `docs/evals/behavioral-interview-test-plan.md`
+- Public-source bank (63 questions): `docs/evals/behavioral_question_bank_public.json`
+
 ## Manual rubric
 
 Score each answer on a 1–5 scale:

@@ -35,15 +35,15 @@ Milestone status as of 2026-03-28:
 ## Implementation status
 
 Core deliverables now in place:
-- ✅ Curated content corpus with consistent frontmatter (`content/`)
-- ✅ Document and chunk schemas (`docs/schemas-content.md`)
-- ✅ Ingestion scaffold (`apps/api/`, `scripts/ingest_all.py`, `scripts/smoke_test.py`)
+- ✅ Curated content corpus with consistent frontmatter ([content/](content/))
+- ✅ Document and chunk schemas ([docs/schemas-content.md](docs/schemas-content.md))
+- ✅ Ingestion scaffold ([apps/api/](apps/api/), [scripts/ingest_all.py](scripts/ingest_all.py), [scripts/smoke_test.py](scripts/smoke_test.py))
 - ✅ Retrieval runtime with `/api/chat` and citation-aware responses
-- ✅ API and eval smoke helpers (`scripts/chat_smoke_test.py`, `scripts/run_eval_bank.py`)
+- ✅ API and eval smoke helpers ([scripts/chat_smoke_test.py](scripts/chat_smoke_test.py), [scripts/run_eval_bank.py](scripts/run_eval_bank.py))
 - ✅ Architecture and deployment documentation
 - ✅ Cloudflare deployment and integration runbooks
-- ✅ Cloudflare deployable artifacts (`apps/api/worker/`, `apps/web/wrangler.toml`, `.github/workflows/deploy-cloudflare.yml`)
-- ✅ Website integration widget (`apps/web/embed/askrich-widget.js`)
+- ✅ Cloudflare deployable artifacts ([apps/api/worker/](apps/api/worker/), [apps/web/wrangler.toml](apps/web/wrangler.toml), [.github/workflows/deploy-cloudflare.yml](.github/workflows/deploy-cloudflare.yml))
+- ✅ Website integration widget ([apps/web/embed/askrich-widget.js](apps/web/embed/askrich-widget.js))
 - ✅ Canned response quality testing suite (Python + JavaScript test implementations)
 
 ## Quality Assurance
@@ -57,9 +57,9 @@ The worker contains hardcoded response paths for specific question types (Oracle
 - **Conciseness** - All answers stay under reasonable length limits
 
 **Test suites:**
-- `scripts/test_canned_responses.py` - Specification validator (11 test cases, 7 categories)
-- `scripts/test_canned_responses_integration.py` - Live worker response validation
-- `apps/api/worker/src/index.test.js` - JavaScript unit tests (40+ assertions, requires Node.js)
+- [scripts/test_canned_responses.py](scripts/test_canned_responses.py) - Specification validator (11 test cases, 7 categories)
+- [scripts/test_canned_responses_integration.py](scripts/test_canned_responses_integration.py) - Live worker response validation
+- [apps/api/worker/src/index.test.js](apps/api/worker/src/index.test.js) - JavaScript unit tests (40+ assertions, requires Node.js)
 
 **Documentation:**
 - [docs/testing/CANNED_RESPONSES.md](docs/testing/CANNED_RESPONSES.md) - Complete testing guide with examples and how to extend
@@ -84,7 +84,7 @@ Ask Rich is a **RAG application**, not a generic freeform chatbot:
 
 ## Tech stack
 
-- **Frontend:** Static web app (`apps/web`) deployed as Cloudflare Worker assets
+- **Frontend:** Static web app ([apps/web](apps/web)) deployed as Cloudflare Worker assets
 - **Backend API:** Cloudflare Worker API (`/api/chat` target)
 - **Workers edge runtime constraints:** Prefer Edge-compatible APIs; avoid Node-only runtime assumptions
 - **RAG framework:** LangChain first
@@ -100,16 +100,16 @@ Ask Rich is a **RAG application**, not a generic freeform chatbot:
 - Environment separation: dev, staging, prod
 
 Current deploy artifacts:
-- Web assets config: `apps/web/wrangler.toml`
-- API Worker config: `apps/api/worker/wrangler.toml`
-- CI workflow: `.github/workflows/deploy-cloudflare.yml`
+- Web assets config: [apps/web/wrangler.toml](apps/web/wrangler.toml)
+- API Worker config: [apps/api/worker/wrangler.toml](apps/api/worker/wrangler.toml)
+- CI workflow: [.github/workflows/deploy-cloudflare.yml](.github/workflows/deploy-cloudflare.yml)
 
-See `docs/deployment/cloudflare.md` for details.
+See [docs/deployment/cloudflare.md](docs/deployment/cloudflare.md) for details.
 
 Additional deployment docs:
-- `docs/deployment/cloudflare-config-and-deploy.md`
-- `docs/deployment/myrobertson-website-integration.md`
-- `docs/deployment/costs.md`
+- [docs/deployment/cloudflare-config-and-deploy.md](docs/deployment/cloudflare-config-and-deploy.md)
+- [docs/deployment/myrobertson-website-integration.md](docs/deployment/myrobertson-website-integration.md)
+- [docs/deployment/costs.md](docs/deployment/costs.md)
 
 ## Repository structure
 
@@ -132,19 +132,19 @@ data/
 - **M4:** Evaluation harness and quality polish
 - **M5:** Cloudflare deployment and production hardening
 
-See `docs/milestones/overview.md`.
+See [docs/milestones/overview.md](docs/milestones/overview.md).
 
 Milestone detail pages:
-- `docs/milestones/milestone-01.md`
-- `docs/milestones/milestone-02.md`
-- `docs/milestones/milestone-03.md`
-- `docs/milestones/milestone-04.md`
-- `docs/milestones/milestone-05.md`
+- [docs/milestones/milestone-01.md](docs/milestones/milestone-01.md)
+- [docs/milestones/milestone-02.md](docs/milestones/milestone-02.md)
+- [docs/milestones/milestone-03.md](docs/milestones/milestone-03.md)
+- [docs/milestones/milestone-04.md](docs/milestones/milestone-04.md)
+- [docs/milestones/milestone-05.md](docs/milestones/milestone-05.md)
 
 Milestone-1 planning details are expanded in:
-- `docs/milestones/milestone-01.md`
-- `docs/schemas-content.md`
-- `docs/ingestion-scaffold-plan.md`
+- [docs/milestones/milestone-01.md](docs/milestones/milestone-01.md)
+- [docs/schemas-content.md](docs/schemas-content.md)
+- [docs/ingestion-scaffold-plan.md](docs/ingestion-scaffold-plan.md)
 
 ## Local development intention
 
@@ -174,7 +174,7 @@ Ask Rich is explicitly designed to demonstrate practical open-source LLM integra
 
 ## License
 
-MIT. See `LICENSE`.
+MIT. See [LICENSE](LICENSE).
 
 ## Security and Quality Automation
 
@@ -186,4 +186,12 @@ This repository includes automated static analysis and dependency checks for pul
 - Python lint/security checks (Ruff + Bandit)
 - Dependabot updates for pip and GitHub Actions
 
-Workflow files are in `.github/workflows/` and dependency update policy is in `.github/dependabot.yml`.
+Workflow files are in [.github/workflows/](.github/workflows/) and dependency update policy is in [.github/dependabot.yml](.github/dependabot.yml).
+
+## Crosslinks
+
+- [API README](apps/api/README.md)
+- [Web README](apps/web/README.md)
+- [Scripts README](scripts/README.md)
+- [Architecture docs](docs/architecture.md)
+- [Deployment docs](docs/deployment/cloudflare.md)

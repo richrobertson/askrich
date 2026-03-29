@@ -1,6 +1,6 @@
 # apps/api
 
-FastAPI-based local development API for Ask Rich, plus a Cloudflare Worker edge entrypoint under `worker/`.
+FastAPI-based local development API for Ask Rich, plus a Cloudflare Worker edge entrypoint under [worker/](worker/).
 
 ## Current implementation
 
@@ -14,10 +14,10 @@ This API currently provides:
 - Provider-agnostic embedding and model adapter contracts
 - Local deterministic fallback adapters for smoke testing (`hash` embeddings + extractive answerer)
 - Structured response envelope with citations
-- Cloudflare Worker API edge entrypoint in `worker/src/index.js` with CORS/origin controls and two backend modes:
+- Cloudflare Worker API edge entrypoint in [worker/src/index.js](worker/src/index.js) with CORS/origin controls and two backend modes:
   - `CHAT_BACKEND_MODE=upstream`: proxy to a configured upstream API (`UPSTREAM_API_BASE`)
   - `CHAT_BACKEND_MODE=local`: serve responses from the worker's built-in corpus
-- Environment-specific Worker deployment config in `worker/wrangler.toml`
+- Environment-specific Worker deployment config in [worker/wrangler.toml](worker/wrangler.toml)
 
 ## Project Structure
 
@@ -62,7 +62,7 @@ The API will be available at `http://localhost:8000`.
 
 ### Run Ingestion
 
-See `scripts/README.md` for ingestion and smoke testing guidance.
+See [scripts/README.md](../../scripts/README.md) for ingestion and smoke testing guidance.
 
 ## Endpoints
 
@@ -106,7 +106,7 @@ Settings are loaded from environment variables (with defaults):
 
 ### Setting Up API Keys Securely
 
-`.env.example` is the tracked template. To set up locally:
+[.env.example](../../.env.example) is the tracked template. To set up locally:
 
 1. **Create a local `.env.local` file** (not committed to git):
    ```bash
@@ -126,9 +126,9 @@ Settings are loaded from environment variables (with defaults):
    PYTHONPATH=apps/api uvicorn app.main:app --host 127.0.0.1 --port 8000
    ```
 
-`.env.local` is listed in `.gitignore` and will never be committed to the repository.
+`.env.local` is listed in [.gitignore](../../.gitignore) and will never be committed to the repository.
 
-## Worker edge configuration (`worker/wrangler.toml`)
+## Worker edge configuration ([worker/wrangler.toml](worker/wrangler.toml))
 
 - `ALLOWED_ORIGINS`: comma-separated allowed web origins
 - `CHAT_BACKEND_MODE`: `upstream` or `local`
@@ -144,6 +144,9 @@ Settings are loaded from environment variables (with defaults):
 
 ## Related docs
 
+- [Repository README](../../README.md)
+- [Web README](../web/README.md)
+- [Scripts README](../../scripts/README.md)
 - [Ingestion plan](../../docs/ingestion-scaffold-plan.md)
 - [Content guide](../../docs/content-guide.md)
 - [Architecture](../../docs/architecture.md)

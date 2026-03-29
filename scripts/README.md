@@ -4,7 +4,7 @@ Automation helpers for ingestion, testing, and deployment.
 
 ## Implemented Scripts
 
-### `ingest_all.py`
+### [ingest_all.py](ingest_all.py)
 
 Run the full ingestion pipeline: load → split → embed → index.
 
@@ -12,9 +12,9 @@ Run the full ingestion pipeline: load → split → embed → index.
 python scripts/ingest_all.py
 ```
 
-Produces a summary of documents loaded and chunks created, and persists the vector store to `data/chroma/`.
+Produces a summary of documents loaded and chunks created, and persists the vector store to [data/chroma/](../data/chroma/).
 
-### `smoke_test.py`
+### [smoke_test.py](smoke_test.py)
 
 Quick validation of document loading, chunking, and vector store setup.
 
@@ -23,7 +23,7 @@ python scripts/smoke_test.py
 ```
 
 Tests:
-1. Load documents from `content/`
+1. Load documents from [content/](../content/)
 2. Validate document metadata
 3. Split into chunks
 4. Print sample chunk metadata and content
@@ -34,7 +34,7 @@ Useful for:
 - Debugging document structure
 - Confirming content is parsed correctly
 
-### `chat_smoke_test.py`
+### [chat_smoke_test.py](chat_smoke_test.py)
 
 Quick runtime check for retrieval-backed chat output.
 
@@ -54,7 +54,7 @@ Useful for:
 
 ## Evaluation Helpers
 
-### `run_eval_bank.py`
+### [run_eval_bank.py](run_eval_bank.py)
 
 Run the recruiter question bank against `POST /api/chat` and emit review artifacts.
 
@@ -77,7 +77,7 @@ Outputs:
 - `data/evals/eval_run_<timestamp>.json` with full responses and citations
 - `data/evals/eval_rubric_<timestamp>.csv` with blank rubric columns for scoring
 
-The question bank is stored at `docs/evals/question_bank.json` and is designed to be portable across model providers.
+The question bank is stored at [docs/evals/question_bank.json](../docs/evals/question_bank.json) and is designed to be portable across model providers.
 
 ## Future Script Categories
 
@@ -87,7 +87,7 @@ The question bank is stored at `docs/evals/question_bank.json` and is designed t
 
 ## Repository Security Rollout
 
-### `rollout_security_baseline.sh`
+### [rollout_security_baseline.sh](rollout_security_baseline.sh)
 
 Roll out this repository's GitHub security workflow baseline to other repositories.
 
@@ -105,10 +105,17 @@ scripts/rollout_security_baseline.sh --owner richrobertson --all-public --execut
 ```
 
 This copies:
-- `.github/workflows/codeql.yml`
-- `.github/workflows/dependency-review.yml`
-- `.github/workflows/secret-scan.yml`
-- `.github/workflows/static-analysis.yml`
-- `.github/dependabot.yml`
+- [.github/workflows/codeql.yml](../.github/workflows/codeql.yml)
+- [.github/workflows/dependency-review.yml](../.github/workflows/dependency-review.yml)
+- [.github/workflows/secret-scan.yml](../.github/workflows/secret-scan.yml)
+- [.github/workflows/static-analysis.yml](../.github/workflows/static-analysis.yml)
+- [.github/dependabot.yml](../.github/dependabot.yml)
 
 Then commits, pushes a branch, and opens a PR per repository.
+
+## Crosslinks
+
+- [Repository README](../README.md)
+- [API README](../apps/api/README.md)
+- [Web README](../apps/web/README.md)
+- [Testing docs](../docs/testing/CANNED_RESPONSES.md)

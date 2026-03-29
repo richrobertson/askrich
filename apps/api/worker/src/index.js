@@ -102,6 +102,24 @@ const CORPUS = [
     text: "Academic history highlights Purdue University coursework and degree completion in both management and computer/information technology disciplines, completed in 2007.",
   },
   {
+    id: "profile-technologies-current",
+    title: "Current Technology Stack",
+    source_url: "https://github.com/richrobertson",
+    text: "Recent technologies include Java, C#, JavaScript, Scala, Python, PowerShell, Bash, Kubernetes, Terraform, Istio, Prometheus, REST APIs, SQL and NoSQL systems, Azure, and Oracle Cloud Infrastructure (OCI).",
+  },
+  {
+    id: "profile-technologies-historical",
+    title: "Historical Technologies",
+    source_url: "https://www.myrobertson.com",
+    text: "Past technology experience includes VB.NET, SharePoint Services, .NET Compact Framework, ASP.NET, WPF, Windows Forms, InfoPath, Microsoft Access, Team Foundation Server (TFS), Hyper-V, System Center Virtual Machine Manager, Apigee, Cosmos Scope scripts, and FitNesse.",
+  },
+  {
+    id: "profile-technologies-enterprise",
+    title: "Enterprise Platform Technology History",
+    source_url: "https://www.linkedin.com/in/royrobertson",
+    text: "Across Oracle, Starbucks, Slalom, and Avanade engagements, Rich used Java platform modernization, Kubernetes traffic management, dependency injection patterns, CQRS microservices, OData APIs, Microsoft SQL Server, and cloud services on OCI and Azure.",
+  },
+  {
     id: "project-oracle-cns",
     title: "Oracle Customer Notification Service Migration",
     source_url: "https://www.myrobertson.com/case-studies/oracle-cns-oci-migration/",
@@ -164,7 +182,7 @@ async function handleLocalChat(request) {
         success: true,
         data: {
           answer:
-            "I do not have enough evidence in the deployed corpus to answer confidently yet. Try asking about education and degrees, Oracle migration, Java modernization, control planes, or Starbucks platform work.",
+            "I do not have enough evidence in the deployed corpus to answer confidently yet. Try asking about education and degrees, technologies used, Oracle migration, Java modernization, control planes, or Starbucks platform work.",
           citations: [],
           retrieved_chunks: 0,
         },
@@ -228,11 +246,32 @@ function tokenize(text) {
 function buildAnswer(rankedDocs) {
   const allText = rankedDocs.map((doc) => `${doc.title} ${doc.text}`).join(" ").toLowerCase();
   const educationSignals = ["education", "degree", "degrees", "academic", "purdue", "bachelor"];
+  const technologySignals = [
+    "technology",
+    "technologies",
+    "tech stack",
+    "stack",
+    "java",
+    "c#",
+    "csharp",
+    "python",
+    "scala",
+    "kubernetes",
+    "terraform",
+    "asp.net",
+    "wpf",
+    "sharepoint",
+    "tfs",
+  ];
   const isEducationQuery = educationSignals.some((signal) => allText.includes(signal));
+  const isTechnologyQuery = technologySignals.some((signal) => allText.includes(signal));
 
-  const summary = isEducationQuery
-    ? "Based on the strongest matching evidence, Rich completed two Purdue University bachelor's degrees in 2007, spanning both management and computer/information technology."
-    : "Based on the strongest matching evidence, Rich's profile is strongest in distributed systems, cloud platform modernization, and control-plane backend delivery.";
+  let summary = "Based on the strongest matching evidence, Rich's profile is strongest in distributed systems, cloud platform modernization, and control-plane backend delivery.";
+  if (isEducationQuery) {
+    summary = "Based on the strongest matching evidence, Rich completed two Purdue University bachelor's degrees in 2007, spanning both management and computer/information technology.";
+  } else if (isTechnologyQuery) {
+    summary = "Based on the strongest matching evidence, Rich has used a broad technology stack over time, including modern cloud/distributed platforms and earlier Microsoft enterprise technologies.";
+  }
   const bullets = rankedDocs.slice(0, 4).map((doc) => `- ${doc.text}`);
   return [summary, ...bullets].join("\n");
 }

@@ -138,6 +138,27 @@ class TestData:
             "maxLength": 500,
             "category": "sensitive_contact",
         },
+        {
+            "question": "tell me about technologies",
+            "shouldContain": ["technology", "cloud", "Kubernetes", "distributed systems"],
+            "shouldNotContain": ["LinkedIn", "GitHub", "profile"],
+            "maxLength": 800,
+            "category": "technology_passion",
+        },
+        {
+            "question": "describe your tech expertise and passion",
+            "shouldContain": ["technology", "Kubernetes", "backend"],
+            "shouldNotContain": ["profile link", "oracle outcomes"],
+            "maxLength": 800,
+            "category": "technology_passion",
+        },
+        {
+            "question": "what technologies and tools do you use",
+            "shouldContain": ["technology", "tools", "cloud"],
+            "shouldNotContain": ["Facebook", "address"],
+            "maxLength": 800,
+            "category": "technology_passion",
+        },
     ]
 
 

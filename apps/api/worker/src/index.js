@@ -594,6 +594,65 @@ function isOracleCnsOutcomesQuestion(questionLower) {
 }
 
 /**
+ * Intent detection: Technology passion question.
+ *
+ * Returns true if the user is asking about technology expertise, passion, or
+ * technology stack in general terms (not specific to a project or problem).
+ *
+ * This detection enables a dedicated answer path to highlight technology expertise
+ * without accidentally returning profile links or other unrelated content.
+ *
+ * Examples:
+ *   - "tell me about technologies"
+ *   - "what is your passion for technology"
+ *   - "describe your tech expertise"
+ *   - "technologies and tools you use"
+ *
+ * @param {string} questionLower - Lowercased question text
+ * @returns {boolean} - True if question is about technology passion/expertise
+ */
+function isTechnologyPassionQuestion(questionLower) {
+  const technologySignals = [
+    "technology",
+    "technologies",
+    "tech",
+    "tech stack",
+    "tech expertise",
+    "passion",
+    "tools",
+    "stack",
+  ];
+  const passionSignals = [
+    "tell me about",
+    "describe",
+    "what is",
+    "expertise",
+    "passion",
+    "experience with",
+    "how do you",
+  ];
+
+  // Exclude specific project/problem questions (these want project-focused answers)
+  const projectSignals = [
+    "in the oracle",
+    "in the starbucks",
+    "during the",
+    "for the",
+    " at ",
+  ];
+
+  const hasProjectContext = projectSignals.some((signal) => questionLower.includes(signal));
+  if (hasProjectContext) {
+    return false;
+  }
+
+  const hasTechSignal = includesAny(questionLower, technologySignals);
+  const hasPassionSignal = includesAny(questionLower, passionSignals);
+
+  return hasTechSignal && hasPassionSignal;
+}
+
+/**
  * Primary answer builder for local chat mode.
  *
  * Routes questions based on detected intent:
@@ -635,6 +694,19 @@ function buildAnswer(question, rankedDocs) {
       "- Supported a $2M enterprise deal timeline while the service moved to OCI-native architecture.",
       "- Improved scalability by modernizing the service onto OCI-native patterns.",
       "- Improved operational readiness through a safer migration and rollout approach.",
+    ].join("\n");
+  }
+
+  // Special-case technology passion questions: return focused tech summary, never profile links.
+  // This prevents "Tell me about technologies" from being misclassified as a profile query.
+  if (isTechnologyPassionQuestion(q)) {
+    return [
+      "Rich has broad technology expertise across modern cloud platforms and distributed systems:",
+      "- Cloud & orchestration: Kubernetes, Terraform, OCI migration architecture, control-plane patterns",
+      "- Distributed systems: Microservices, asynchronous messaging, eventual consistency patterns",
+      "- Backend platforms: Java, C#, Python, Scala across ASP.NET, SharePoint, enterprise middleware",
+      "- Data & analytics: Stream processing, event sourcing, distributed tracing",
+      "Rich's strength is translating platform technology into reliable business outcomes.",
     ].join("\n");
   }
 
@@ -1008,6 +1080,7 @@ export {
   buildProfileResponse,
   isBehavioralQuestion,
   isOracleCnsOutcomesQuestion,
+  isTechnologyPassionQuestion,
   isProfileLinksQuery,
   isContactQuery,
   isSensitiveContactQuery,

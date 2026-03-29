@@ -65,6 +65,7 @@ import {
   buildProfileResponse,
   isBehavioralQuestion,
   isOracleCnsOutcomesQuestion,
+  isTechnologyPassionQuestion,
   isProfileLinksQuery,
   isContactQuery,
   isSensitiveContactQuery,
@@ -121,6 +122,16 @@ describe('Canned Response Quality Tests', () => {
       expect(isBehavioralQuestion('describe when you had to deal with conflict')).toBe(true);
       expect(isBehavioralQuestion('what technologies do you use')).toBe(false);
     });
+
+    it('should detect technology passion questions', () => {
+      expect(isTechnologyPassionQuestion('tell me about technologies')).toBe(true);
+      expect(isTechnologyPassionQuestion('describe your tech expertise and passion')).toBe(true);
+      expect(isTechnologyPassionQuestion('what technologies and tools do you use')).toBe(true);
+      expect(isTechnologyPassionQuestion('how do you approach technology')).toBe(true);
+      expect(isTechnologyPassionQuestion('technologies you used in the oracle project')).toBe(false);
+      expect(isTechnologyPassionQuestion('what is your education')).toBe(false);
+      expect(isTechnologyPassionQuestion('Oracle CNS outcomes')).toBe(false);
+    });
   });
 
   describe('Oracle CNS Outcomes Answer Quality', () => {
@@ -142,6 +153,50 @@ describe('Canned Response Quality Tests', () => {
 
       const lines = answer.split('\n').filter((line) => line.trim());
       expect(lines.length).toBeLessThanOrEqual(5);
+    });
+  });
+
+  describe('Technology Passion Answer Quality', () => {
+    it('should return technology expertise when asked about technologies', () => {
+      const mockDocs = CORPUS.slice(0, 3);
+      const answer = buildAnswer('tell me about technologies', mockDocs);
+
+      expect(answer).toContain('technology');
+      expect(answer).toContain('cloud');
+      expect(answer).toContain('Kubernetes');
+      expect(answer).not.toContain('GitHub');
+      expect(answer).not.toContain('LinkedIn');
+      expect(answer).not.toContain('profile');
+    });
+
+    it('should return tech expertise for detailed technology questions', () => {
+      const mockDocs = CORPUS.slice(0, 3);
+      const answer = buildAnswer('describe your tech expertise and passion', mockDocs);
+
+      expect(answer).toContain('technology');
+      expect(answer).toContain('backend');
+      expect(answer).toContain('distributed systems');
+      expect(answer).not.toContain('contact point');
+    });
+
+    it('should keep technology answer well-structured', () => {
+      const mockDocs = CORPUS.slice(0, 3);
+      const answer = buildAnswer('what technologies and tools do you use', mockDocs);
+
+      const lines = answer.split('\n').filter((line) => line.trim());
+      expect(lines.length).toBeGreaterThan(3);
+      expect(lines.length).toBeLessThanOrEqual(8);
+      expect(answer.length).toBeLessThan(900);
+    });
+
+    it('should exclude project-specific technology questions from passion detection', () => {
+      // "What technologies in the Oracle project" should NOT trigger technology passion answer
+      const mockDocs = CORPUS.filter((doc) => doc.id === 'project-oracle-cns');
+      const answer = buildAnswer('technologies you used in the oracle project', mockDocs);
+
+      // Should fall back to generic answer (not the technology passion answer)
+      // This test ensures we don't return the dedicated technology passion answer
+      expect(answer).not.toContain('Rich has broad technology expertise');
     });
   });
 

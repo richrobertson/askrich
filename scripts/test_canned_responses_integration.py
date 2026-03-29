@@ -218,6 +218,38 @@ class CannedResponseValidator:
         passed = len(answer) < 800 and "LinkedIn" not in answer
         return (passed, "Pass") if passed else (False, "Answer too long or has profile links")
 
+    def test_technology_passion_simple(self):
+        """Test simple technology passion query (tell me about technologies)."""
+        question = "tell me about technologies"
+        data = self.ask_question(question)
+        if not data:
+            return False, "Failed to get answer"
+
+        answer = data.get("answer", "")
+        return self.validate_answer(
+            question,
+            answer,
+            ["technology", "cloud", "Kubernetes"],
+            ["LinkedIn", "GitHub", "profile"],
+            800,
+        )
+
+    def test_technology_passion_detailed(self):
+        """Test detailed technology passion query (describe your tech expertise)."""
+        question = "describe your tech expertise and passion"
+        data = self.ask_question(question)
+        if not data:
+            return False, "Failed to get answer"
+
+        answer = data.get("answer", "")
+        return self.validate_answer(
+            question,
+            answer,
+            ["technology", "Kubernetes", "backend"],
+            ["Contact point", "oracle outcomes"],
+            800,
+        )
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -252,6 +284,8 @@ def main():
         ("All Profiles", validator.test_all_profiles),
         ("Sensitive Contact (PII Protection)", validator.test_sensitive_contact),
         ("Technology Query", validator.test_technology_query),
+        ("Technology Passion - Simple", validator.test_technology_passion_simple),
+        ("Technology Passion - Detailed", validator.test_technology_passion_detailed),
     ]
 
     passed = 0

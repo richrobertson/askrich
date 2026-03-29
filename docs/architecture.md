@@ -87,6 +87,29 @@ Adapters isolate provider-specific SDK/API differences so model backends can be 
 The project is meant to demonstrate practical open-source LLM integration capability.
 Making OpenAI optional (not required) keeps architecture portable and avoids proprietary lock-in.
 
+## Answer Quality Assurance
+
+The local worker mode contains hardcoded response paths for specific question types:
+- Oracle CNS outcomes → focused metrics (timeline, scalability, readiness)
+- Profile queries → profile links only
+- Education queries → degree/university info
+- Technology queries → tech stack summary
+- Sensitive contact → refuse PII, redirect to LinkedIn
+- Behavioral questions → STAR-formatted answers
+
+These responses are extensively tested to ensure:
+- **Appropriate routing** - Questions match their intended answer paths
+- **No mixing** - Profile queries don't include unrelated project details
+- **Safety** - Sensitive contact requests properly refuse private information
+- **Conciseness** - All answers stay under 600-800 character limits
+
+**Test coverage:**
+- `scripts/test_canned_responses.py` - Specification validator (11 test cases)
+- `scripts/test_canned_responses_integration.py` - Live worker response validation (6 tests)
+- `apps/api/worker/src/index.test.js` - JavaScript unit tests (40+ assertions)
+
+See [docs/testing/CANNED_RESPONSES.md](testing/CANNED_RESPONSES.md) for complete testing approach.
+
 ## Future expansion points
 
 - LangGraph workflow orchestration for advanced flows

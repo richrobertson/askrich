@@ -1,3 +1,45 @@
+/**
+ * Ask Rich Cloudflare Worker: Chat API Handler
+ *
+ * This worker handles two modes:
+ * 1. UPSTREAM mode: Proxies requests to a retrieval-backed API (e.g., FastAPI server)
+ * 2. LOCAL mode: Serves canned responses from hardcoded CORPUS and rules
+ *
+ * QUALITY ASSURANCE:
+ *   The local mode contains hardcoded response paths for specific question types.
+ *   These are extensively tested to ensure focused, concise, and safe answers.
+ *
+ *   Test suites (see docs/testing/CANNED_RESPONSES.md):
+ *     - scripts/test_canned_responses.py: Specification validation
+ *     - scripts/test_canned_responses_integration.py: Live worker response validation
+ *     - src/index.test.js: JavaScript unit tests (40+ assertions)
+ *
+ *   Response quality guarantees:
+ *     - Oracle CNS outcomes questions → focused metrics (not profile link noise)
+ *     - Profile queries → profile links only (no project details)
+ *     - Education queries → degree info (no unrelated content)
+ *     - Sensitive contact → refuse PII, redirect to LinkedIn
+ *     - All fallback answers → stay under 600-800 characters
+ *
+ * KEY FUNCTIONS:
+ *   - buildAnswer(): Routes questions based on intent (behavioral, outcomes, education, etc.)
+ *   - buildProfileResponse(): Handles profile/contact queries
+ *   - buildBehavioralAnswer(): Returns STAR-formatted answers for behavioral questions
+ *   - rankCorpus(): Token-based relevance ranking of CORPUS documents
+ *   - isOracleCnsOutcomesQuestion(): Intent detection for Oracle outcomes
+ *
+ * DOCUMENTATION & CROSSLINKS:
+ *   - docs/testing/CANNED_RESPONSES.md: Complete testing guide
+ *   - docs/architecture.md: System design overview
+ *   - README.md: Quality assurance section
+ *   - apps/api/worker/package.json: Test dependencies
+ *
+ * ENVIRONMENT:
+ *   - CHAT_BACKEND_MODE: "upstream" or "local" (defaults to "local")
+ *   - UPSTREAM_API_BASE: Base URL for upstream (e.g., http://127.0.0.1:8000)
+ *   - ALLOWED_ORIGINS: CORS whitelist (comma-separated)
+ */
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -501,13 +543,101 @@ function buildProfileResponse({
   return ["Here is Rich's LinkedIn profile:", `- LinkedIn: ${PROFILE_LINKS.linkedin}`].join("\n");
 }
 
+/**
+ * Utility: Check if text includes any of the signal phrases.
+ * Used throughout intent detection to keep signal lists DRY.
+ *
+ * @param {string} text - Text to search (typically lowercased question)
+ * @param {string[]} signals - List of phrases to match
+ * @returns {boolean} - True if any signal is found
+ */
+function includesAny(text, signals) {
+  return signals.some((signal) => text.includes(signal));
+}
+
+/**
+ * Intent detection: Oracle CNS outcomes question.
+ *
+ * Returns true if the user is asking about measurable results/outcomes from the
+ * Oracle Customer Notification Service migration project.
+ *
+ * This detection enables a dedicated answer path that returns specific metrics
+ * (timeline, scalability, operational readiness) without unrelated content.
+ * See: docs/testing/CANNED_RESPONSES.md for test coverage.
+ *
+ * @param {string} questionLower - Lowercased question text
+ * @returns {boolean} - True if question is about Oracle CNS outcomes
+ */
+function isOracleCnsOutcomesQuestion(questionLower) {
+  const oracleSignals = [
+    "oracle",
+    "cns",
+    "customer notification service",
+    "notification service",
+  ];
+  const outcomeSignals = [
+    "outcome",
+    "outcomes",
+    "result",
+    "results",
+    "impact",
+    "measurable",
+    "metric",
+    "metrics",
+    "deliver",
+    "delivered",
+    "achieve",
+    "achieved",
+  ];
+
+  return includesAny(questionLower, oracleSignals) && includesAny(questionLower, outcomeSignals);
+}
+
+/**
+ * Primary answer builder for local chat mode.
+ *
+ * Routes questions based on detected intent:
+ * 1. Behavioral questions → STAR-formatted answers
+ * 2. Oracle CNS outcomes → Focused metrics response
+ * 3. Education queries → Degree/university info
+ * 4. Technology queries → Tech stack overview
+ * 5. Cloud/platform queries → Control-plane and OCI expertise
+ * 6. Generic fallback → Summary + top 2 retrieved bullets
+ *
+ * TESTING & VALIDATION:
+ *   - scripts/test_canned_responses.py: Test spec validation (7 categories, 11 test cases)
+ *   - scripts/test_canned_responses_integration.py: Live worker response validation
+ *   - apps/api/worker/src/index.test.js: JavaScript unit tests (40+ assertions)
+ *   - docs/testing/CANNED_RESPONSES.md: Full testing guide with examples
+ *
+ * Quality metrics enforced by tests:
+ *   - Oracle CNS outcomes: Returns $2M timeline, scalability, operational readiness (no profile links)
+ *   - Profile queries: Return only profile info (no project details)
+ *   - Education: Return Purdue degree (no unrelated content)
+ *   - Sensitive contact: Refuse PII, redirect to LinkedIn
+ *   - All answers: Stay under 600-800 characters
+ *
+ * @param {string} question - User's question
+ * @param {object[]} rankedDocs - Retrieved docs ranked by relevance (CORPUS)
+ * @returns {string} - Formatted answer text
+ */
 function buildAnswer(question, rankedDocs) {
   const q = String(question || "").toLowerCase();
   if (isBehavioralQuestion(q)) {
     return buildBehavioralAnswer(q, rankedDocs);
   }
 
-  const allText = rankedDocs.map((doc) => `${doc.title} ${doc.text}`).join(" ").toLowerCase();
+  // Special-case Oracle CNS outcomes: return focused metrics, never generic intro text.
+  // This prevents "What outcomes from Oracle?" from drifting into profile links or noise.
+  if (isOracleCnsOutcomesQuestion(q)) {
+    return [
+      "For the Oracle CNS migration, the key measurable outcomes were:",
+      "- Supported a $2M enterprise deal timeline while the service moved to OCI-native architecture.",
+      "- Improved scalability by modernizing the service onto OCI-native patterns.",
+      "- Improved operational readiness through a safer migration and rollout approach.",
+    ].join("\n");
+  }
+
   const profileSignals = [
     "github",
     "linkedin",
@@ -537,14 +667,21 @@ function buildAnswer(question, rankedDocs) {
     "sharepoint",
     "tfs",
   ];
-  const isProfileQuery = profileSignals.some((signal) => allText.includes(signal));
-  const includesLinkedIn = allText.includes("linkedin");
-  const includesGitHub = allText.includes("github");
-  const includesFacebook = allText.includes("facebook");
-  const isEducationQuery = educationSignals.some((signal) => allText.includes(signal));
-  const isTechnologyQuery = technologySignals.some((signal) => allText.includes(signal));
+  const cloudPlatformSignals = ["cloud", "platform", "control plane", "control-plane", "kubernetes", "oci"];
 
-  let summary = "The strongest evidence points to deep experience in distributed systems, cloud modernization, and reliable backend platform delivery.";
+  // CRITICAL: Classify intent based on USER'S QUESTION, not retrieved document text.
+  // This prevents misrouting. Example: if a doc happens to mention "LinkedIn" in passing,
+  // we don't want to return a profile-links answer to a question about "What projects?"
+  // See: docs/testing/CANNED_RESPONSES.md - "Answer Appropriateness" section.
+  const isProfileQuery = includesAny(q, profileSignals);
+  const includesLinkedIn = q.includes("linkedin");
+  const includesGitHub = q.includes("github");
+  const includesFacebook = q.includes("facebook");
+  const isEducationQuery = includesAny(q, educationSignals);
+  const isTechnologyQuery = includesAny(q, technologySignals);
+  const isCloudPlatformQuery = includesAny(q, cloudPlatformSignals);
+
+  let summary = "Rich's strongest evidence points to distributed systems, cloud modernization, and reliable backend platform delivery.";
   if (isProfileQuery) {
     const profileDetails = [];
     if (includesLinkedIn) {
@@ -564,9 +701,17 @@ function buildAnswer(question, rankedDocs) {
   } else if (isEducationQuery) {
     summary = "Rich completed two Purdue University bachelor's degrees in 2007, spanning both management and computer/information technology.";
   } else if (isTechnologyQuery) {
-    summary = "Rich has used a broad technology stack over time, including modern cloud/distributed platforms and earlier Microsoft enterprise technologies.";
+    summary = "Rich has used a broad technology stack across modern cloud/distributed platforms and earlier Microsoft enterprise technologies.";
+  } else if (isCloudPlatformQuery) {
+    summary = "Rich is highly relevant for cloud platform and control-plane roles, with OCI migration leadership, Kubernetes platform operations, and reusable multitenant control-plane architecture experience.";
   }
-  const bullets = rankedDocs.slice(0, 3).map((doc) => `- ${clipSentence(doc.text, 200)}`);
+
+  // Fallback: return summary + top 2 bullets, each clipped to 180 characters.
+  // Reduced from 3 bullets (200 chars) to 2 bullets (180 chars) to avoid excessive noise
+  // when question intent is ambiguous. See test validation in:
+  //   - apps/api/worker/src/index.test.js (buildAnswer quality constraints)
+  //   - docs/testing/CANNED_RESPONSES.md (answer quality section)
+  const bullets = rankedDocs.slice(0, 2).map((doc) => `- ${clipSentence(doc.text, 180)}`);
   return [summary, ...bullets].join("\n");
 }
 
@@ -854,3 +999,20 @@ function withCors(response, request, env) {
     headers,
   });
 }
+
+// Export functions for testing
+export {
+  CORPUS,
+  buildAnswer,
+  buildBehavioralAnswer,
+  buildProfileResponse,
+  isBehavioralQuestion,
+  isOracleCnsOutcomesQuestion,
+  isProfileLinksQuery,
+  isContactQuery,
+  isSensitiveContactQuery,
+  isAllProfilesQuery,
+  rankCorpus,
+  clipSentence,
+  formatStarAnswer,
+};

@@ -44,6 +44,33 @@ Core deliverables now in place:
 - ✅ Cloudflare deployment and integration runbooks
 - ✅ Cloudflare deployable artifacts (`apps/api/worker/`, `apps/web/wrangler.toml`, `.github/workflows/deploy-cloudflare.yml`)
 - ✅ Website integration widget (`apps/web/embed/askrich-widget.js`)
+- ✅ Canned response quality testing suite (Python + JavaScript test implementations)
+
+## Quality Assurance
+
+### Answer Quality Testing
+
+The worker contains hardcoded response paths for specific question types (Oracle outcomes, profile queries, education, technology, sensitive contact, behavioral). These are extensively tested to ensure:
+- **Focused answers** - Questions about outcomes get outcome-specific answers (not profile links)
+- **No noisy mixing** - Profile queries don't include project details
+- **PII safety** - Sensitive contact requests refuse private information appropriately
+- **Conciseness** - All answers stay under reasonable length limits
+
+**Test suites:**
+- `scripts/test_canned_responses.py` - Specification validator (11 test cases, 7 categories)
+- `scripts/test_canned_responses_integration.py` - Live worker response validation
+- `apps/api/worker/src/index.test.js` - JavaScript unit tests (40+ assertions, requires Node.js)
+
+**Documentation:**
+- [docs/testing/CANNED_RESPONSES.md](docs/testing/CANNED_RESPONSES.md) - Complete testing guide with examples and how to extend
+
+**Run tests:**
+```bash
+python3 scripts/test_canned_responses.py          # Validate test spec
+python3 scripts/test_canned_responses_integration.py --url http://localhost:8787  # Test live worker
+```
+
+See [docs/testing/CANNED_RESPONSES.md](docs/testing/CANNED_RESPONSES.md) for detailed testing approach and test coverage matrix.
 
 ## High-level architecture summary
 

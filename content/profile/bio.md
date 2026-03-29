@@ -4,8 +4,10 @@ title: Rich Robertson Bio
 type: profile
 summary: Senior software engineer focused on backend systems, cloud platforms, and modernization programs.
 tags: [profile, bio, backend, distributed-systems, cloud]
-updated: 2026-03-28
+updated: "2026-03-28"
 ---
+
+## Bio
 
 Rich Robertson is a senior software engineer with 15+ years of experience delivering backend, distributed systems, and cloud/platform solutions.
 

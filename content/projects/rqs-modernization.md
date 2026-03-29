@@ -6,7 +6,7 @@ summary: Modernization initiative spanning runtime upgrades, architecture simpli
 role: Senior Software Engineer
 technologies: [Java, ARM, dependency-management, cloud-infrastructure]
 tags: [modernization, performance, compliance, platform]
-updated: 2026-03-28
+updated: "2026-03-28"
 ---
 
 ## Recruiter Summary

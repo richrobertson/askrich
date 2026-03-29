@@ -90,6 +90,18 @@ export default {
 
 const CORPUS = [
   {
+    id: "profile-education-degrees",
+    title: "Education and Degrees",
+    source_url: "https://www.linkedin.com/in/royrobertson",
+    text: "Rich holds two bachelor's degrees from Purdue University (2007): a Bachelor of Science in Management (Krannert School of Management) and a Bachelor of Science in Computer & Information Technology (College of Technology). This education history reflects both business and technical foundations.",
+  },
+  {
+    id: "profile-academic-history",
+    title: "Academic History",
+    source_url: "https://www.myrobertson.com",
+    text: "Academic history highlights Purdue University coursework and degree completion in both management and computer/information technology disciplines, completed in 2007.",
+  },
+  {
     id: "project-oracle-cns",
     title: "Oracle Customer Notification Service Migration",
     source_url: "https://www.myrobertson.com/case-studies/oracle-cns-oci-migration/",
@@ -152,7 +164,7 @@ async function handleLocalChat(request) {
         success: true,
         data: {
           answer:
-            "I do not have enough evidence in the deployed corpus to answer confidently yet. Try asking about Oracle migration, Java modernization, control planes, or Starbucks platform work.",
+            "I do not have enough evidence in the deployed corpus to answer confidently yet. Try asking about education and degrees, Oracle migration, Java modernization, control planes, or Starbucks platform work.",
           citations: [],
           retrieved_chunks: 0,
         },
@@ -214,7 +226,13 @@ function tokenize(text) {
 }
 
 function buildAnswer(rankedDocs) {
-  const summary = `Based on the strongest matching evidence, Rich's profile is strongest in distributed systems, cloud platform modernization, and control-plane backend delivery.`;
+  const allText = rankedDocs.map((doc) => `${doc.title} ${doc.text}`).join(" ").toLowerCase();
+  const educationSignals = ["education", "degree", "degrees", "academic", "purdue", "bachelor"];
+  const isEducationQuery = educationSignals.some((signal) => allText.includes(signal));
+
+  const summary = isEducationQuery
+    ? "Based on the strongest matching evidence, Rich completed two Purdue University bachelor's degrees in 2007, spanning both management and computer/information technology."
+    : "Based on the strongest matching evidence, Rich's profile is strongest in distributed systems, cloud platform modernization, and control-plane backend delivery.";
   const bullets = rankedDocs.slice(0, 4).map((doc) => `- ${doc.text}`);
   return [summary, ...bullets].join("\n");
 }

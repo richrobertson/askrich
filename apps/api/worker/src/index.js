@@ -169,6 +169,8 @@ const PROFILE_LINKS = {
   facebook: "https://www.facebook.com/rich.r.robertson/",
 };
 
+const PROFILE_PLATFORM_ORDER = ["linkedin", "github", "facebook"];
+
 function getBackendMode(env) {
   return String(env.CHAT_BACKEND_MODE || "local").trim().toLowerCase();
 }
@@ -187,17 +189,32 @@ async function handleLocalChat(request) {
     return json({ success: false, error: "Question must be at least 3 characters" }, 400);
   }
 
-  if (isProfileLinksQuery(question)) {
+  const requestedProfiles = getRequestedProfiles(question);
+  const asksForAllProfiles = isAllProfilesQuery(question);
+  const isContactRequest = isContactQuery(question);
+  const isSensitiveContactRequest = isSensitiveContactQuery(question);
+  const isGenericProfileRequest = isProfileLinksQuery(question);
+
+  if (
+    requestedProfiles.length ||
+    asksForAllProfiles ||
+    isContactRequest ||
+    isSensitiveContactRequest ||
+    isGenericProfileRequest
+  ) {
+    const answer = buildProfileResponse({
+      requestedProfiles,
+      asksForAllProfiles,
+      isContactRequest,
+      isSensitiveContactRequest,
+      isGenericProfileRequest,
+    });
+
     return json(
       {
         success: true,
         data: {
-          answer: [
-            "Here are Rich's public profile links:",
-            `- GitHub: ${PROFILE_LINKS.github}`,
-            `- LinkedIn: ${PROFILE_LINKS.linkedin}`,
-            `- Facebook: ${PROFILE_LINKS.facebook}`,
-          ].join("\n"),
+          answer,
           citations: [
             {
               id: "profile-public-links",
@@ -283,20 +300,181 @@ function tokenize(text) {
 
 function isProfileLinksQuery(question) {
   const q = String(question || "").toLowerCase();
-  const signals = [
+  const platformSignals = [
     "github",
     "linkedin",
     "facebook",
-    "social",
-    "profile",
-    "profiles",
+  ];
+  const linkSignals = [
     "link",
     "links",
     "url",
     "urls",
   ];
+  const profileLinkPhrases = [
+    "profile link",
+    "profile links",
+    "public profile",
+    "public profiles",
+    "social profile",
+    "social profiles",
+    "social links",
+    "portfolio links",
+  ];
 
-  return signals.some((signal) => q.includes(signal));
+  const hasPlatformMention = platformSignals.some((signal) => q.includes(signal));
+  const hasLinkIntent = linkSignals.some((signal) => q.includes(signal));
+  const hasProfileLinkPhrase = profileLinkPhrases.some((signal) => q.includes(signal));
+
+  return hasPlatformMention || hasProfileLinkPhrase || hasLinkIntent;
+}
+
+function isAllProfilesQuery(question) {
+  const q = String(question || "").toLowerCase();
+  const allSignals = [
+    "all profiles",
+    "all profile links",
+    "all social",
+    "social profiles",
+    "public profiles",
+    "profile links",
+    "all links",
+    "portfolio links",
+  ];
+  return allSignals.some((signal) => q.includes(signal));
+}
+
+function isContactQuery(question) {
+  const q = String(question || "").toLowerCase();
+  const contactSignals = [
+    "contact",
+    "reach",
+    "reach out",
+    "best way to connect",
+    "best way to contact",
+    "how can i connect",
+    "how do i connect",
+    "get in touch",
+    "primary contact",
+  ];
+  return contactSignals.some((signal) => q.includes(signal));
+}
+
+function isSensitiveContactQuery(question) {
+  const q = String(question || "").toLowerCase();
+  const piiSignals = [
+    "phone",
+    "phone number",
+    "mobile",
+    "cell",
+    "text",
+    "email",
+    "e-mail",
+    "mail address",
+    "gmail",
+    "outlook",
+    "personal contact",
+    "home address",
+    "address",
+    "pii",
+    "private",
+    "personal info",
+  ];
+  const requestSignals = [
+    "share",
+    "give",
+    "provide",
+    "what is",
+    "what's",
+    "can i have",
+    "send",
+    "contact",
+    "reach",
+    "get",
+  ];
+
+  const hasPiiSignal = piiSignals.some((signal) => q.includes(signal));
+  if (!hasPiiSignal) {
+    return false;
+  }
+
+  return requestSignals.some((signal) => q.includes(signal));
+}
+
+function getRequestedProfiles(question) {
+  const q = String(question || "").toLowerCase();
+  const requested = [];
+
+  if (q.includes("linkedin")) {
+    requested.push("linkedin");
+  }
+  if (q.includes("github") || q.includes("git hub")) {
+    requested.push("github");
+  }
+  if (q.includes("facebook")) {
+    requested.push("facebook");
+  }
+
+  return requested;
+}
+
+function toProfileLabel(profile) {
+  if (profile === "linkedin") return "LinkedIn";
+  if (profile === "github") return "GitHub";
+  if (profile === "facebook") return "Facebook";
+  return profile;
+}
+
+function formatProfileLines(profiles) {
+  return profiles.map((profile) => `- ${toProfileLabel(profile)}: ${PROFILE_LINKS[profile]}`);
+}
+
+function buildProfileResponse({
+  requestedProfiles,
+  asksForAllProfiles,
+  isContactRequest,
+  isSensitiveContactRequest,
+  isGenericProfileRequest,
+}) {
+  if (isSensitiveContactRequest) {
+    return [
+      "I do not share private contact details such as personal phone numbers or email addresses here.",
+      "The best way to reach Rich is LinkedIn:",
+      `- LinkedIn: ${PROFILE_LINKS.linkedin}`,
+      "If you send a brief note there with role details and your preferred follow-up channel, he can respond appropriately.",
+    ].join("\n");
+  }
+
+  if (asksForAllProfiles) {
+    return ["Here are Rich's public profile links:", ...formatProfileLines(PROFILE_PLATFORM_ORDER)].join("\n");
+  }
+
+  if (requestedProfiles.length) {
+    const requestedUnique = PROFILE_PLATFORM_ORDER.filter((profile) => requestedProfiles.includes(profile));
+    const firstRequested = requestedUnique[0];
+    const heading = requestedUnique.length === 1
+      ? `Here is Rich's ${toProfileLabel(firstRequested)} profile:`
+      : "Here are the requested profile links:";
+    return [heading, ...formatProfileLines(requestedUnique)].join("\n");
+  }
+
+  if (isContactRequest) {
+    return [
+      "LinkedIn is Rich's primary contact point:",
+      `- LinkedIn: ${PROFILE_LINKS.linkedin}`,
+      "If you want additional profile links (for example GitHub or Facebook), ask and I can share those too.",
+    ].join("\n");
+  }
+
+  if (isGenericProfileRequest) {
+    return [
+      "I can share specific profile links. LinkedIn is the primary contact point:",
+      `- LinkedIn: ${PROFILE_LINKS.linkedin}`,
+      "If you want GitHub or Facebook as well, ask for those directly.",
+    ].join("\n");
+  }
+
+  return ["Here is Rich's LinkedIn profile:", `- LinkedIn: ${PROFILE_LINKS.linkedin}`].join("\n");
 }
 
 function buildAnswer(rankedDocs) {
@@ -331,12 +509,29 @@ function buildAnswer(rankedDocs) {
     "tfs",
   ];
   const isProfileQuery = profileSignals.some((signal) => allText.includes(signal));
+  const includesLinkedIn = allText.includes("linkedin");
+  const includesGitHub = allText.includes("github");
+  const includesFacebook = allText.includes("facebook");
   const isEducationQuery = educationSignals.some((signal) => allText.includes(signal));
   const isTechnologyQuery = technologySignals.some((signal) => allText.includes(signal));
 
   let summary = "Based on the strongest matching evidence, Rich's profile is strongest in distributed systems, cloud platform modernization, and control-plane backend delivery.";
   if (isProfileQuery) {
-    summary = "Based on the strongest matching evidence, Rich's public profiles are: GitHub https://github.com/richrobertson, LinkedIn https://www.linkedin.com/in/royrobertson, and Facebook https://www.facebook.com/rich.r.robertson/.";
+    const profileDetails = [];
+    if (includesLinkedIn) {
+      profileDetails.push(`LinkedIn ${PROFILE_LINKS.linkedin} (primary contact point)`);
+    }
+    if (includesGitHub) {
+      profileDetails.push(`GitHub ${PROFILE_LINKS.github}`);
+    }
+    if (includesFacebook) {
+      profileDetails.push(`Facebook ${PROFILE_LINKS.facebook}`);
+    }
+
+    const details = profileDetails.length
+      ? profileDetails.join(", ")
+      : `LinkedIn ${PROFILE_LINKS.linkedin} (primary contact point)`;
+    summary = `Based on the strongest matching evidence, Rich's public profile links include ${details}.`;
   } else if (isEducationQuery) {
     summary = "Based on the strongest matching evidence, Rich completed two Purdue University bachelor's degrees in 2007, spanning both management and computer/information technology.";
   } else if (isTechnologyQuery) {

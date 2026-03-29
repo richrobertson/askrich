@@ -21,3 +21,5 @@ Use these links when answering questions such as:
 - "Can you share his LinkedIn profile?"
 - "Do you have his Facebook profile link?"
 - "What social or public profile URLs should I review?"
+
+When the question is about contact or how to reach Rich, default to LinkedIn as the primary contact point and only include other profile links when requested.

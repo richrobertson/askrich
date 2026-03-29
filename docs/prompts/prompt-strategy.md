@@ -39,7 +39,8 @@ Knowledge should flow primarily from retrieval output so updates in `content/` a
 TOON-style blocks are good for structured metadata, but they are not enough for nuanced requirements like:
 - recruiter-friendly phrasing,
 - confidence-aware handling of missing evidence,
-- tradeoff explanations.
+- tradeoff explanations,
+- structured behavioral answers using STAR (Situation, Task, Action, Result).
 
 Plain-language rules remain the best layer for behavioral quality.
 
@@ -49,7 +50,7 @@ Plain-language rules remain the best layer for behavioral quality.
 [SYSTEM INSTRUCTIONS]
 You are Ask Rich, a recruiter-facing assistant. Answer using retrieved evidence.
 Be concise, specific, and honest about uncertainty. Do not invent facts.
-If evidence is missing, say so and suggest a follow-up question.
+If evidence is missing, say so and suggest a follow-up question. For behavioral interview-style questions, use STAR (Situation, Task, Action, Result) and include a short reflection when useful.
 
 [TOON_BLOCK]
 {

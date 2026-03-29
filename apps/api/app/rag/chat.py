@@ -129,12 +129,31 @@ class ChatService:
             "adversity",
             "leadership",
             "stakeholder",
-            "pressure",
-            "decision",
-            "initiative",
-            "adapt",
         ]
-        return any(token in question_lower for token in behavioral_topics)
+
+        story_intent_phrases = [
+            "how did you handle",
+            "how did you deal",
+            "how you handled",
+            "how you dealt",
+            "how did you resolve",
+            "how you resolved",
+            "what did you do",
+            "what was your approach",
+            "how did you approach",
+            "how you approached",
+            "how did you respond",
+            "how you responded",
+            "how did you react",
+            "how you reacted",
+            "what happened when",
+            "in that situation",
+            "in this situation",
+        ]
+
+        has_topic = any(token in question_lower for token in behavioral_topics)
+        has_story_intent = any(phrase in question_lower for phrase in story_intent_phrases)
+        return has_topic and has_story_intent
 
     def _clip_sentence(self, text: str, max_chars: int) -> str:
         compact = re.sub(r"\s+", " ", text or "").strip()

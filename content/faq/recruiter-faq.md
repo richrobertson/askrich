@@ -36,6 +36,14 @@ Teams facing ambiguous requirements, legacy complexity, or high-accountability d
 
 Both. He has delivered in enterprise consulting contexts and in product/platform organizations, including customer-facing systems at scale.
 
+## What is the best way to contact Rich?
+
+LinkedIn is the primary contact point: https://www.linkedin.com/in/royrobertson. If you want additional public profile links (for example, GitHub or Facebook), ask and those can be shared directly.
+
+## Can you share Rich's phone number, personal email, or other private contact details?
+
+No. Private contact details are not shared here. The appropriate contact path is LinkedIn: https://www.linkedin.com/in/royrobertson. Send a brief message with role context and preferred follow-up method.
+
 ## Do you have prepared behavioral interview examples?
 
 Yes. Start with `content/faq/behavioral-interview-strategic-answers.md`, then use the grouped files under `content/faq/behavioral/` for focused question types.

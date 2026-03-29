@@ -58,9 +58,13 @@ def ingest() -> dict:
 
         return response.to_dict()
 
-    except Exception as e:
+    except Exception:
         logger.exception("Ingestion failed")
-        error_message = str(e) if settings.debug else "Ingestion failed due to an internal error"
+        error_message = (
+            "Ingestion failed due to an internal error."
+            if not settings.debug
+            else "Ingestion failed due to an internal error. Check server logs for details."
+        )
         response = IngestResponse(
             success=False,
             documents_count=0,

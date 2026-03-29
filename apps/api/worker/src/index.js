@@ -243,6 +243,44 @@ const PROFILE_LINKS = {
 
 const PROFILE_PLATFORM_ORDER = ["linkedin", "github", "facebook"];
 
+const GREETING_SIGNALS = new Set([
+  "hi",
+  "hello",
+  "hey",
+  "yo",
+  "hiya",
+  "good morning",
+  "good afternoon",
+  "good evening",
+  "whats up",
+  "what s up",
+  "sup",
+]);
+
+const HOW_ARE_YOU_SIGNALS = new Set([
+  "how are you",
+  "hows it going",
+  "how s it going",
+  "how are you doing",
+  "how do you do",
+]);
+
+const THANKS_SIGNALS = new Set([
+  "thanks",
+  "thank you",
+  "thx",
+  "ty",
+  "appreciate it",
+]);
+
+const WHO_ARE_YOU_SIGNALS = new Set([
+  "who are you",
+  "what are you",
+  "what can you do",
+  "help",
+  "what do you do",
+]);
+
 function getBackendMode(env) {
   return String(env.CHAT_BACKEND_MODE || "local").trim().toLowerCase();
 }
@@ -419,53 +457,19 @@ function normalizeIntentText(text) {
 }
 
 function isGreetingQuery(questionLower) {
-  const greetingSignals = new Set([
-    "hi",
-    "hello",
-    "hey",
-    "yo",
-    "hiya",
-    "good morning",
-    "good afternoon",
-    "good evening",
-    "whats up",
-    "what s up",
-    "sup",
-  ]);
-  return greetingSignals.has(questionLower);
+  return GREETING_SIGNALS.has(questionLower);
 }
 
 function isHowAreYouQuery(questionLower) {
-  const signals = new Set([
-    "how are you",
-    "hows it going",
-    "how s it going",
-    "how are you doing",
-    "how do you do",
-  ]);
-  return signals.has(questionLower);
+  return HOW_ARE_YOU_SIGNALS.has(questionLower);
 }
 
 function isThanksQuery(questionLower) {
-  const signals = new Set([
-    "thanks",
-    "thank you",
-    "thx",
-    "ty",
-    "appreciate it",
-  ]);
-  return signals.has(questionLower);
+  return THANKS_SIGNALS.has(questionLower);
 }
 
 function isWhoAreYouQuery(questionLower) {
-  const signals = new Set([
-    "who are you",
-    "what are you",
-    "what can you do",
-    "help",
-    "what do you do",
-  ]);
-  return signals.has(questionLower);
+  return WHO_ARE_YOU_SIGNALS.has(questionLower);
 }
 
 function isProfileLinksQuery(question) {

@@ -282,7 +282,8 @@ describe('Canned Response Quality Tests', () => {
 
     it('should handle short greetings that are less than three characters', () => {
       const response = buildSmallTalkResponse('hi');
-      expect(response).not.toBeNull();
+      expect(typeof response).toBe('string');
+      expect(response.length).toBeGreaterThan(0);
     });
 
     it('should return null for non-small-talk questions', () => {

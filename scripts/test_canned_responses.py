@@ -43,7 +43,6 @@ from pathlib import Path
 
 # Add the worker API to path so we can test it
 REPO_ROOT = Path(__file__).resolve().parents[1]
-WORKER_DIR = REPO_ROOT / "apps" / "api" / "worker"
 API_DIR = REPO_ROOT / "apps" / "api"
 
 sys.path.insert(0, str(API_DIR))

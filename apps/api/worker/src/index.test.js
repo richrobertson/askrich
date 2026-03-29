@@ -268,13 +268,26 @@ describe('Canned Response Quality Tests', () => {
       const mockDocs = CORPUS.filter((doc) => doc.id.includes('project'));
       const answer = buildAnswer('what projects has rich worked on', mockDocs);
 
-      // Should not mention GitHub/LinkedIn URLs in body
+      // Should not mention GitHub/LinkedIn hosts in body (ignore LinkedIn contact-line context)
       const lines = answer.split('\n');
-      const profileLines = lines.filter(
-        (line) =>
-          line.includes('github.com') ||
-          (line.includes('linkedin.com') && !line.includes('primary contact'))
-      );
+      const extractHosts = (line) => {
+        const matches = line.match(/https?:\/\/[^\s)]+/g) || [];
+        return matches
+          .map((value) => {
+            try {
+              return new URL(value).hostname.toLowerCase();
+            } catch (_error) {
+              return '';
+            }
+          })
+          .filter(Boolean);
+      };
+      const profileLines = lines.filter((line) => {
+        const hosts = extractHosts(line);
+        const hasGitHubHost = hosts.includes('github.com') || hosts.includes('www.github.com');
+        const hasLinkedInHost = hosts.includes('linkedin.com') || hosts.includes('www.linkedin.com');
+        return hasGitHubHost || (hasLinkedInHost && !line.includes('primary contact'));
+      });
       expect(profileLines.length).toBeLessThanOrEqual(1);
     });
 

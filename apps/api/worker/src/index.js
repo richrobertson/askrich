@@ -102,6 +102,12 @@ const CORPUS = [
     text: "Academic history highlights Purdue University coursework and degree completion in both management and computer/information technology disciplines, completed in 2007.",
   },
   {
+    id: "profile-public-links",
+    title: "Public Profiles",
+    source_url: "https://www.linkedin.com/in/royrobertson",
+    text: "Public profile links: GitHub https://github.com/richrobertson, LinkedIn https://www.linkedin.com/in/royrobertson, and Facebook https://www.facebook.com/rich.r.robertson/. These can be shared when recruiters ask for social profiles, portfolio links, or professional profile URLs.",
+  },
+  {
     id: "profile-technologies-current",
     title: "Current Technology Stack",
     source_url: "https://github.com/richrobertson",
@@ -182,7 +188,7 @@ async function handleLocalChat(request) {
         success: true,
         data: {
           answer:
-            "I do not have enough evidence in the deployed corpus to answer confidently yet. Try asking about education and degrees, technologies used, Oracle migration, Java modernization, control planes, or Starbucks platform work.",
+            "I do not have enough evidence in the deployed corpus to answer confidently yet. Try asking about profile links (GitHub/LinkedIn/Facebook), education and degrees, technologies used, Oracle migration, Java modernization, control planes, or Starbucks platform work.",
           citations: [],
           retrieved_chunks: 0,
         },
@@ -245,6 +251,17 @@ function tokenize(text) {
 
 function buildAnswer(rankedDocs) {
   const allText = rankedDocs.map((doc) => `${doc.title} ${doc.text}`).join(" ").toLowerCase();
+  const profileSignals = [
+    "github",
+    "linkedin",
+    "facebook",
+    "profile",
+    "profiles",
+    "social",
+    "links",
+    "url",
+    "urls",
+  ];
   const educationSignals = ["education", "degree", "degrees", "academic", "purdue", "bachelor"];
   const technologySignals = [
     "technology",
@@ -263,11 +280,14 @@ function buildAnswer(rankedDocs) {
     "sharepoint",
     "tfs",
   ];
+  const isProfileQuery = profileSignals.some((signal) => allText.includes(signal));
   const isEducationQuery = educationSignals.some((signal) => allText.includes(signal));
   const isTechnologyQuery = technologySignals.some((signal) => allText.includes(signal));
 
   let summary = "Based on the strongest matching evidence, Rich's profile is strongest in distributed systems, cloud platform modernization, and control-plane backend delivery.";
-  if (isEducationQuery) {
+  if (isProfileQuery) {
+    summary = "Based on the strongest matching evidence, Rich's public profiles are: GitHub https://github.com/richrobertson, LinkedIn https://www.linkedin.com/in/royrobertson, and Facebook https://www.facebook.com/rich.r.robertson/.";
+  } else if (isEducationQuery) {
     summary = "Based on the strongest matching evidence, Rich completed two Purdue University bachelor's degrees in 2007, spanning both management and computer/information technology.";
   } else if (isTechnologyQuery) {
     summary = "Based on the strongest matching evidence, Rich has used a broad technology stack over time, including modern cloud/distributed platforms and earlier Microsoft enterprise technologies.";

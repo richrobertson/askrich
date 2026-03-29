@@ -94,7 +94,33 @@ The following items were merged from the 2010 resume archive to preserve earlier
 - Produced implementation-oriented documentation covering architecture decisions (ADRs), deployment runbooks, and prompt strategy designed to support maintainable AI-assisted engineering workflows.
 - Published technical writing focused on distributed-systems reliability patterns, including backpressure stability and graceful degradation.
 
+**Representative personal projects and repositories (since Nov 2024)**
+- Ask Rich recruiter assistant platform: https://github.com/richrobertson/askrich
+- Personal site and engineering writing: https://github.com/richrobertson/myrobertson_com
+- Private cloud bootstrap (Terraform-first): https://github.com/richrobertson/homelab_bootstrap
+- Homelab GitOps platform (Flux + Kubernetes): https://github.com/richrobertson/homelab_flux
+- Homelab infrastructure automation (Ansible): https://github.com/richrobertson/homelab_ansible
+- Distributed systems reliability prototypes:
+	- Notification service: https://github.com/richrobertson/notification_service
+	- Lease coordination service: https://github.com/richrobertson/tenure
+
+**Private cloud focus**
+- Built an infrastructure-as-code private cloud stack using Terraform, Kubernetes, Vault-integrated secrets, DNS automation, and distributed storage workflows across a homelab environment.
+
+**Published writing and blog posts**
+- Writing hub: https://www.myrobertson.com/writing/
+- Backpressure in distributed systems: https://www.myrobertson.com/writing/backpressure-in-distributed-systems/
+- Architecting a multitenant control plane: https://www.myrobertson.com/writing/architecting-a-multitenant-control-plane/
+- Control plane architecture guide: https://www.myrobertson.com/writing/control-plane-architecture-guide/
+- Designing a correct distributed lease service (Tenure on Raft): https://www.myrobertson.com/writing/designing-a-correct-distributed-lease-service-tenure-on-raft/
+- Distributed systems reliability: https://www.myrobertson.com/writing/distributed-systems-reliability/
+- API backpressure explained simply: https://www.myrobertson.com/blog/api-backpressure-explained-simply.html
+- What it took to modernize a legacy service across 32 global regions: https://www.myrobertson.com/blog/what-it-took-to-modernize-a-legacy-service-across-32-global-regions.html
+
 ### Oracle Senior Software Engineer (2/2020 – 11/2024)
+**Role Transition Context**
+- My Oracle role was eliminated as part of a reduction in force (RIF) in November 2024.
+
 **Customer Notification Service (CNS) Cloud Migration**
 - Led migration architecture using Kubernetes and Istio L7 routing for controlled traffic management.
 - Established observability and migration safety controls with Prometheus metrics and GoldenGate-informed safeguards.
@@ -105,6 +131,12 @@ The following items were merged from the 2010 resume archive to preserve earlier
 - Led technical debt reduction initiatives: onboarded codebase to OCI Internal and dependency management, reducing security compliance issues by 60%.
 - Consolidated service client code into unit-tested providers, enabling timely certificate and ca-bundle auto-reloading.
 - Mentored team on unit testing, dependency injection, and pull request best practices.
+
+### Career Break / Family Focus (11/2024 – Present)
+**Full-Time Parenting Chapter**
+- Since November 2024, I have focused on being a full-time dad with my two children.
+- During this period, I maintained technical momentum through architecture writing and hands-on engineering projects.
+- I am now ready to begin the next chapter of my career and return to a full-time engineering role.
 
 ### Starbucks Engineer Lead (9/2016 – 2/2020)
 **Platform Leadership & Architecture**

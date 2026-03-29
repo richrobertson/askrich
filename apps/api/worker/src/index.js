@@ -150,6 +150,30 @@ const CORPUS = [
     text: "At Starbucks, Rich led backend architecture changes supporting rewards migration and platform services for more than 17 million active users, including API and integration leadership.",
   },
   {
+    id: "profile-career-transition-rif",
+    title: "Career Transition and Work Gap Context",
+    source_url: "https://www.linkedin.com/in/royrobertson",
+    text: "Rich's Oracle role was eliminated in November 2024 as part of a reduction in force (RIF). Since then, he has spent time as a full-time dad with his two children while maintaining technical momentum through engineering projects and technical writing. He is now ready for the next chapter of his career.",
+  },
+  {
+    id: "projects-post-oracle-github",
+    title: "Personal Projects and GitHub Repositories Since Nov 2024",
+    source_url: "https://github.com/richrobertson",
+    text: "Since November 2024, Rich has been building personal projects including Ask Rich (https://github.com/richrobertson/askrich), MyRobertson.com (https://github.com/richrobertson/myrobertson_com), homelab bootstrap (https://github.com/richrobertson/homelab_bootstrap), homelab flux (https://github.com/richrobertson/homelab_flux), homelab ansible (https://github.com/richrobertson/homelab_ansible), notification_service (https://github.com/richrobertson/notification_service), and tenure (https://github.com/richrobertson/tenure).",
+  },
+  {
+    id: "projects-private-cloud-iac",
+    title: "Infrastructure as Code Private Cloud and Distributed Storage",
+    source_url: "https://github.com/richrobertson/homelab_bootstrap",
+    text: "A major post-Oracle focus has been building an infrastructure-as-code private cloud using Terraform-first provisioning, Kubernetes platform operations, Vault-integrated secrets, DNS automation, and distributed storage workflows in a homelab environment.",
+  },
+  {
+    id: "writing-published-articles",
+    title: "Published Writing and Articles",
+    source_url: "https://www.myrobertson.com/writing/",
+    text: "Rich has published writing and blog posts including Backpressure in Distributed Systems (https://www.myrobertson.com/writing/backpressure-in-distributed-systems/), Architecting a Multitenant Control Plane (https://www.myrobertson.com/writing/architecting-a-multitenant-control-plane/), Control Plane Architecture Guide (https://www.myrobertson.com/writing/control-plane-architecture-guide/), Designing a Correct Distributed Lease Service Tenure on Raft (https://www.myrobertson.com/writing/designing-a-correct-distributed-lease-service-tenure-on-raft/), Distributed Systems Reliability (https://www.myrobertson.com/writing/distributed-systems-reliability/), API Backpressure Explained Simply (https://www.myrobertson.com/blog/api-backpressure-explained-simply.html), and What It Took to Modernize a Legacy Service Across 32 Global Regions (https://www.myrobertson.com/blog/what-it-took-to-modernize-a-legacy-service-across-32-global-regions.html).",
+  },
+  {
     id: "skills-cloud",
     title: "Cloud and Platform Engineering",
     source_url: "https://www.myrobertson.com/cloud-platform-engineer.html",

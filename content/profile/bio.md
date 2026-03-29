@@ -7,6 +7,8 @@ tags: [profile, bio, backend, distributed-systems, cloud, leadership]
 updated: 2026-03-29
 ---
 
+## Bio
+
 Rich (Roy) Robertson is a senior software engineer with 15+ years of experience building and modernizing backend and distributed systems.
 
 He is strongest in roles that require both architecture judgment and day-to-day execution: taking ambiguous goals, shaping a pragmatic technical plan, and driving delivery with measurable outcomes.

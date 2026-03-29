@@ -38,4 +38,4 @@ Both. He has delivered in enterprise consulting contexts and in product/platform
 
 ## Do you have prepared behavioral interview examples?
 
-Yes. See `content/faq/behavioral-interview-strategic-answers.md` for strategic answers to the most common behavioral questions, grounded in migration, modernization, reliability, and leadership examples.
+Yes. Start with `content/faq/behavioral-interview-strategic-answers.md`, then use the grouped files under `content/faq/behavioral/` for focused question types.

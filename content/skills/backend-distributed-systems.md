@@ -4,8 +4,10 @@ title: Backend and Distributed Systems
 type: skill
 summary: Designs reliable backend services and distributed system interactions with practical tradeoff management.
 tags: [backend, distributed-systems, reliability, APIs]
-updated: 2026-03-28
+updated: "2026-03-28"
 ---
+
+## Overview
 
 Rich’s backend/distributed systems strength centers on designing clear service boundaries, failure-aware interactions, and maintainable APIs.
 

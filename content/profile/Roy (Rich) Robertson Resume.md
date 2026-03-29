@@ -1,3 +1,14 @@
+---
+id: profile-roy-rich-robertson-resume-archive
+title: Roy (Rich) Robertson Resume (Archive)
+type: profile
+summary: Archived resume source retained for historical reference and normalization input.
+tags: [profile, resume, archive, historical]
+updated: "2026-03-28"
+---
+
+## Archived Resume Content
+
 **Roy (Rich) Robertson** 
 
 Seattle, WA | www.linkedin.com/in/royrobertson 

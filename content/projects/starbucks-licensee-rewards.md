@@ -6,7 +6,7 @@ summary: Backend integration work enabling reward and receipt support for licens
 role: Senior Software Engineer
 technologies: [APIs, Java, dependency-injection, strategy-pattern]
 tags: [integration, backend, architecture, retail]
-updated: 2026-03-28
+updated: "2026-03-28"
 ---
 
 ## Recruiter Summary

@@ -4,8 +4,10 @@ title: Cloud, Kubernetes, and Terraform
 type: skill
 summary: Applies cloud platform and infrastructure practices to support scalable, observable, and maintainable systems.
 tags: [cloud, kubernetes, terraform, platform-engineering]
-updated: 2026-03-28
+updated: "2026-03-28"
 ---
+
+## Overview
 
 Rich has hands-on experience with cloud/platform engineering patterns, including Kubernetes deployments and infrastructure-centric modernization work.
 

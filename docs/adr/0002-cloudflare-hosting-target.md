@@ -7,7 +7,7 @@ Ask Rich needs low-ops hosting for both frontend and API, with managed services 
 ## Decision
 
 Use Cloudflare as the default hosting target:
-- Next.js frontend on Workers,
+- static web assets (`apps/web`) on Workers,
 - Worker API backend,
 - Vectorize + D1 (R2 optional later).
 

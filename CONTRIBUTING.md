@@ -1,6 +1,6 @@
 # Contributing to askrich
 
-Thanks for contributing. This repository is currently planning-focused, and high-quality documentation is a core deliverable.
+Thanks for contributing. This repository is implementation-active, and high-quality documentation remains a core deliverable.
 
 ## Workflow expectations
 

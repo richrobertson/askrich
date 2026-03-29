@@ -36,7 +36,7 @@ Useful for:
 
 ### `chat_smoke_test.py`
 
-Quick Milestone 2 runtime check for retrieval-backed chat output.
+Quick runtime check for retrieval-backed chat output.
 
 ```bash
 python scripts/chat_smoke_test.py
@@ -52,7 +52,7 @@ Useful for:
 - Checking citation formatting
 - Sanity-checking prompt/answer structure and runtime pipeline without external model dependencies
 
-## Milestone 4: Evaluation Helpers
+## Evaluation Helpers
 
 ### `run_eval_bank.py`
 

@@ -34,4 +34,4 @@ If inference is self-hosted on dedicated GPU infrastructure, GPU hosting becomes
 
 - Start with modest traffic assumptions.
 - Track usage metrics before optimizing prematurely.
-- Revisit cost model after Milestone 2 and again before production launch.
+- Revisit cost model after major runtime or traffic-profile changes.

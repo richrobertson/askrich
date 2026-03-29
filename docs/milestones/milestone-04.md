@@ -41,7 +41,7 @@
 - At least one full tuning cycle is completed and documented.
 - Evidence-grounding failures are reduced compared to baseline.
 
-## Initial implementation progress
+## Implementation summary
 
 - ✅ Added evaluation plan and question bank in `docs/evals/`.
 - ✅ Added `scripts/run_eval_bank.py` to execute eval runs and emit JSON/CSV artifacts.

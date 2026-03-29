@@ -2,7 +2,7 @@
 
 **Status: Completed (MVP)**
 
-## Objectives
+## Goals
 
 Implement the first end-to-end runtime answer path with evidence-based output.
 
@@ -35,13 +35,13 @@ Implement the first end-to-end runtime answer path with evidence-based output.
 - Short summary + bullet points for recruiter readability.
 - Explicit unknowns when evidence is insufficient.
 
-## Explicit non-goals
+## Non-goals
 
 - No full agent orchestration graph yet.
 - No autonomous tool-use workflows.
 - No complex memory strategy beyond minimal session context.
 
-## Provider-agnostic adapter requirements
+## Implementation requirements
 
 ### Model adapter layer
 
@@ -59,7 +59,7 @@ Vector store logic should remain unchanged when swapping providers.
 - Model and embedding providers are configurable through adapters.
 - Basic smoke/evaluation checks pass for representative recruiter questions.
 
-## Initial implementation progress
+## Implementation summary
 
 - ✅ Added `/api/chat` endpoint with validated request payload and structured response envelope.
 - ✅ Added retrieval runtime service with top-k search and optional metadata filters (`doc_types`, `tags`).

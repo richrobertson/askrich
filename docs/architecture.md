@@ -10,9 +10,10 @@ The goal is trustworthy, role-relevant responses—not unconstrained conversatio
 
 1. Recruiter opens website chat panel.
 2. Asks a hiring-relevant question.
-3. System retrieves top matching evidence chunks.
-4. Prompt assembler combines instructions, structured context, and retrieved snippets.
-5. LLM returns concise answer with citations and confidence-aware language.
+3. Worker `/api/chat` handles the request in one of two modes:
+   - upstream proxy mode to a retrieval-backed API, or
+   - local corpus mode in the Worker.
+4. Runtime returns concise answers with citations and confidence-aware language.
 
 ## System boundaries
 
@@ -37,15 +38,10 @@ content/*.md
 ```text
 Recruiter UI (web)
    -> /api/chat (Worker)
-   -> query preprocessing
-   -> retriever (vector search)
-   -> prompt assembly
-      - natural-language rules
-      - TOON-style structured context block (optional)
-      - retrieved evidence
-      - optional response schema
-   -> model adapter
-   -> response formatting + citations
+   -> backend mode switch
+      - upstream mode: proxy to retrieval-backed FastAPI runtime
+      - local mode: keyword ranking over worker corpus
+   -> response formatting + citations envelope
    -> UI rendering
 ```
 
@@ -55,6 +51,10 @@ Ask Rich is intentionally retrieval-first to maximize:
 - factual grounding,
 - citation traceability,
 - maintainability as source content evolves.
+
+Current implementation note:
+- Local FastAPI runtime implements retrieval over Chroma.
+- Cloudflare Worker currently supports both upstream proxy mode and local corpus mode.
 
 A freeform chatbot without retrieval would be harder to trust for hiring decisions.
 

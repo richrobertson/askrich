@@ -55,9 +55,9 @@ Ask Rich is a **RAG application**, not a generic freeform chatbot:
 5. Runtime chat retrieves evidence and composes an answer prompt.
 6. The LLM returns a recruiter-friendly answer with citations.
 
-## Planned tech stack
+## Tech stack
 
-- **Frontend:** Next.js deployed to Cloudflare Workers
+- **Frontend:** Static web app (`apps/web`) deployed as Cloudflare Worker assets
 - **Backend API:** Cloudflare Worker API (`/api/chat` target)
 - **Workers edge runtime constraints:** Prefer Edge-compatible APIs; avoid Node-only runtime assumptions
 - **RAG framework:** LangChain first
@@ -71,6 +71,11 @@ Ask Rich is a **RAG application**, not a generic freeform chatbot:
 - Web app and API both hosted on Cloudflare Workers
 - Cloudflare-native data services for low operational overhead
 - Environment separation: dev, staging, prod
+
+Current deploy artifacts:
+- Web assets config: `apps/web/wrangler.toml`
+- API Worker config: `apps/api/worker/wrangler.toml`
+- CI workflow: `.github/workflows/deploy-cloudflare.yml`
 
 See `docs/deployment/cloudflare.md` for details.
 

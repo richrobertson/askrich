@@ -20,7 +20,8 @@ Recruiter-facing chat UI scaffold with prompt starters, citation rendering, and 
 
 ## `apps/api`
 
-FastAPI local runtime for ingestion and retrieval-backed chat (`/ingest`, `/api/chat`) using provider-agnostic adapters.
+FastAPI local runtime for ingestion and retrieval-backed chat (`/api/chat`) using provider-agnostic adapters.
+The `/ingest` route is available but environment-gated by `ENABLE_INGEST_ENDPOINT`.
 
 ## `content`
 

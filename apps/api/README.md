@@ -1,38 +1,22 @@
 # apps/api
 
-FastAPI-based local development API for Ask Rich. This repository includes Milestone 1 + Milestone 2 runtime capabilities locally, while Cloudflare Worker deployment remains the production target.
-
-## Milestone status
-
-### Milestone 1 (completed)
-
-- Document loading and chunking (Markdown with YAML frontmatter)
-- Vector store integration (Chroma for local dev, Vectorize production target)
-- Health check endpoint (`/health`)
-- Ingestion scaffold endpoint (`/ingest`)
-- Provider-agnostic configuration for LLM and embeddings
-
-### Milestone 2 (completed MVP)
-
-- `/api/chat` retrieval-aware endpoint
-- Retrieval with top-k and optional metadata filters
-- Prompt assembly and citation formatting
-- Provider-agnostic adapter factories for embeddings and model generation
-- Local deterministic fallback adapters for smoke testing
+FastAPI-based local development API for Ask Rich, plus a Cloudflare Worker edge entrypoint under `worker/`.
 
 ## Current implementation
 
 This API currently provides:
 - Document loading and chunking (Markdown with YAML frontmatter)
-- Vector store integration (Chroma for local dev, Vectorize production target)
+- Local vector store integration via Chroma
 - Health check endpoint (`/health`)
-- Ingestion scaffold endpoint (`/ingest`)
+- Ingestion endpoint (`/ingest`) with environment gate
 - `/api/chat` retrieval-aware endpoint
 - Retrieval over Chroma (`top_k` + optional metadata filters)
 - Provider-agnostic embedding and model adapter contracts
 - Local deterministic fallback adapters for smoke testing (`hash` embeddings + extractive answerer)
 - Structured response envelope with citations
-- Cloudflare Worker API edge entrypoint in `worker/src/index.js` with CORS/origin controls
+- Cloudflare Worker API edge entrypoint in `worker/src/index.js` with CORS/origin controls and two backend modes:
+  - `CHAT_BACKEND_MODE=upstream`: proxy to a configured upstream API (`UPSTREAM_API_BASE`)
+  - `CHAT_BACKEND_MODE=local`: serve responses from the worker's built-in corpus
 - Environment-specific Worker deployment config in `worker/wrangler.toml`
 
 ## Project Structure
@@ -55,7 +39,7 @@ app/
     ingestion.py    # Orchestration pipeline
 worker/
   src/
-    index.js        # Cloudflare Worker API entrypoint (/health, /api/chat proxy)
+    index.js        # Cloudflare Worker API entrypoint (/health, /api/chat; upstream or local mode)
   wrangler.toml     # Environment-aware Worker deployment configuration
 ```
 
@@ -84,7 +68,7 @@ See `scripts/README.md` for ingestion and smoke testing guidance.
 
 - **GET** `/` — Welcome and endpoint listing
 - **GET** `/health` — Health status (`{ "status": "ok" }`)
-- **POST** `/ingest` — Run document ingestion pipeline (see `scripts/ingest_all.py`)
+- **POST** `/ingest` — Run document ingestion pipeline (returns `403` unless `ENABLE_INGEST_ENDPOINT=true`)
 - **POST** `/api/chat` — Retrieval-backed recruiter answers with citations
 
 ### `/api/chat` request example
@@ -118,6 +102,7 @@ Settings are loaded from environment variables (with defaults):
 - `CONTENT_ROOT` (default: repo-root `content`)
 - `CHAT_TOP_K` (default: `5`)
 - `CHAT_MAX_EVIDENCE_CHARS` (default: `1800`)
+- `ENABLE_INGEST_ENDPOINT` (default: inherits `DEBUG`; endpoint disabled when false)
 
 ### Setting Up API Keys Securely
 
@@ -143,19 +128,23 @@ Settings are loaded from environment variables (with defaults):
 
 `.env.local` is listed in `.gitignore` and will never be committed to the repository.
 
+## Worker edge configuration (`worker/wrangler.toml`)
+
+- `ALLOWED_ORIGINS`: comma-separated allowed web origins
+- `CHAT_BACKEND_MODE`: `upstream` or `local`
+- `UPSTREAM_API_BASE`: required when `CHAT_BACKEND_MODE=upstream`
+- `UPSTREAM_CHAT_PATH`: optional override for upstream route (default `/api/chat`)
+- `UPSTREAM_AUTH_TOKEN`: optional bearer token for upstream calls
+
 ## Ongoing hardening path
 
-1. Replace upstream dependency with direct Cloudflare-native retrieval/runtime path when ready.
+1. Replace worker local corpus with production retrieval/index integration.
 2. Wire production Vectorize and D1 bindings for Worker-native operation.
 3. Expand API-level tests and deployment smoke checks.
 
-## Next Steps
+## Related docs
 
-- [Milestone 1 details](../../docs/milestones/milestone-01.md)
-- [Milestone 2 details](../../docs/milestones/milestone-02.md)
-- [Milestone 3 details](../../docs/milestones/milestone-03.md)
-- [Milestone 5 details](../../docs/milestones/milestone-05.md)
-- [Milestone overview](../../docs/milestones/overview.md)
 - [Ingestion plan](../../docs/ingestion-scaffold-plan.md)
 - [Content guide](../../docs/content-guide.md)
 - [Architecture](../../docs/architecture.md)
+- [Cloudflare deployment plan](../../docs/deployment/cloudflare.md)

@@ -6,7 +6,7 @@ This runbook describes a practical path to configure and deploy Ask Rich on Clou
 
 ## Deployment targets
 
-- Web app: Cloudflare Workers (Next.js runtime target)
+- Web app: Cloudflare Workers static assets from `apps/web`
 - API: Cloudflare Worker route for `/api/chat`
 - Vector storage: Cloudflare Vectorize
 - Relational metadata: Cloudflare D1
@@ -19,7 +19,7 @@ This runbook describes a practical path to configure and deploy Ask Rich on Clou
 - Local tooling installed:
   - Node.js LTS
   - `wrangler` CLI
-- Environment secrets available for model and embedding providers
+- Environment configuration values available for worker backend mode and allowed origins
 
 ## Environment model
 
@@ -63,8 +63,7 @@ npx wrangler whoami
 4. Store runtime secrets per environment:
 
 ```bash
-npx wrangler secret put LLM_API_KEY --env dev
-npx wrangler secret put EMBEDDING_API_KEY --env dev
+npx wrangler secret put UPSTREAM_AUTH_TOKEN --config apps/api/worker/wrangler.toml --env dev
 ```
 
 Repeat for `staging` and `prod`.
@@ -76,25 +75,22 @@ Use these as launch-day templates (update names if you choose a different conven
 Dev:
 
 ```bash
-npx wrangler secret put LLM_API_KEY --env dev
-npx wrangler secret put EMBEDDING_API_KEY --env dev
-npx wrangler deploy --env dev
+npx wrangler deploy --config apps/api/worker/wrangler.toml --env dev
+npx wrangler deploy --config apps/web/wrangler.toml --env dev
 ```
 
 Staging:
 
 ```bash
-npx wrangler secret put LLM_API_KEY --env staging
-npx wrangler secret put EMBEDDING_API_KEY --env staging
-npx wrangler deploy --env staging
+npx wrangler deploy --config apps/api/worker/wrangler.toml --env staging
+npx wrangler deploy --config apps/web/wrangler.toml --env staging
 ```
 
 Prod:
 
 ```bash
-npx wrangler secret put LLM_API_KEY --env prod
-npx wrangler secret put EMBEDDING_API_KEY --env prod
-npx wrangler deploy --env prod
+npx wrangler deploy --config apps/api/worker/wrangler.toml --env prod
+npx wrangler deploy --config apps/web/wrangler.toml --env prod
 ```
 
 ## Configuration guidance
@@ -109,10 +105,10 @@ Implemented config artifacts:
 
 Typical settings to map per environment:
 - API base URL
-- provider identifiers (`LLM_PROVIDER`, `EMBEDDING_PROVIDER`)
-- model names (`LLM_MODEL`, `EMBEDDING_MODEL`)
-- retrieval defaults (`CHAT_TOP_K`, `CHAT_MAX_EVIDENCE_CHARS`)
-- Vectorize and D1 binding names
+- API backend mode (`CHAT_BACKEND_MODE` as `upstream` or `local`)
+- upstream settings (`UPSTREAM_API_BASE`, optional `UPSTREAM_CHAT_PATH`, optional `UPSTREAM_AUTH_TOKEN`)
+- CORS allowlist (`ALLOWED_ORIGINS`)
+- Vectorize and D1 binding names (when worker retrieval path is wired)
 
 ## Build and deploy workflow
 
@@ -187,11 +183,10 @@ Fill this section with your real Cloudflare account values before production cut
 
 ### Production secrets checklist
 
-- [ ] `LLM_API_KEY` configured in `prod`
-- [ ] `EMBEDDING_API_KEY` configured in `prod`
-- [ ] `LLM_PROVIDER` and `LLM_MODEL` validated in `prod`
-- [ ] `EMBEDDING_PROVIDER` and `EMBEDDING_MODEL` validated in `prod`
-- [ ] Retrieval defaults (`CHAT_TOP_K`, `CHAT_MAX_EVIDENCE_CHARS`) set for `prod`
+- [ ] `CHAT_BACKEND_MODE` validated for `prod`
+- [ ] `UPSTREAM_API_BASE` configured when using upstream mode
+- [ ] `UPSTREAM_AUTH_TOKEN` configured when upstream requires auth
+- [ ] `ALLOWED_ORIGINS` restricted to trusted production domains
 
 ### Routing and security checklist
 

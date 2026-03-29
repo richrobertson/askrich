@@ -121,18 +121,18 @@ Settings are loaded from environment variables (with defaults):
 
 ### Setting Up API Keys Securely
 
-The `.env` file in the repository contains placeholder values and is tracked in git. To use real API keys locally:
+`.env.example` is the tracked template. To set up locally:
 
 1. **Create a local `.env.local` file** (not committed to git):
    ```bash
-   cp .env .env.local
+   cp .env.example .env.local
    ```
 
-2. **Edit `.env.local` and replace placeholder values with actual API keys**:
+2. **Edit `.env.local` and replace placeholder values with your provider credentials**:
    ```bash
-   # Replace sk-... with your actual OpenAI API key
-   LLM_API_KEY=sk-your-actual-key-here
-   EMBEDDING_API_KEY=sk-your-actual-key-here
+   # Replace placeholder values with the API key(s) for your configured LLM/embedding provider
+   LLM_API_KEY=your-llm-provider-api-key
+   EMBEDDING_API_KEY=your-embedding-provider-api-key
    ```
 
 3. **Start the API** — environment variables from `.env.local` will be loaded automatically, overriding `.env`:

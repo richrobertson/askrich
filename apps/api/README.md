@@ -108,19 +108,19 @@ Settings are loaded from environment variables (with defaults):
 
 [.env.example](../../.env.example) is the tracked template. To set up locally:
 
-1. **Create a local [.env.local](../../.env.local) file** (not committed to git):
+1. **Create a local `.env.local` file** (not committed to git):
    ```bash
    cp .env.example .env.local
    ```
 
-2. **Edit [.env.local](../../.env.local) and replace placeholder values with your provider credentials**:
+2. **Edit `.env.local` and replace placeholder values with your provider credentials**:
    ```bash
    # Replace placeholder values with the API key(s) for your configured LLM/embedding provider
    LLM_API_KEY=your-llm-provider-api-key
    EMBEDDING_API_KEY=your-embedding-provider-api-key
    ```
 
-3. **Start the API** — environment variables from [.env.local](../../.env.local) will be loaded automatically, overriding [.env](../../.env):
+3. **Start the API** — environment variables from `.env.local` will be loaded automatically, overriding `.env`:
    ```bash
    source .venv/bin/activate
    PYTHONPATH=apps/api uvicorn app.main:app --host 127.0.0.1 --port 8000

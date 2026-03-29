@@ -1,7 +1,14 @@
 """Provider-agnostic text generation model interface and local fallback."""
 
 from abc import ABC, abstractmethod
+import json
+import logging
 from typing import Any
+
+import httpx
+
+
+logger = logging.getLogger(__name__)
 
 
 class ModelClient(ABC):
@@ -67,11 +74,122 @@ class ExtractiveModelClient(ModelClient):
         return f"Based on retrieved evidence, the strongest support comes from {title}."
 
 
-def get_model_client(provider: str) -> ModelClient:
+class OpenAICompatibleModelClient(ModelClient):
+    """Model client for any OpenAI-compatible chat completions API.
+
+    Works with OpenAI, Together AI, Groq, Ollama, vLLM, LM Studio, and any
+    service that implements the /chat/completions endpoint contract.
+    Falls back to ExtractiveModelClient on transport or API errors so the
+    service degrades gracefully rather than returning 500s.
+    """
+
+    _TIMEOUT = 60.0
+
+    def __init__(
+        self,
+        api_base: str,
+        api_key: str,
+        model: str,
+        temperature: float = 0.0,
+    ) -> None:
+        if not api_base:
+            raise ValueError("api_base is required for OpenAICompatibleModelClient")
+        if not model:
+            raise ValueError("model is required for OpenAICompatibleModelClient")
+        self._api_base = api_base.rstrip("/")
+        self._api_key = api_key
+        self._model = model
+        self._temperature = max(0.0, min(float(temperature), 2.0))
+
+    def generate_answer(
+        self,
+        question: str,
+        evidence_snippets: list[dict[str, Any]],
+        instructions: str,
+        tone: str | None = None,
+    ) -> str:
+        system_content = self._build_system_prompt(instructions, evidence_snippets, tone)
+        payload = {
+            "model": self._model,
+            "temperature": self._temperature,
+            "messages": [
+                {"role": "system", "content": system_content},
+                {"role": "user", "content": question},
+            ],
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self._api_key}",
+        }
+        try:
+            with httpx.Client(timeout=self._TIMEOUT) as client:
+                response = client.post(
+                    f"{self._api_base}/chat/completions",
+                    headers=headers,
+                    json=payload,
+                )
+                response.raise_for_status()
+                data = response.json()
+                return data["choices"][0]["message"]["content"]
+        except (httpx.HTTPError, KeyError, json.JSONDecodeError, IndexError) as exc:
+            logger.warning(
+                "LLM inference call failed (%s); falling back to extractive mode.",
+                type(exc).__name__,
+            )
+            return ExtractiveModelClient().generate_answer(
+                question=question,
+                evidence_snippets=evidence_snippets,
+                instructions=instructions,
+                tone=tone,
+            )
+
+    def _build_system_prompt(
+        self,
+        instructions: str,
+        evidence_snippets: list[dict[str, Any]],
+        tone: str | None,
+    ) -> str:
+        parts: list[str] = [instructions]
+
+        if tone:
+            parts.append(f"Tone guidance: {tone}")
+
+        if evidence_snippets:
+            parts.append("## Retrieved Evidence\n")
+            for i, snippet in enumerate(evidence_snippets, 1):
+                text = (snippet.get("text") or "").strip()
+                meta = snippet.get("metadata") or {}
+                source = meta.get("doc_title") or meta.get("doc_id") or f"source-{i}"
+                source_url = str(meta.get("source_url") or "")
+                ref = f"[{i}] {source}"
+                if source_url:
+                    ref += f" — {source_url}"
+                parts.append(f"{ref}\n{text}")
+        else:
+            parts.append("## Retrieved Evidence\nNo relevant evidence was retrieved.")
+
+        return "\n\n".join(parts)
+
+
+def get_model_client(
+    provider: str,
+    api_base: str = "",
+    api_key: str = "",
+    model: str = "",
+    temperature: float = 0.0,
+) -> ModelClient:
     """Factory for generation model clients.
 
-    Provider-specific SDK clients are intentionally deferred; for Milestone 2,
-    return a deterministic local extractive client to keep runtime functional.
+    Returns an OpenAICompatibleModelClient when provider is "openai" or
+    "openai-compatible" and the required api_base/model are configured.
+    Falls back to ExtractiveModelClient for local/stub operation.
     """
-    del provider
+    normalized = (provider or "").strip().lower()
+    if normalized in {"openai", "openai-compatible", "together", "groq", "ollama"} and api_base and model:
+        return OpenAICompatibleModelClient(
+            api_base=api_base,
+            api_key=api_key,
+            model=model,
+            temperature=temperature,
+        )
     return ExtractiveModelClient()

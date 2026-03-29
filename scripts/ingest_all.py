@@ -22,7 +22,7 @@ sys.path.insert(0, str(API_ROOT))
 
 from app.rag.loader import DocumentLoader  # noqa: E402
 from app.rag.splitter import TextSplitter  # noqa: E402
-from app.rag.embeddings import PlaceholderEmbeddingClient  # noqa: E402
+from app.rag.embeddings import get_embedding_client  # noqa: E402
 from app.rag.vectorstore import ChromaVectorStore  # noqa: E402
 from app.rag.ingestion import IngestionPipeline  # noqa: E402
 from app.config import settings  # noqa: E402
@@ -44,7 +44,13 @@ def main():
         print("Initializing components...")
         loader = DocumentLoader(content_root=settings.content_root)
         splitter = TextSplitter(chunk_size=512, chunk_overlap=128)
-        embedding_client = PlaceholderEmbeddingClient(dimension=1536)
+        embedding_client = get_embedding_client(
+            provider=settings.embedding_provider,
+            dimension=settings.embedding_dimension,
+            api_base=settings.embedding_api_base,
+            api_key=settings.embedding_api_key,
+            model=settings.embedding_model,
+        )
         vector_store = ChromaVectorStore(
             persist_directory=settings.chroma_persist_directory
         )

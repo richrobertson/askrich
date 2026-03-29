@@ -14,18 +14,18 @@ class Settings:
     """Application settings loaded from environment."""
 
     # LLM Provider (abstract)
-    llm_provider: str = os.getenv("LLM_PROVIDER", "")
-    llm_api_base: str = os.getenv("LLM_API_BASE", "")
-    llm_api_key: str = os.getenv("LLM_API_KEY", "")
-    llm_model: str = os.getenv("LLM_MODEL", "")
+    llm_provider: str = os.getenv("LLM_PROVIDER", "ollama")
+    llm_api_base: str = os.getenv("LLM_API_BASE", "http://localhost:11434/v1")
+    llm_api_key: str = os.getenv("LLM_API_KEY", "ollama")
+    llm_model: str = os.getenv("LLM_MODEL", "llama3.2")
     llm_temperature: float = float(os.getenv("LLM_TEMPERATURE", "0.0"))
 
     # Embedding Provider (abstract)
-    embedding_provider: str = os.getenv("EMBEDDING_PROVIDER", "")
-    embedding_api_base: str = os.getenv("EMBEDDING_API_BASE", "")
-    embedding_api_key: str = os.getenv("EMBEDDING_API_KEY", "")
-    embedding_model: str = os.getenv("EMBEDDING_MODEL", "")
-    embedding_dimension: int = int(os.getenv("EMBEDDING_DIMENSION", "1536"))
+    embedding_provider: str = os.getenv("EMBEDDING_PROVIDER", "ollama")
+    embedding_api_base: str = os.getenv("EMBEDDING_API_BASE", "http://localhost:11434/v1")
+    embedding_api_key: str = os.getenv("EMBEDDING_API_KEY", "ollama")
+    embedding_model: str = os.getenv("EMBEDDING_MODEL", "nomic-embed-text")
+    embedding_dimension: int = int(os.getenv("EMBEDDING_DIMENSION", "768"))
 
     # Chat Runtime
     chat_top_k: int = int(os.getenv("CHAT_TOP_K", "5"))

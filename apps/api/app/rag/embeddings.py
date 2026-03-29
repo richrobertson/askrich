@@ -3,28 +3,43 @@
 This module defines the abstract interface for embeddings.
 Concrete implementations will adapt specific providers (OpenAI, Hugging Face, Ollama, etc.)
 to this contract.
-
-Currently a placeholder; actual provider wiring deferred to Milestone 2.
 """
 
 from abc import ABC, abstractmethod
 from typing import List
 import hashlib
+import json
 import logging
 import math
 import re
+
+import httpx
 
 
 logger = logging.getLogger(__name__)
 
 
-def get_embedding_client(provider: str, dimension: int) -> "EmbeddingClient":
+def get_embedding_client(
+    provider: str,
+    dimension: int,
+    api_base: str = "",
+    api_key: str = "",
+    model: str = "",
+) -> "EmbeddingClient":
     """Factory for embedding clients.
 
-    For Milestone 2 local development, use a deterministic hash embedding by
-    default so retrieval behaves meaningfully without external dependencies.
+    Returns an OpenAICompatibleEmbeddingClient when provider is "openai" or
+    compatible and the required api_base/model are set.
+    Falls back to HashEmbeddingClient for local/stub operation.
     """
     normalized = (provider or "hash").strip().lower()
+    if normalized in {"openai", "openai-compatible", "together", "groq", "ollama"} and api_base and model:
+        return OpenAICompatibleEmbeddingClient(
+            api_base=api_base,
+            api_key=api_key,
+            model=model,
+            dimension=dimension,
+        )
     if normalized in {"", "hash", "local"}:
         return HashEmbeddingClient(dimension=dimension)
     if normalized == "placeholder":
@@ -163,3 +178,59 @@ class HashEmbeddingClient(EmbeddingClient):
         if norm == 0.0:
             return vector
         return [value / norm for value in vector]
+
+
+class OpenAICompatibleEmbeddingClient(EmbeddingClient):
+    """Embedding client for any OpenAI-compatible embeddings API.
+
+    Works with OpenAI, Together AI, Ollama, vLLM, LM Studio, and any service
+    that implements the /embeddings endpoint contract.
+    """
+
+    _TIMEOUT = 30.0
+
+    def __init__(
+        self,
+        api_base: str,
+        api_key: str,
+        model: str,
+        dimension: int = 1536,
+    ) -> None:
+        if not api_base:
+            raise ValueError("api_base is required for OpenAICompatibleEmbeddingClient")
+        if not model:
+            raise ValueError("model is required for OpenAICompatibleEmbeddingClient")
+        self._api_base = api_base.rstrip("/")
+        self._api_key = api_key
+        self._model = model
+        self._dimension = dimension
+
+    def embed_text(self, text: str) -> List[float]:
+        return self.embed_texts([text])[0]
+
+    def embed_texts(self, texts: List[str]) -> List[List[float]]:
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self._api_key}",
+        }
+        payload = {"model": self._model, "input": texts}
+        try:
+            with httpx.Client(timeout=self._TIMEOUT) as client:
+                response = client.post(
+                    f"{self._api_base}/embeddings",
+                    headers=headers,
+                    json=payload,
+                )
+                response.raise_for_status()
+                data = response.json()
+                items = sorted(data["data"], key=lambda d: d["index"])
+                return [item["embedding"] for item in items]
+        except (httpx.HTTPError, KeyError, json.JSONDecodeError, IndexError) as exc:
+            logger.warning(
+                "Embedding API call failed (%s); returning zero vectors.",
+                type(exc).__name__,
+            )
+            return [[0.0] * self._dimension for _ in texts]
+
+    def get_embedding_dimension(self) -> int:
+        return self._dimension

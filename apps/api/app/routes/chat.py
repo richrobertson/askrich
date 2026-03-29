@@ -15,8 +15,17 @@ def get_chat_service() -> ChatService:
     embedding_client = get_embedding_client(
         provider=settings.embedding_provider,
         dimension=settings.embedding_dimension,
+        api_base=settings.embedding_api_base,
+        api_key=settings.embedding_api_key,
+        model=settings.embedding_model,
     )
-    model_client = get_model_client(provider=settings.llm_provider)
+    model_client = get_model_client(
+        provider=settings.llm_provider,
+        api_base=settings.llm_api_base,
+        api_key=settings.llm_api_key,
+        model=settings.llm_model,
+        temperature=settings.llm_temperature,
+    )
     vector_store = ChromaVectorStore(
         persist_directory=settings.chroma_persist_directory
     )

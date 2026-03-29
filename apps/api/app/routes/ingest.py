@@ -23,6 +23,9 @@ def get_ingestion_pipeline() -> IngestionPipeline:
     embedding_client = get_embedding_client(
         provider=settings.embedding_provider,
         dimension=settings.embedding_dimension,
+        api_base=settings.embedding_api_base,
+        api_key=settings.embedding_api_key,
+        model=settings.embedding_model,
     )
     vector_store = ChromaVectorStore(
         persist_directory=settings.chroma_persist_directory

@@ -101,6 +101,12 @@ export default {
 
 const CORPUS = [
   {
+    id: "career-history",
+    title: "Career History Summary",
+    source_url: "https://www.myrobertson.com/about/",
+    text: "Rich most recently worked as a Senior Software Engineer at Oracle (2020-2024), after leadership and engineering roles at Starbucks, Slalom, and Avanade.",
+  },
+  {
     id: "project-oracle-cns",
     title: "Oracle Customer Notification Service Migration",
     source_url: "https://www.myrobertson.com/case-studies/oracle-cns-oci-migration/",
@@ -344,7 +350,23 @@ function tokenize(text) {
   const matches = String(text || "")
     .toLowerCase()
     .match(/[a-z0-9]+/g);
-  return new Set(matches || []);
+  const output = new Set();
+  for (const raw of matches || []) {
+    output.add(normalizeToken(raw));
+  }
+  return output;
+}
+
+function normalizeToken(token) {
+  let value = String(token || "").toLowerCase();
+  if (value.length > 4 && value.endsWith("ing")) {
+    value = value.slice(0, -3);
+  } else if (value.length > 3 && value.endsWith("ed")) {
+    value = value.slice(0, -2);
+  } else if (value.length > 3 && value.endsWith("s")) {
+    value = value.slice(0, -1);
+  }
+  return value;
 }
 function buildResponse(answer, docs, retrievedChunks, responseMeta) {
   const citations = docs.map((doc, index) => ({

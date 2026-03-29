@@ -62,7 +62,7 @@ class CannedResponseValidator:
         try:
             health_url = f"{self.base_url}/health"
             req = Request(health_url, method="GET")
-            with urlopen(req, timeout=5) as response:
+            with urlopen(req, timeout=5) as response:  # nosec B310
                 data = json.loads(response.read().decode())
                 return data.get("status") == "ok"
         except Exception as e:
@@ -80,7 +80,7 @@ class CannedResponseValidator:
         )
 
         try:
-            with urlopen(req, timeout=10) as response:
+            with urlopen(req, timeout=10) as response:  # nosec B310
                 result = json.loads(response.read().decode())
                 if result.get("success"):
                     return result.get("data", {})

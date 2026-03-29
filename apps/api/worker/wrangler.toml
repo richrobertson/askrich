@@ -26,5 +26,7 @@ name = "askrich-prod-api"
 
 [env.prod.vars]
 UPSTREAM_API_BASE = "https://api.myrobertson.com"
-CHAT_BACKEND_MODE = "local"
+CHAT_BACKEND_MODE = "openai"
+LLM_API_BASE = "https://api.openai.com/v1"
+LLM_MODEL = "gpt-4o"
 ALLOWED_ORIGINS = "https://www.myrobertson.com,https://myrobertson.com"

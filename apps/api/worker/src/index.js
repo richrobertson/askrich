@@ -7,11 +7,18 @@ export default {
     }
 
     if (url.pathname === "/health") {
+      const backendMode = getBackendMode(env);
       const payload = {
         status: "ok",
         service: "askrich-worker-api",
         upstream_configured: Boolean(env.UPSTREAM_API_BASE),
-        backend_mode: getBackendMode(env),
+        backend_mode: backendMode,
+        response_source:
+          backendMode === "upstream"
+            ? "python-upstream-proxy"
+            : backendMode === "openai"
+              ? "worker-openai"
+              : "worker-local-corpus",
       };
       return withCors(json(payload, 200), request, env);
     }
@@ -81,6 +88,10 @@ export default {
         );
       }
 
+      if (backendMode === "openai") {
+        return withCors(await handleOpenAIChat(request, env), request, env);
+      }
+
       return withCors(await handleLocalChat(request), request, env);
     }
 
@@ -148,36 +159,122 @@ async function handleLocalChat(request) {
   const ranked = rankCorpus(question).slice(0, topK);
   if (!ranked.length) {
     return json(
-      {
-        success: true,
-        data: {
-          answer:
-            "I do not have enough evidence in the deployed corpus to answer confidently yet. Try asking about Oracle migration, Java modernization, control planes, or Starbucks platform work.",
-          citations: [],
-          retrieved_chunks: 0,
-        },
-      },
+      buildResponse(
+        "I do not have enough evidence in the deployed corpus to answer confidently yet. Try asking about Oracle migration, Java modernization, control planes, or Starbucks platform work.",
+        [],
+        0,
+        buildResponseMeta("local", "worker-local-corpus", "local-extractive", null, null),
+      ),
       200,
     );
   }
 
   const answer = buildAnswer(ranked);
-  const citations = ranked.map((doc, index) => ({
-    id: doc.id,
-    title: doc.title,
-    source_url: doc.source_url,
-    chunk_index: index,
-  }));
+  return json(
+    buildResponse(
+      answer,
+      ranked,
+      ranked.length,
+      buildResponseMeta("local", "worker-local-corpus", "local-extractive", null, null),
+    ),
+    200,
+  );
+}
+
+async function handleOpenAIChat(request, env) {
+  let payload;
+  try {
+    payload = await request.json();
+  } catch (_error) {
+    return json({ success: false, error: "Invalid JSON payload" }, 400);
+  }
+
+  const question = String(payload?.question || "").trim();
+  const topK = clampTopK(payload?.top_k);
+  if (question.length < 3) {
+    return json({ success: false, error: "Question must be at least 3 characters" }, 400);
+  }
+
+  if (!env.OPENAI_API_KEY) {
+    return json({ success: false, error: "OPENAI_API_KEY is not configured" }, 500);
+  }
+
+  const ranked = rankCorpus(question).slice(0, topK);
+  const model = String(env.LLM_MODEL || "gpt-4o").trim() || "gpt-4o";
+  const apiBase = String(env.LLM_API_BASE || "https://api.openai.com/v1").replace(/\/$/, "");
+
+  if (!ranked.length) {
+    return json(
+      buildResponse(
+        "I do not have enough evidence in the deployed corpus to answer confidently yet. Try asking about Oracle migration, Java modernization, control planes, or Starbucks platform work.",
+        [],
+        0,
+        buildResponseMeta("openai", "worker-openai", "openai-compatible", "openai", model),
+      ),
+      200,
+    );
+  }
+
+  const evidence = ranked
+    .slice(0, 5)
+    .map((doc, index) => `[${index + 1}] ${doc.title} - ${doc.text}`)
+    .join("\n");
+
+  const upstreamBody = {
+    model,
+    temperature: 0.2,
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are Ask Rich, a recruiter-facing assistant. Answer only from provided evidence. Be concise, factual, and first-person from Rich's perspective when appropriate.",
+      },
+      {
+        role: "user",
+        content: `Question: ${question}\n\nEvidence:\n${evidence}`,
+      },
+    ],
+  };
+
+  let openaiResponse;
+  try {
+    openaiResponse = await fetch(`${apiBase}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify(upstreamBody),
+    });
+  } catch (_error) {
+    return json({ success: false, error: "OpenAI request failed" }, 502);
+  }
+
+  let openaiPayload;
+  try {
+    openaiPayload = await openaiResponse.json();
+  } catch (_error) {
+    return json({ success: false, error: "OpenAI response parse failed" }, 502);
+  }
+
+  if (!openaiResponse.ok) {
+    const openaiError =
+      openaiPayload?.error?.message || openaiPayload?.message || "OpenAI returned an error";
+    return json({ success: false, error: openaiError }, 502);
+  }
+
+  const answer = String(openaiPayload?.choices?.[0]?.message?.content || "").trim();
+  if (!answer) {
+    return json({ success: false, error: "OpenAI returned an empty answer" }, 502);
+  }
 
   return json(
-    {
-      success: true,
-      data: {
-        answer,
-        citations,
-        retrieved_chunks: ranked.length,
-      },
-    },
+    buildResponse(
+      answer,
+      ranked,
+      ranked.length,
+      buildResponseMeta("openai", "worker-openai", "openai-compatible", "openai", model),
+    ),
     200,
   );
 }
@@ -211,6 +308,34 @@ function tokenize(text) {
     .toLowerCase()
     .match(/[a-z0-9]+/g);
   return new Set(matches || []);
+}
+function buildResponse(answer, docs, retrievedChunks, responseMeta) {
+  const citations = docs.map((doc, index) => ({
+    id: doc.id,
+    title: doc.title,
+    source_url: doc.source_url,
+    chunk_index: index,
+  }));
+
+  return {
+    success: true,
+    data: {
+      answer,
+      citations,
+      retrieved_chunks: retrievedChunks,
+      response_meta: responseMeta,
+    },
+  };
+}
+
+function buildResponseMeta(backendMode, answerSource, generationMode, provider, model) {
+  return {
+    backend_mode: backendMode,
+    answer_source: answerSource,
+    generation_mode: generationMode,
+    llm_provider: provider,
+    llm_model: model,
+  };
 }
 
 function buildAnswer(rankedDocs) {

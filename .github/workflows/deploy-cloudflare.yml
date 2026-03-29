@@ -34,9 +34,15 @@ jobs:
         env:
           CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           if [ -z "$CF_API_TOKEN" ] || [ -z "$CF_ACCOUNT_ID" ]; then
             echo "Missing Cloudflare secrets. Configure CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in repository secrets."
+            exit 1
+          fi
+
+          if [ "${DEPLOY_ENV}" = "prod" ] && [ -z "$OPENAI_API_KEY" ]; then
+            echo "Missing OPENAI_API_KEY for prod openai mode. Configure OPENAI_API_KEY in repository secrets."
             exit 1
           fi
 
@@ -46,6 +52,10 @@ jobs:
           command: deploy --config apps/api/worker/wrangler.toml --env ${{ env.DEPLOY_ENV }}
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          secrets: |
+            OPENAI_API_KEY
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
   deploy-web-worker-assets:
     runs-on: ubuntu-latest

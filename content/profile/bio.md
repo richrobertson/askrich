@@ -25,6 +25,36 @@ He is strongest in roles that require both architecture judgment and day-to-day 
 - **Starbucks (Engineer Lead):** Helped lead backend API platforms supporting high-scale customer workflows and enabled architecture transitions for rewards/commerce systems.
 - **Consulting (Slalom / Avanade):** Delivered enterprise software and platform solutions across retail, healthcare, and financial domains, with recurring ownership in architecture, delivery quality, and team enablement.
 
+## Career transition context
+
+- In November 2024, Rich's Oracle role was eliminated as part of a reduction in force (RIF).
+- Since then, he has spent focused time as a full-time dad with his two children while continuing selective technical writing and engineering work.
+- He is now ready for the next chapter of his career and actively pursuing full-time senior engineering opportunities.
+
+## Recent personal projects (since Nov 2024)
+
+- Ask Rich recruiter assistant: https://github.com/richrobertson/askrich
+- Personal engineering site and blog: https://github.com/richrobertson/myrobertson_com
+- Private cloud bootstrap with infrastructure as code: https://github.com/richrobertson/homelab_bootstrap
+- Kubernetes GitOps platform operations: https://github.com/richrobertson/homelab_flux
+- Infrastructure automation workflows: https://github.com/richrobertson/homelab_ansible
+- Reliability-focused distributed systems prototypes:
+  - https://github.com/richrobertson/notification_service
+  - https://github.com/richrobertson/tenure
+
+These projects reflect ongoing execution in infrastructure as code, private cloud operations, distributed storage workflows, and production reliability patterns.
+
+## Published writing and articles
+
+- Writing landing page: https://www.myrobertson.com/writing/
+- Backpressure in distributed systems: https://www.myrobertson.com/writing/backpressure-in-distributed-systems/
+- Architecting a multitenant control plane: https://www.myrobertson.com/writing/architecting-a-multitenant-control-plane/
+- Control plane architecture guide: https://www.myrobertson.com/writing/control-plane-architecture-guide/
+- Designing a correct distributed lease service (Tenure on Raft): https://www.myrobertson.com/writing/designing-a-correct-distributed-lease-service-tenure-on-raft/
+- Distributed systems reliability: https://www.myrobertson.com/writing/distributed-systems-reliability/
+- API backpressure explained simply: https://www.myrobertson.com/blog/api-backpressure-explained-simply.html
+- What it took to modernize a legacy service across 32 global regions: https://www.myrobertson.com/blog/what-it-took-to-modernize-a-legacy-service-across-32-global-regions.html
+
 ## Public profile signals
 
 - LinkedIn: https://www.linkedin.com/in/royrobertson (Seattle, WA)

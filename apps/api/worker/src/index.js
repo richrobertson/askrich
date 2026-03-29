@@ -150,6 +150,30 @@ const CORPUS = [
     text: "At Starbucks, Rich led backend architecture changes supporting rewards migration and platform services for more than 17 million active users, including API and integration leadership.",
   },
   {
+    id: "profile-career-transition-rif",
+    title: "Career Transition and Work Gap Context",
+    source_url: "https://www.linkedin.com/in/royrobertson",
+    text: "Rich's Oracle role was eliminated in November 2024 as part of a reduction in force (RIF). Since then, he has spent time as a full-time dad with his two children while maintaining technical momentum through engineering projects and technical writing. He is now ready for the next chapter of his career.",
+  },
+  {
+    id: "projects-post-oracle-github",
+    title: "Personal Projects and GitHub Repositories Since Nov 2024",
+    source_url: "https://github.com/richrobertson",
+    text: "Since November 2024, Rich has been building personal projects including Ask Rich (https://github.com/richrobertson/askrich), MyRobertson.com (https://github.com/richrobertson/myrobertson_com), homelab bootstrap (https://github.com/richrobertson/homelab_bootstrap), homelab flux (https://github.com/richrobertson/homelab_flux), homelab ansible (https://github.com/richrobertson/homelab_ansible), notification_service (https://github.com/richrobertson/notification_service), and tenure (https://github.com/richrobertson/tenure).",
+  },
+  {
+    id: "projects-private-cloud-iac",
+    title: "Infrastructure as Code Private Cloud and Distributed Storage",
+    source_url: "https://github.com/richrobertson/homelab_bootstrap",
+    text: "A major post-Oracle focus has been building an infrastructure-as-code private cloud using Terraform-first provisioning, Kubernetes platform operations, Vault-integrated secrets, DNS automation, and distributed storage workflows in a homelab environment.",
+  },
+  {
+    id: "writing-published-articles",
+    title: "Published Writing and Articles",
+    source_url: "https://www.myrobertson.com/writing/",
+    text: "Rich has published writing and blog posts including Backpressure in Distributed Systems (https://www.myrobertson.com/writing/backpressure-in-distributed-systems/), Architecting a Multitenant Control Plane (https://www.myrobertson.com/writing/architecting-a-multitenant-control-plane/), Control Plane Architecture Guide (https://www.myrobertson.com/writing/control-plane-architecture-guide/), Designing a Correct Distributed Lease Service Tenure on Raft (https://www.myrobertson.com/writing/designing-a-correct-distributed-lease-service-tenure-on-raft/), Distributed Systems Reliability (https://www.myrobertson.com/writing/distributed-systems-reliability/), API Backpressure Explained Simply (https://www.myrobertson.com/blog/api-backpressure-explained-simply.html), and What It Took to Modernize a Legacy Service Across 32 Global Regions (https://www.myrobertson.com/blog/what-it-took-to-modernize-a-legacy-service-across-32-global-regions.html).",
+  },
+  {
     id: "skills-cloud",
     title: "Cloud and Platform Engineering",
     source_url: "https://www.myrobertson.com/cloud-platform-engineer.html",
@@ -246,7 +270,7 @@ async function handleLocalChat(request) {
     );
   }
 
-  const answer = buildAnswer(ranked);
+  const answer = buildAnswer(question, ranked);
   const citations = ranked.map((doc, index) => ({
     id: doc.id,
     title: doc.title,
@@ -477,7 +501,12 @@ function buildProfileResponse({
   return ["Here is Rich's LinkedIn profile:", `- LinkedIn: ${PROFILE_LINKS.linkedin}`].join("\n");
 }
 
-function buildAnswer(rankedDocs) {
+function buildAnswer(question, rankedDocs) {
+  const q = String(question || "").toLowerCase();
+  if (isBehavioralQuestion(q)) {
+    return buildBehavioralAnswer(q, rankedDocs);
+  }
+
   const allText = rankedDocs.map((doc) => `${doc.title} ${doc.text}`).join(" ").toLowerCase();
   const profileSignals = [
     "github",
@@ -515,7 +544,7 @@ function buildAnswer(rankedDocs) {
   const isEducationQuery = educationSignals.some((signal) => allText.includes(signal));
   const isTechnologyQuery = technologySignals.some((signal) => allText.includes(signal));
 
-  let summary = "Based on the strongest matching evidence, Rich's profile is strongest in distributed systems, cloud platform modernization, and control-plane backend delivery.";
+  let summary = "The strongest evidence points to deep experience in distributed systems, cloud modernization, and reliable backend platform delivery.";
   if (isProfileQuery) {
     const profileDetails = [];
     if (includesLinkedIn) {
@@ -531,14 +560,120 @@ function buildAnswer(rankedDocs) {
     const details = profileDetails.length
       ? profileDetails.join(", ")
       : `LinkedIn ${PROFILE_LINKS.linkedin} (primary contact point)`;
-    summary = `Based on the strongest matching evidence, Rich's public profile links include ${details}.`;
+    summary = `Rich's public profile links include ${details}.`;
   } else if (isEducationQuery) {
-    summary = "Based on the strongest matching evidence, Rich completed two Purdue University bachelor's degrees in 2007, spanning both management and computer/information technology.";
+    summary = "Rich completed two Purdue University bachelor's degrees in 2007, spanning both management and computer/information technology.";
   } else if (isTechnologyQuery) {
-    summary = "Based on the strongest matching evidence, Rich has used a broad technology stack over time, including modern cloud/distributed platforms and earlier Microsoft enterprise technologies.";
+    summary = "Rich has used a broad technology stack over time, including modern cloud/distributed platforms and earlier Microsoft enterprise technologies.";
   }
-  const bullets = rankedDocs.slice(0, 4).map((doc) => `- ${doc.text}`);
+  const bullets = rankedDocs.slice(0, 3).map((doc) => `- ${clipSentence(doc.text, 200)}`);
   return [summary, ...bullets].join("\n");
+}
+
+function isBehavioralQuestion(questionLower) {
+  const explicitStoryPrompts = [
+    "tell me about a time",
+    "give me an example",
+    "example of a time",
+    "time when",
+    "describe a time",
+    "walk me through a time",
+  ];
+  if (explicitStoryPrompts.some((signal) => questionLower.includes(signal))) {
+    return true;
+  }
+
+  const behavioralTopics = [
+    "convince",
+    "persuade",
+    "influence",
+    "disagree",
+    "conflict",
+    "challenge",
+    "failure",
+    "mistake",
+    "leadership",
+    "stakeholder",
+  ];
+
+  const storyIntentSignals = [
+    " a time ",
+    " example ",
+    " when you ",
+    " had to ",
+    " situation ",
+    " instance ",
+    " how did you ",
+    " have you ever ",
+  ];
+
+  const hasBehavioralTopic = behavioralTopics.some((signal) => questionLower.includes(signal));
+  const hasStoryIntent = storyIntentSignals.some((signal) => questionLower.includes(signal));
+  return hasBehavioralTopic && hasStoryIntent;
+}
+
+function buildBehavioralAnswer(questionLower, rankedDocs) {
+  const docIds = new Set(rankedDocs.map((doc) => doc.id));
+  const persuasionPrompt = ["convince", "persuade", "influence", "stakeholder"].some((signal) =>
+    questionLower.includes(signal),
+  );
+
+  if (persuasionPrompt && docIds.has("project-oracle-cns")) {
+    return [
+      "Situation: At Oracle, the Customer Notification Service needed to move to an OCI-native architecture while supporting a $2M enterprise deal timeline.",
+      "Task: I needed to get cross-functional stakeholders aligned on a migration approach that improved reliability without risking delivery commitments.",
+      "Action: I proposed a phased migration plan with explicit rollout checkpoints, reliability safeguards, and clear communication on tradeoffs and risk reduction.",
+      "Result: We completed the migration with stronger scalability and operational readiness while staying aligned to the deal timeline.",
+      "Reflection: When I need to convince people, I focus on concrete risk controls, phased execution, and business impact rather than abstract technical arguments.",
+    ].join("\n");
+  }
+
+  if (persuasionPrompt && docIds.has("project-java17")) {
+    return [
+      "Situation: I led a Java 8 to Java 17 modernization with rollout across 32 global data centers under a tight timeline.",
+      "Task: I had to align teams on a controlled migration strategy that balanced speed with production safety.",
+      "Action: I drove agreement on staged rollout gates, architecture-specific validation, and reliability safeguards before each expansion step.",
+      "Result: We completed the rollout in under three months with controlled delivery and operational stability.",
+      "Reflection: Persuasion works best when you pair urgency with a concrete safety model and measurable checkpoints.",
+    ].join("\n");
+  }
+
+  const primary = rankedDocs[0];
+  const secondary = rankedDocs[1];
+  const primaryText = primary ? toFirstPerson(clipSentence(primary.text, 180)) : "I do not have enough evidence to provide a strong example yet.";
+  const secondaryText = secondary ? toFirstPerson(clipSentence(secondary.text, 180)) : "I focused on stakeholder alignment and execution clarity.";
+
+  return [
+    `Situation: ${primaryText}`,
+    "Task: I needed to align people around a clear path to delivery while managing risk.",
+    `Action: ${secondaryText}`,
+    "Result: The work improved delivery confidence and execution reliability.",
+    "Reflection: I am most effective when I combine clear communication, staged execution, and ownership of outcomes.",
+  ].join("\n");
+}
+
+function clipSentence(text, maxLen) {
+  const normalized = String(text || "").replace(/\s+/g, " ").trim();
+  if (normalized.length <= maxLen) {
+    return normalized;
+  }
+  return `${normalized.slice(0, Math.max(0, maxLen - 3)).trimEnd()}...`;
+}
+
+function toFirstPerson(text) {
+  let result = String(text || "")
+    .replace(/Rich's/gi, "my")
+    .replace(/\bRich\b/gi, "I");
+
+  // Fix common agreement issues introduced by third-person to first-person replacement.
+  result = result
+    .replace(/\bI holds\b/gi, "I hold")
+    .replace(/\bI has\b/gi, "I have")
+    .replace(/\bI is\b/gi, "I am")
+    .replace(/\bI focuses\b/gi, "I focus")
+    .replace(/\bI leds\b/gi, "I lead");
+
+  return result;
 }
 
 function normalizeUpstreamPath(path) {

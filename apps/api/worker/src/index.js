@@ -721,7 +721,19 @@ function buildAnswer(question, rankedDocs) {
     "url",
     "urls",
   ];
-  const educationSignals = ["education", "degree", "degrees", "academic", "purdue", "bachelor"];
+  const educationSignals = [
+    "education",
+    "degree",
+    "degrees",
+    "academic",
+    "purdue",
+    "bachelor",
+    "school",
+    "college",
+    "university",
+    "alma mater",
+    "studied",
+  ];
   const technologySignals = [
     "technology",
     "technologies",

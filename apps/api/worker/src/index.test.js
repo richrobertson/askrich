@@ -431,6 +431,16 @@ describe('Canned Response Quality Tests', () => {
       expect(answer).not.toContain('LinkedIn');
     });
 
+    it('should treat school questions as education queries', () => {
+      const question = 'where did you go to school?';
+      const ranked = rankCorpus(question);
+      const answer = buildAnswer(question, ranked);
+
+      expect(answer).toContain('Purdue');
+      expect(answer).toContain('bachelor');
+      expect(answer).not.toContain('strongest evidence');
+    });
+
     it('should deliver tech-stack answer for technology question', () => {
       const question = 'what is your tech stack';
       const ranked = rankCorpus(question);

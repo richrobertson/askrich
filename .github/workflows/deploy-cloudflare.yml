@@ -52,8 +52,11 @@ jobs:
           command: deploy --config apps/api/worker/wrangler.toml --env ${{ env.DEPLOY_ENV }}
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          secrets: |
-            OPENAI_API_KEY
+
+      - name: Set API Worker OpenAI secret
+        if: env.DEPLOY_ENV == 'prod'
+        run: |
+          printf "%s" "$OPENAI_API_KEY" | npx wrangler secret put OPENAI_API_KEY --config apps/api/worker/wrangler.toml --env $DEPLOY_ENV
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 

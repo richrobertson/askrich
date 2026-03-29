@@ -66,6 +66,7 @@ import {
   isBehavioralQuestion,
   isOracleCnsOutcomesQuestion,
   isTechnologyPassionQuestion,
+  isShortFactualQuestion,
   isProfileLinksQuery,
   isContactQuery,
   isSensitiveContactQuery,
@@ -131,6 +132,14 @@ describe('Canned Response Quality Tests', () => {
       expect(isTechnologyPassionQuestion('technologies you used in the oracle project')).toBe(false);
       expect(isTechnologyPassionQuestion('what is your education')).toBe(false);
       expect(isTechnologyPassionQuestion('Oracle CNS outcomes')).toBe(false);
+    });
+
+    it('should detect short factual questions', () => {
+      expect(isShortFactualQuestion('where did you go to school')).toBe(true);
+      expect(isShortFactualQuestion('what is your educational background')).toBe(true);
+      expect(isShortFactualQuestion('what is your tech stack')).toBe(true);
+      expect(isShortFactualQuestion('tell me about a time you had to convince stakeholders')).toBe(false);
+      expect(isShortFactualQuestion('how did you lead the oracle migration')).toBe(false);
     });
   });
 
@@ -439,6 +448,16 @@ describe('Canned Response Quality Tests', () => {
       expect(answer).toContain('Purdue');
       expect(answer).toContain('bachelor');
       expect(answer).not.toContain('strongest evidence');
+    });
+
+    it('should keep school questions concise without retrieval bullets', () => {
+      const question = 'where did you go to school?';
+      const ranked = rankCorpus(question);
+      const answer = buildAnswer(question, ranked);
+
+      expect(answer).toContain('Purdue University');
+      expect(answer).not.toContain('\n- ');
+      expect(answer.length).toBeLessThan(260);
     });
 
     it('should deliver tech-stack answer for technology question', () => {

@@ -256,6 +256,21 @@ async function handleLocalChat(request) {
   }
 
   const question = String(payload?.question || "").trim();
+  const smallTalkResponse = buildSmallTalkResponse(question);
+  if (smallTalkResponse) {
+    return json(
+      {
+        success: true,
+        data: {
+          answer: smallTalkResponse,
+          citations: [],
+          retrieved_chunks: 0,
+        },
+      },
+      200,
+    );
+  }
+
   const topK = clampTopK(payload?.top_k);
   if (question.length < 3) {
     return json({ success: false, error: "Question must be at least 3 characters" }, 400);
@@ -368,6 +383,89 @@ function tokenize(text) {
     .toLowerCase()
     .match(/[a-z0-9]+/g);
   return new Set(matches || []);
+}
+
+function buildSmallTalkResponse(question) {
+  const q = normalizeIntentText(question);
+  if (!q) {
+    return null;
+  }
+
+  if (isGreetingQuery(q)) {
+    return "Hi there 👋 Great to chat with you. Ask me about Rich's experience, projects, technology stack, or public profile links any time.";
+  }
+
+  if (isHowAreYouQuery(q)) {
+    return "I'm doing well and ready to help. If you want, I can share a quick summary of Rich's background or dive into a specific project.";
+  }
+
+  if (isThanksQuery(q)) {
+    return "You're welcome — happy to help. If you'd like, ask a follow-up about Oracle migration, platform engineering, or leadership examples.";
+  }
+
+  if (isWhoAreYouQuery(q)) {
+    return "I'm Ask Rich, a chat assistant focused on Rich Robertson's background, experience, and project outcomes.";
+  }
+
+  return null;
+}
+
+function normalizeIntentText(text) {
+  return String(text || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isGreetingQuery(questionLower) {
+  const greetingSignals = new Set([
+    "hi",
+    "hello",
+    "hey",
+    "yo",
+    "hiya",
+    "good morning",
+    "good afternoon",
+    "good evening",
+    "whats up",
+    "what s up",
+    "sup",
+  ]);
+  return greetingSignals.has(questionLower);
+}
+
+function isHowAreYouQuery(questionLower) {
+  const signals = new Set([
+    "how are you",
+    "hows it going",
+    "how s it going",
+    "how are you doing",
+    "how do you do",
+  ]);
+  return signals.has(questionLower);
+}
+
+function isThanksQuery(questionLower) {
+  const signals = new Set([
+    "thanks",
+    "thank you",
+    "thx",
+    "ty",
+    "appreciate it",
+  ]);
+  return signals.has(questionLower);
+}
+
+function isWhoAreYouQuery(questionLower) {
+  const signals = new Set([
+    "who are you",
+    "what are you",
+    "what can you do",
+    "help",
+    "what do you do",
+  ]);
+  return signals.has(questionLower);
 }
 
 function isProfileLinksQuery(question) {
@@ -1176,6 +1274,11 @@ export {
   isContactQuery,
   isSensitiveContactQuery,
   isAllProfilesQuery,
+  buildSmallTalkResponse,
+  isGreetingQuery,
+  isHowAreYouQuery,
+  isThanksQuery,
+  isWhoAreYouQuery,
   rankCorpus,
   clipSentence,
   formatStarAnswer,

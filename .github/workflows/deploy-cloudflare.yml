@@ -1,6 +1,13 @@
 name: Deploy Cloudflare
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/api/worker/**'
+      - 'apps/web/**'
+      - '.github/workflows/deploy-cloudflare.yml'
   workflow_dispatch:
     inputs:
       environment:
@@ -17,6 +24,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      DEPLOY_ENV: ${{ github.event_name == 'push' && 'prod' || github.event.inputs.environment }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,7 +43,7 @@ jobs:
       - name: Deploy API Worker
         uses: cloudflare/wrangler-action@v3
         with:
-          command: deploy --config apps/api/worker/wrangler.toml --env ${{ github.event.inputs.environment }}
+          command: deploy --config apps/api/worker/wrangler.toml --env ${{ env.DEPLOY_ENV }}
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
@@ -42,6 +51,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      DEPLOY_ENV: ${{ github.event_name == 'push' && 'prod' || github.event.inputs.environment }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -59,6 +70,6 @@ jobs:
       - name: Deploy Web Worker Assets
         uses: cloudflare/wrangler-action@v3
         with:
-          command: deploy --config apps/web/wrangler.toml --env ${{ github.event.inputs.environment }}
+          command: deploy --config apps/web/wrangler.toml --env ${{ env.DEPLOY_ENV }}
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

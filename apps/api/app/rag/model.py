@@ -108,7 +108,7 @@ class OpenAICompatibleModelClient(ModelClient):
         instructions: str,
         tone: str | None = None,
     ) -> str:
-        logger.info("OpenAICompatibleModelClient.generate_answer called with model=%s, api_base=%s", self._model, self._api_base)
+        logger.debug("OpenAICompatibleModelClient.generate_answer called with model=%s, api_base=%s", self._model, self._api_base)
         system_content = self._build_system_prompt(instructions, evidence_snippets, tone)
         payload = {
             "model": self._model,
@@ -133,7 +133,7 @@ class OpenAICompatibleModelClient(ModelClient):
                 response.raise_for_status()
                 data = response.json()
                 answer = data["choices"][0]["message"]["content"]
-                logger.info("OpenAI API returned successfully")
+                logger.debug("Chat completions API call returned successfully")
                 return answer
         except (httpx.HTTPError, KeyError, json.JSONDecodeError, IndexError) as exc:
             logger.error(
@@ -185,12 +185,13 @@ def get_model_client(
 ) -> ModelClient:
     """Factory for generation model clients.
 
-    Returns an OpenAICompatibleModelClient when provider is "openai" or
-    "openai-compatible" and the required api_base/model are configured.
+    Returns an OpenAICompatibleModelClient when provider is one of
+    "openai", "openai-compatible", "together", "groq", or "ollama"
+    and the required api_base/model are configured.
     Falls back to ExtractiveModelClient for local/stub operation.
     """
     normalized = (provider or "").strip().lower()
-    logger.info(
+    logger.debug(
         "get_model_client: provider=%s (normalized=%s), api_base=%s, model=%s, api_key_configured=%s",
         provider,
         normalized,
@@ -200,12 +201,12 @@ def get_model_client(
     )
     
     if normalized in {"openai", "openai-compatible", "together", "groq", "ollama"} and api_base and model:
-        logger.info("Instantiating OpenAICompatibleModelClient")
+        logger.debug("Instantiating OpenAICompatibleModelClient")
         return OpenAICompatibleModelClient(
             api_base=api_base,
             api_key=api_key,
             model=model,
             temperature=temperature,
         )
-    logger.info("Falling back to ExtractiveModelClient")
+    logger.debug("Falling back to ExtractiveModelClient")
     return ExtractiveModelClient()

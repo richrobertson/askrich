@@ -9,12 +9,12 @@ Recruiter-facing web chat experience for Ask Rich.
 - Citation rendering per assistant message
 - Client-side interaction telemetry (sent/received/error counts and latency)
 - API integration with `POST /api/chat`
-- Cloudflare asset deployment config via `wrangler.toml`
-- Embeddable site widget at `embed/askrich-widget.js`
+- Cloudflare asset deployment config via [wrangler.toml](wrangler.toml)
+- Embeddable site widget at [embed/askrich-widget.js](embed/askrich-widget.js)
 
 ## Run locally
 
-1. Start the API in `apps/api` (default base URL: `http://127.0.0.1:8000`).
+1. Start the API in [apps/api](../api/) (default base URL: `http://127.0.0.1:8000`).
 2. Serve this folder as static files:
 
 ```bash
@@ -27,7 +27,7 @@ python -m http.server 3000
 ## Notes
 
 - API base URL is editable in the UI and persisted in local storage.
-- This app is deployed as static assets via Cloudflare Workers (`wrangler.toml`).
+- This app is deployed as static assets via Cloudflare Workers ([wrangler.toml](wrangler.toml)).
 
 ## Embedding on www.myrobertson.com
 
@@ -42,3 +42,10 @@ Include the widget script on any page:
 ```
 
 The widget opens a recruiter-focused chat panel and calls `POST /api/chat` on the configured API base.
+
+## Crosslinks
+
+- [Repository README](../../README.md)
+- [API README](../api/README.md)
+- [Scripts README](../../scripts/README.md)
+- [Cloudflare deployment docs](../../docs/deployment/cloudflare.md)

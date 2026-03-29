@@ -39,8 +39,8 @@ He is strongest in roles that require both architecture judgment and day-to-day 
 - Kubernetes GitOps platform operations: https://github.com/richrobertson/homelab_flux
 - Infrastructure automation workflows: https://github.com/richrobertson/homelab_ansible
 - Reliability-focused distributed systems prototypes:
-	- https://github.com/richrobertson/notification_service
-	- https://github.com/richrobertson/tenure
+  - https://github.com/richrobertson/notification_service
+  - https://github.com/richrobertson/tenure
 
 These projects reflect ongoing execution in infrastructure as code, private cloud operations, distributed storage workflows, and production reliability patterns.
 

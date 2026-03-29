@@ -101,8 +101,8 @@ The following items were merged from the 2010 resume archive to preserve earlier
 - Homelab GitOps platform (Flux + Kubernetes): https://github.com/richrobertson/homelab_flux
 - Homelab infrastructure automation (Ansible): https://github.com/richrobertson/homelab_ansible
 - Distributed systems reliability prototypes:
-	- Notification service: https://github.com/richrobertson/notification_service
-	- Lease coordination service: https://github.com/richrobertson/tenure
+  - Notification service: https://github.com/richrobertson/notification_service
+  - Lease coordination service: https://github.com/richrobertson/tenure
 
 **Private cloud focus**
 - Built an infrastructure-as-code private cloud stack using Terraform, Kubernetes, Vault-integrated secrets, DNS automation, and distributed storage workflows across a homelab environment.

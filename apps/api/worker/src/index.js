@@ -571,11 +571,19 @@ function buildAnswer(question, rankedDocs) {
 }
 
 function isBehavioralQuestion(questionLower) {
-  const signals = [
+  const explicitStoryPrompts = [
     "tell me about a time",
     "give me an example",
     "example of a time",
     "time when",
+    "describe a time",
+    "walk me through a time",
+  ];
+  if (explicitStoryPrompts.some((signal) => questionLower.includes(signal))) {
+    return true;
+  }
+
+  const behavioralTopics = [
     "convince",
     "persuade",
     "influence",
@@ -587,7 +595,21 @@ function isBehavioralQuestion(questionLower) {
     "leadership",
     "stakeholder",
   ];
-  return signals.some((signal) => questionLower.includes(signal));
+
+  const storyIntentSignals = [
+    " a time ",
+    " example ",
+    " when you ",
+    " had to ",
+    " situation ",
+    " instance ",
+    " how did you ",
+    " have you ever ",
+  ];
+
+  const hasBehavioralTopic = behavioralTopics.some((signal) => questionLower.includes(signal));
+  const hasStoryIntent = storyIntentSignals.some((signal) => questionLower.includes(signal));
+  return hasBehavioralTopic && hasStoryIntent;
 }
 
 function buildBehavioralAnswer(questionLower, rankedDocs) {
@@ -639,9 +661,19 @@ function clipSentence(text, maxLen) {
 }
 
 function toFirstPerson(text) {
-  return String(text || "")
+  let result = String(text || "")
     .replace(/Rich's/gi, "my")
     .replace(/\bRich\b/gi, "I");
+
+  // Fix common agreement issues introduced by third-person to first-person replacement.
+  result = result
+    .replace(/\bI holds\b/gi, "I hold")
+    .replace(/\bI has\b/gi, "I have")
+    .replace(/\bI is\b/gi, "I am")
+    .replace(/\bI focuses\b/gi, "I focus")
+    .replace(/\bI leds\b/gi, "I lead");
+
+  return result;
 }
 
 function normalizeUpstreamPath(path) {

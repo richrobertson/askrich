@@ -1,10 +1,10 @@
 ---
 id: profile-public-profiles
-title: Public Profile Links
+title: Public Profiles, Repositories, and Writing Links
 type: profile
-summary: Canonical public profile URLs for recruiter and hiring-manager questions.
-tags: [profile, links, social, github, linkedin, facebook]
-updated: "2026-03-28"
+summary: Canonical public profile URLs plus featured repositories and writing links for recruiter and hiring-manager questions.
+tags: [profile, links, social, github, linkedin, facebook, repositories, writing]
+updated: "2026-03-29"
 ---
 
 ## Public profile links

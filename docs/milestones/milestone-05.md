@@ -60,3 +60,4 @@
 
 - Overview: [Milestone Overview](overview.md)
 - Previous: [Milestone 04](milestone-04.md)
+- Next: [Milestone 06](milestone-06.md)

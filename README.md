@@ -31,6 +31,7 @@ Milestone status as of 2026-03-28:
 - ✅ Milestone 3 completed (web chat integration + embeddable widget)
 - ✅ Milestone 4 completed (eval harness + quality loop)
 - ✅ Milestone 5 completed (Cloudflare deployment + production hardening docs and runbooks)
+- Planned next: Milestone 6 (rate limiting, question recording, thumbs up/down feedback, and privacy/feedback operations)
 
 ## Implementation status
 
@@ -131,6 +132,7 @@ data/
 - **M3:** Website integration and recruiter UX
 - **M4:** Evaluation harness and quality polish
 - **M5:** Cloudflare deployment and production hardening
+- **M6:** Usage controls, question analytics, feedback capture, and privacy/review workflows
 
 See [docs/milestones/overview.md](docs/milestones/overview.md).
 
@@ -140,6 +142,7 @@ Milestone detail pages:
 - [docs/milestones/milestone-03.md](docs/milestones/milestone-03.md)
 - [docs/milestones/milestone-04.md](docs/milestones/milestone-04.md)
 - [docs/milestones/milestone-05.md](docs/milestones/milestone-05.md)
+- [docs/milestones/milestone-06.md](docs/milestones/milestone-06.md)
 
 Milestone-1 planning details are expanded in:
 - [docs/milestones/milestone-01.md](docs/milestones/milestone-01.md)
@@ -170,6 +173,7 @@ Ask Rich is explicitly designed to demonstrate practical open-source LLM integra
 - Production-grade ingestion and chunking pipeline
 - API + UI integration with recruiter-focused interaction design
 - Evaluation dashboards and regression checks
+- Rate limiting, question event recording, answer feedback capture, and privacy/review workflows
 - Optional LangGraph-based orchestration for multi-step flows
 
 ## License

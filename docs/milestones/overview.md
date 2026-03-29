@@ -93,3 +93,24 @@ Last updated: 2026-03-28
 
 **Non-goals**
 - Multi-region custom infrastructure beyond Cloudflare-native plan
+
+## Milestone 6 — Usage controls + feedback signals
+
+[Details](milestone-06.md)
+
+**Scope**
+- Add chat rate limiting and abuse controls at the edge
+- Record incoming questions for product and support analysis
+- Capture user thumbs up/down feedback on answer quality
+- Define privacy, retention, and event identity rules for captured interaction data
+
+**Deliverables**
+- Documented rate-limit policy for `POST /api/chat`
+- Durable question event recording
+- Feedback submission flow and stored feedback events
+- Review workflow for negative feedback and follow-up improvements
+
+**Status**: Planned
+
+**Non-goals**
+- Full analytics platform or user account system

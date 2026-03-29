@@ -2,568 +2,1011 @@
   {
     "id": "behavioral_teamwork_personality_diff",
     "category": "behavioral-interview",
-    "question": "Tell me about a time when you had to work closely with someone whose personality was very different from yours.",
-    "filters": { "doc_types": ["faq", "projects", "skills", "profile"] },
+    "question": "Share a concrete example of when you had to work closely with someone whose personality was very different from yours?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills",
+        "profile"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_conflict_coworker",
     "category": "behavioral-interview",
-    "question": "Give me an example of a time you faced a conflict with a coworker. How did you handle that?",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Describe a specific case where you faced a conflict with a coworker. What did you do, and what changed?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_step_up_leadership",
     "category": "behavioral-interview",
-    "question": "Describe a time when you had to step up and demonstrate leadership skills.",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Walk me through a situation where you had to step up and demonstrate leadership skills?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_mistake_colleague",
     "category": "behavioral-interview",
-    "question": "Tell me about a time you made a mistake and wish you had handled a situation with a colleague differently.",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Share a specific instance where you made a mistake and wish you had handled a situation with a colleague differently?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_info_unresponsive",
     "category": "behavioral-interview",
-    "question": "Tell me about a time you needed to get information from someone who was not very responsive. What did you do?",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Share a specific instance where you needed to get information from someone who was not very responsive. What steps did you take?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_client_impression",
     "category": "behavioral-interview",
-    "question": "Describe a time when it was especially important to make a good impression on a client. How did you go about doing so?",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Walk me through a situation where it was especially important to make a good impression on a client. What approach did you use?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_client_expectation_miss",
     "category": "behavioral-interview",
-    "question": "Give me an example of a time when you did not meet a client's expectation. What happened, and how did you attempt to rectify the situation?",
-    "filters": { "doc_types": ["faq", "projects"] },
+    "question": "Describe a specific case where when you did not meet a client's expectation. What happened, and how did you attempt to rectify the situation?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_customer_satisfaction",
     "category": "behavioral-interview",
-    "question": "Tell me about a time when you made sure a customer or stakeholder was pleased with your service.",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Share a concrete example of when you made sure a customer, client, or stakeholder was pleased with your service?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_difficult_client",
     "category": "behavioral-interview",
-    "question": "Describe a time when you had to interact with a difficult client or customer. What was the situation, and how did you handle it?",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Walk me through a situation where you had to interact with a difficult client or customer. What was the situation, and What actions did you take, and what was the outcome?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_prioritize_customers",
     "category": "behavioral-interview",
     "question": "When you are working with a large number of customers or stakeholders, how do you prioritize their needs?",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_pressure",
     "category": "behavioral-interview",
-    "question": "Tell me about a time you were under a lot of pressure at work. What was going on, and how did you get through it?",
-    "filters": { "doc_types": ["faq", "projects", "skills", "profile"] },
+    "question": "Share a specific instance where you were under significant pressure at work. What was going on, and how did you get through it?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills",
+        "profile"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_company_change",
     "category": "behavioral-interview",
-    "question": "Describe a time when your team or company was undergoing change. How did that impact you, and how did you adapt?",
-    "filters": { "doc_types": ["faq", "projects", "skills", "profile"] },
+    "question": "Walk me through a situation where your team or organization was undergoing change. How did that impact you, and how did you adapt?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills",
+        "profile"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_settle_last_job",
     "category": "behavioral-interview",
     "question": "Tell me about settling into your last job. What did you do to learn the ropes?",
-    "filters": { "doc_types": ["profile", "faq", "projects"] },
+    "filters": {
+      "doc_types": [
+        "profile",
+        "faq",
+        "projects"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_think_on_feet",
     "category": "behavioral-interview",
-    "question": "Give me an example of a time when you had to think on your feet.",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Describe a specific case where when you had to think quickly with limited time?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_fail_deal",
     "category": "behavioral-interview",
-    "question": "Tell me about a time you failed. How did you deal with the situation?",
-    "filters": { "doc_types": ["faq", "projects", "profile"] },
+    "question": "Share a specific instance where you failed. How did you deal with the situation?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "profile"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_many_responsibilities",
     "category": "behavioral-interview",
-    "question": "Give me an example of a time you managed numerous responsibilities. How did you handle that?",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Describe a specific case where you managed numerous responsibilities. What did you do, and what changed?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_long_project_track",
     "category": "behavioral-interview",
     "question": "Describe a long-term project that you kept on track. How did you keep everything moving?",
-    "filters": { "doc_types": ["projects", "skills", "faq"] },
+    "filters": {
+      "doc_types": [
+        "projects",
+        "skills",
+        "faq"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_overwhelmed_responsibilities",
     "category": "behavioral-interview",
-    "question": "Tell me about a time your responsibilities got overwhelming. What did you do?",
-    "filters": { "doc_types": ["faq", "projects", "profile"] },
+    "question": "Share a specific instance where your responsibilities got overwhelming. What steps did you take?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "profile"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_goal_self",
     "category": "behavioral-interview",
-    "question": "Tell me about a time you set a goal for yourself. How did you ensure you met your objective?",
-    "filters": { "doc_types": ["faq", "projects", "profile"] },
+    "question": "Share a specific instance where you set a goal for yourself. How did you ensure you met that goal?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "profile"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_unexpected_derail",
     "category": "behavioral-interview",
-    "question": "Tell me about a time an unexpected problem derailed your planning. How did you recover?",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Share a specific instance where an unexpected problem derailed your planning. How did you recover?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_priorities_self",
     "category": "behavioral-interview",
-    "question": "Tell me about a time when you had to establish priorities for yourself.",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Share a concrete example of when you had to establish priorities for yourself?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_management_delegate",
     "category": "behavioral-interview",
     "question": "Describe your management style. How do you successfully delegate tasks?",
-    "filters": { "doc_types": ["faq", "skills", "projects"] },
+    "filters": {
+      "doc_types": [
+        "faq",
+        "skills",
+        "projects"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_organized_deadline",
     "category": "behavioral-interview",
-    "question": "Describe a time when being organized helped you with a tight deadline.",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Walk me through a situation where being organized helped you with a tight deadline?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_written_communication",
     "category": "behavioral-interview",
-    "question": "Tell me about a time when you had to rely on written communication to get your ideas across.",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Share a concrete example of when you had to rely on written communication to get your ideas across?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_persuade_work",
     "category": "behavioral-interview",
-    "question": "Give me an example of a time when you were able to successfully persuade someone at work to see things your way.",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Describe a specific case where when you were able to successfully persuade someone at work to see things your way?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_explain_technical",
     "category": "behavioral-interview",
-    "question": "Describe a time when you were the technical expert and had to make sure everyone understood you.",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Walk me through a situation where you were the technical expert and had to make sure everyone understood you?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_difficult_conversation",
     "category": "behavioral-interview",
-    "question": "Give me an example of a time when you had to have a difficult conversation with a frustrated client or colleague.",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Describe a specific case where when you had to have a difficult conversation with a frustrated client or colleague?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_successful_presentation",
     "category": "behavioral-interview",
-    "question": "Tell me about a successful presentation you gave and why you think it was a hit.",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Tell me about a successful presentation you gave and why you think it was a hit?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_proudest_accomplishment",
     "category": "behavioral-interview",
-    "question": "Tell me about your proudest professional accomplishment.",
-    "filters": { "doc_types": ["projects", "profile", "skills"] },
+    "question": "Tell me about your proudest professional accomplishment?",
+    "filters": {
+      "doc_types": [
+        "projects",
+        "profile",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_supervision_style",
     "category": "behavioral-interview",
-    "question": "Tell me about a time when you worked under either extremely close supervision or extremely loose supervision. How did you handle that?",
-    "filters": { "doc_types": ["faq", "profile", "skills"] },
+    "question": "Share a concrete example of when you worked under either extremely close supervision or extremely loose supervision. What did you do, and what changed?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "profile",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_creativity_work",
     "category": "behavioral-interview",
-    "question": "Give me an example of a time you were able to be creative with your work. What was exciting or difficult about it?",
-    "filters": { "doc_types": ["projects", "skills", "faq"] },
+    "question": "Describe a specific case where you were able to be creative with your work. What was exciting or difficult about it?",
+    "filters": {
+      "doc_types": [
+        "projects",
+        "skills",
+        "faq"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_initiative_problem",
     "category": "behavioral-interview",
-    "question": "Describe a time when you saw a problem and took the initiative to correct it.",
-    "filters": { "doc_types": ["projects", "skills", "faq"] },
+    "question": "Walk me through a situation where you saw a problem and took the initiative to correct it?",
+    "filters": {
+      "doc_types": [
+        "projects",
+        "skills",
+        "faq"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "behavioral_dissatisfied_role",
     "category": "behavioral-interview",
-    "question": "Tell me about a time you were dissatisfied in your role. What could have been done to make it better?",
-    "filters": { "doc_types": ["profile", "faq", "skills"] },
+    "question": "Share a specific instance where you were dissatisfied in your role. What could have been done to make it better?",
+    "filters": {
+      "doc_types": [
+        "profile",
+        "faq",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples"
+    "source_url": "https://www.themuse.com/advice/behavioral-interview-questions-answers-examples",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "indeed_conflict_team_member",
     "category": "behavioral-interview",
-    "question": "Give me an example of a time you had a conflict with a team member. How did you handle it?",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Describe a specific case where you had a conflict with a team member. What actions did you take, and what was the outcome?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions"
+    "source_url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "indeed_mistake_learn",
     "category": "behavioral-interview",
-    "question": "Tell me about a time you made a mistake at work. How did you resolve the problem, and what did you learn?",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Share a specific instance where you made a mistake at work. How did you resolve the problem, and what did you learn?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions"
+    "source_url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "indeed_time_management_task",
     "category": "behavioral-interview",
-    "question": "Describe an occasion when you had to manage your time to complete a task. How did you do it?",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Describe a scenario in which you had to manage your time to complete a task. How did you do it?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions"
+    "source_url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "indeed_failed_task",
     "category": "behavioral-interview",
-    "question": "Describe an occasion when you failed at a task. What did you learn from it?",
-    "filters": { "doc_types": ["faq", "projects", "profile"] },
+    "question": "Describe a scenario in which you failed at a task. What did you learn from it?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "profile"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions"
+    "source_url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "indeed_initiative_career",
     "category": "behavioral-interview",
-    "question": "Tell me about a time you took initiative in your career. What was your motivation for doing so?",
-    "filters": { "doc_types": ["projects", "skills", "profile"] },
+    "question": "Share a specific instance where you took initiative in your professional work. What was your motivation for doing so?",
+    "filters": {
+      "doc_types": [
+        "projects",
+        "skills",
+        "profile"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions"
+    "source_url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "indeed_leadership_motivate_team",
     "category": "behavioral-interview",
-    "question": "Describe a time when you used your leadership skills to motivate your team or colleagues.",
-    "filters": { "doc_types": ["projects", "skills", "faq"] },
+    "question": "Walk me through a situation where you used your leadership skills to motivate your team or colleagues?",
+    "filters": {
+      "doc_types": [
+        "projects",
+        "skills",
+        "faq"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions"
+    "source_url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "indeed_untrained_task",
     "category": "behavioral-interview",
-    "question": "Describe a time when you were responsible for a task you did not receive training on and were unsure how to complete. How did you handle it?",
-    "filters": { "doc_types": ["projects", "skills", "profile"] },
+    "question": "Walk me through a situation where you were responsible for a task you did not receive training on and were unsure how to complete. What actions did you take, and what was the outcome?",
+    "filters": {
+      "doc_types": [
+        "projects",
+        "skills",
+        "profile"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions"
+    "source_url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "indeed_career_goal_steps",
     "category": "behavioral-interview",
-    "question": "Share an example of a career goal you had. What steps did you take to achieve it?",
-    "filters": { "doc_types": ["profile", "skills", "faq"] },
+    "question": "Provide an example of a professional work goal you had. What steps did you take to achieve it?",
+    "filters": {
+      "doc_types": [
+        "profile",
+        "skills",
+        "faq"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions"
+    "source_url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "indeed_difficult_decision",
     "category": "behavioral-interview",
-    "question": "Give an example of a time when you had to make a difficult decision. How did you handle it?",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Give an example of a time when you had to make a difficult decision. What actions did you take, and what was the outcome?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions"
+    "source_url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "indeed_problem_solving_process",
     "category": "behavioral-interview",
     "question": "Describe your process for solving problems. What steps do you take to resolve important issues at work?",
-    "filters": { "doc_types": ["skills", "projects", "faq"] },
+    "filters": {
+      "doc_types": [
+        "skills",
+        "projects",
+        "faq"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions"
+    "source_url": "https://www.indeed.com/career-advice/interviewing/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "coursera_organized_priorities",
     "category": "behavioral-interview",
-    "question": "How do you stay organized and determine priorities when demands compete?",
-    "filters": { "doc_types": ["skills", "faq", "projects"] },
+    "question": "What is your approach to stay organized and determine priorities when demands compete?",
+    "filters": {
+      "doc_types": [
+        "skills",
+        "faq",
+        "projects"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions"
+    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "coursera_miscommunication_error",
     "category": "behavioral-interview",
     "question": "Tell us about a time when a miscommunication created an error at work. What happened, and what did you contribute to the solution?",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions"
+    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "coursera_communicate_unpleasant_news",
     "category": "behavioral-interview",
-    "question": "Describe a time when you effectively communicated unpleasant news or a difficult idea.",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Walk me through a situation where you effectively communicated unpleasant news or a difficult idea?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions"
+    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "coursera_feedback_response",
     "category": "behavioral-interview",
-    "question": "How do you respond to constructive feedback? Give a concrete example.",
-    "filters": { "doc_types": ["faq", "skills", "profile"] },
+    "question": "What is your approach to respond to critical feedback? Give a concrete example?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "skills",
+        "profile"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions"
+    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "coursera_quick_decision",
     "category": "behavioral-interview",
     "question": "Tell us about a time when you had to make a decision quickly. What happened?",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions"
+    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "coursera_difficult_decision_year",
     "category": "behavioral-interview",
     "question": "What was a difficult decision you had to make recently, and what made it difficult?",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions"
+    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "coursera_identify_problem_solution",
     "category": "behavioral-interview",
-    "question": "Tell us about a time when you identified a problem and came up with the solution.",
-    "filters": { "doc_types": ["projects", "skills", "faq"] },
+    "question": "Tell us about a time when you identified a problem and came up with the solution?",
+    "filters": {
+      "doc_types": [
+        "projects",
+        "skills",
+        "faq"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions"
+    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "coursera_beyond_expectations",
     "category": "behavioral-interview",
     "question": "How did you go beyond expectations in a previous role?",
-    "filters": { "doc_types": ["projects", "skills", "profile"] },
+    "filters": {
+      "doc_types": [
+        "projects",
+        "skills",
+        "profile"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions"
+    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "coursera_better_way_task",
     "category": "behavioral-interview",
-    "question": "Did you ever find a better way to complete a task? What did you do?",
-    "filters": { "doc_types": ["projects", "skills", "faq"] },
+    "question": "Did you ever find a better way to complete a task? What steps did you take?",
+    "filters": {
+      "doc_types": [
+        "projects",
+        "skills",
+        "faq"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions"
+    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "coursera_under_pressure",
     "category": "behavioral-interview",
-    "question": "Tell me about a time when you felt under pressure. How did you cope with that situation?",
-    "filters": { "doc_types": ["faq", "projects", "profile"] },
+    "question": "Share a concrete example of when you felt under pressure. How did you cope with that situation?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "profile"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions"
+    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "coursera_responsibilities_shift",
     "category": "behavioral-interview",
     "question": "Has one of your roles ever shifted significantly? How did you handle the change in responsibilities?",
-    "filters": { "doc_types": ["profile", "projects", "faq"] },
+    "filters": {
+      "doc_types": [
+        "profile",
+        "projects",
+        "faq"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions"
+    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "coursera_disagree_manager",
     "category": "behavioral-interview",
-    "question": "Tell me about a time when you disagreed with a manager's decision. How did you communicate with your supervisor?",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Share a concrete example of when you disagreed with a manager's decision. How did you communicate with your supervisor?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions"
+    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "coursera_remote_schedule",
     "category": "behavioral-interview",
-    "question": "How do you develop and maintain your schedule while working remotely?",
-    "filters": { "doc_types": ["skills", "profile", "faq"] },
+    "question": "What is your approach to develop and maintain your schedule while working remotely?",
+    "filters": {
+      "doc_types": [
+        "skills",
+        "profile",
+        "faq"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions"
+    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "coursera_remote_comm_tools",
     "category": "behavioral-interview",
-    "question": "What communication tools do you rely on to stay in touch with team members across time zones?",
-    "filters": { "doc_types": ["skills", "faq", "projects"] },
+    "question": "What communication tools do you rely on to stay in touch with team members across multiple time zones?",
+    "filters": {
+      "doc_types": [
+        "skills",
+        "faq",
+        "projects"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions"
+    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "coursera_unknown_task_seek_info",
     "category": "behavioral-interview",
     "question": "What is a time when you did not know how to do something? How did you seek the right information to complete your task?",
-    "filters": { "doc_types": ["projects", "skills", "profile"] },
+    "filters": {
+      "doc_types": [
+        "projects",
+        "skills",
+        "profile"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions"
+    "source_url": "https://www.coursera.org/articles/behavioral-interview-questions",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "simplilearn_handled_challenge",
     "category": "behavioral-interview",
-    "question": "Describe how you handled a challenge in the workplace.",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Describe how you handled a challenge in the workplace?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.simplilearn.com/behavioral-interview-questions-article"
+    "source_url": "https://www.simplilearn.com/behavioral-interview-questions-article",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "simplilearn_error_handling",
     "category": "behavioral-interview",
-    "question": "Have you ever made an error? How did you handle it?",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "Have you ever made an error? What actions did you take, and what was the outcome?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.simplilearn.com/behavioral-interview-questions-article"
+    "source_url": "https://www.simplilearn.com/behavioral-interview-questions-article",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "simplilearn_unpopular_decision",
     "category": "behavioral-interview",
     "question": "Have you ever made a decision that was not popular?",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.simplilearn.com/behavioral-interview-questions-article"
+    "source_url": "https://www.simplilearn.com/behavioral-interview-questions-article",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "simplilearn_disagree_work",
     "category": "behavioral-interview",
-    "question": "What do you do if you disagree with someone at work?",
-    "filters": { "doc_types": ["faq", "projects", "skills"] },
+    "question": "What is your approach to typically respond when you disagree with someone at work?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "skills"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.simplilearn.com/behavioral-interview-questions-article"
+    "source_url": "https://www.simplilearn.com/behavioral-interview-questions-article",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   },
   {
     "id": "simplilearn_failure_workplace",
     "category": "behavioral-interview",
-    "question": "How have you dealt with a failure at the workplace?",
-    "filters": { "doc_types": ["faq", "projects", "profile"] },
+    "question": "How did you handle a failure at the workplace?",
+    "filters": {
+      "doc_types": [
+        "faq",
+        "projects",
+        "profile"
+      ]
+    },
     "tone": "chat-friendly, concise STAR",
     "top_k": 5,
-    "source_url": "https://www.simplilearn.com/behavioral-interview-questions-article"
+    "source_url": "https://www.simplilearn.com/behavioral-interview-questions-article",
+    "source_note": "Paraphrased and internally authored from public behavioral interview themes."
   }
 ]

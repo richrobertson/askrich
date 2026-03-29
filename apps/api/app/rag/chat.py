@@ -98,7 +98,10 @@ class ChatService:
 
     def _strip_chat_preamble(self, answer_text: str) -> str:
         text = answer_text.strip()
-        preamble_re = re.compile(r"^(certainly|sure|absolutely|of course|definitely|great question)[,!\.\s:]+", re.IGNORECASE)
+        preamble_re = re.compile(
+            r"^(certainly|sure|absolutely|of course|definitely|great question)[,!\.\s:\-–—]+",
+            re.IGNORECASE,
+        )
         while True:
             updated = preamble_re.sub("", text, count=1).strip()
             if updated == text:
@@ -142,7 +145,10 @@ class ChatService:
 
     def _extract_star_sections(self, answer_text: str) -> dict[str, str]:
         cleaned = re.sub(r"\*+", "", answer_text)
-        marker_pattern = re.compile(r"(?i)\b(Situation|Task|Action|Result|Reflection|S/T|A|R)\s*:")
+        marker_pattern = re.compile(
+            r"^[ \t]*(Situation|Task|Action|Result|Reflection|S/T|A|R)\s*:",
+            re.IGNORECASE | re.MULTILINE,
+        )
         matches = list(marker_pattern.finditer(cleaned))
         if not matches:
             return {}
@@ -169,6 +175,7 @@ class ChatService:
         sections = self._extract_star_sections(cleaned)
         sentences = self._split_sentences(cleaned)
 
+        combined_st = sections.get("s/t", "")
         situation = sections.get("situation", "")
         task = sections.get("task", "")
         action = sections.get("action", sections.get("a", ""))
@@ -189,7 +196,7 @@ class ChatService:
             if not result and len(sentences) > 2:
                 result = sentences[2]
 
-        st_combined = " ".join(part for part in [situation, task] if part).strip()
+        st_combined = " ".join(part for part in [combined_st, situation, task] if part).strip()
         if not st_combined:
             st_combined = "I handled a high-impact engineering challenge with clear alignment and execution discipline."
         if not action:

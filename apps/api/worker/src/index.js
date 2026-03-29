@@ -640,7 +640,8 @@ function wantsDetailedBehavioralAnswer(questionLower) {
 
 function formatStarAnswer({ situation, task, action, result, reflection, includeReflection, chatMode }) {
   if (chatMode) {
-    const lines = [`S/T: ${situation} ${task}`, `A: ${action}`, `R: ${result}`];
+    const stLine = `${String(situation || "").trim()} ${String(task || "").trim()}`.replace(/\s+/g, " ").trim();
+    const lines = [`S/T: ${stLine}`, `A: ${action}`, `R: ${result}`];
     if (includeReflection && reflection) {
       lines.push(`Why it worked: ${reflection}`);
     }

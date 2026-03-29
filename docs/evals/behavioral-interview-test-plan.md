@@ -24,7 +24,7 @@ Public websites used:
 
 Notes:
 - Each question in the bank includes a `source_url` field for traceability.
-- Wording is preserved or lightly normalized for chat usability.
+- Questions are paraphrased and internally authored from public interview themes.
 - Questions are software-engineer relevant in competency scope: ownership, communication, conflict, execution, decision-making, leadership, adaptability.
 
 ## Test assets

@@ -284,8 +284,10 @@ describe('Canned Response Quality Tests', () => {
       };
       const profileLines = lines.filter((line) => {
         const hosts = extractHosts(line);
-        const hasGitHubHost = hosts.includes('github.com') || hosts.includes('www.github.com');
-        const hasLinkedInHost = hosts.includes('linkedin.com') || hosts.includes('www.linkedin.com');
+        const hasGitHubHost = hosts.some((host) => host === 'github.com' || host === 'www.github.com');
+        const hasLinkedInHost = hosts.some(
+          (host) => host === 'linkedin.com' || host === 'www.linkedin.com'
+        );
         return hasGitHubHost || (hasLinkedInHost && !line.includes('primary contact'));
       });
       expect(profileLines.length).toBeLessThanOrEqual(1);

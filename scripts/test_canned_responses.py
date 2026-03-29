@@ -39,11 +39,10 @@ See: docs/testing/CANNED_RESPONSES.md for complete testing approach.
 
 
 import sys
-import json
 from pathlib import Path
 
 # Add the worker API to path so we can test it
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 WORKER_DIR = REPO_ROOT / "apps" / "api" / "worker"
 API_DIR = REPO_ROOT / "apps" / "api"
 

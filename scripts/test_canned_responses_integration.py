@@ -46,14 +46,10 @@ WORKFLOW:
 See: docs/testing/CANNED_RESPONSES.md for complete testing guide.
 """
 
-import sys
 import json
 import argparse
-from pathlib import Path
 from urllib.request import Request, urlopen
 from urllib.error import URLError
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 class CannedResponseValidator:

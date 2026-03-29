@@ -4,7 +4,7 @@ This directory contains test suites to validate the quality of canned question/a
 
 ## Overview
 
-The worker contains hardcoded responses for certain question types. See [apps/api/worker/src/index.js](../../../apps/api/worker/src/index.js) for implementation.
+The worker contains hardcoded responses for certain question types. See [apps/api/worker/src/index.js](../../apps/api/worker/src/index.js) for implementation.
 
 Response types tested:
 - **Oracle CNS outcomes** - Returns specific measurable results (see `isOracleCnsOutcomesQuestion()`)
@@ -39,7 +39,7 @@ python3 scripts/test_canned_responses.py
 - Answer lengths stay reasonable (<600-1000 chars)
 
 **Test cases:** 11 test cases across 7 question categories.
-See: `TestData.TEST_CASES` in [scripts/test_canned_responses.py](../../../scripts/test_canned_responses.py).
+See: `TestData.TEST_CASES` in [scripts/test_canned_responses.py](../../scripts/test_canned_responses.py).
 
 **Output:**
 ```
@@ -88,7 +88,7 @@ All 6 integration tests passed! ✓
 ```
 
 **Related code:**
-- Worker intent detection: [apps/api/worker/src/index.js](../../../apps/api/worker/src/index.js)
+- Worker intent detection: [apps/api/worker/src/index.js](../../apps/api/worker/src/index.js)
 - Profile response builder: `buildProfileResponse()` in worker
 - Answer builder: `buildAnswer()` in worker
 
@@ -118,7 +118,7 @@ describe('Canned Response Quality Tests', () => {
 })
 ```
 
-See: [apps/api/worker/src/index.test.js](../../../apps/api/worker/src/index.test.js)
+See: [apps/api/worker/src/index.test.js](../../apps/api/worker/src/index.test.js)
 
 ## Test Data
 

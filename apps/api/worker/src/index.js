@@ -739,7 +739,7 @@ function buildAnswer(question, rankedDocs) {
     "sharepoint",
     "tfs",
   ];
-  const cloudPlatformSignals = ["cloud", "platform", "control plane", "control-plane", "kubernetes", "oci"];
+  const cloudPlatformSignals = ["cloud", "platform", "control plane", "control-plane", "oci"];
 
   // CRITICAL: Classify intent based on USER'S QUESTION, not retrieved document text.
   // This prevents misrouting. Example: if a doc happens to mention "LinkedIn" in passing,

@@ -7,7 +7,7 @@
 - Establish high-quality recruiter-facing corpus content.
 - Define consistent document schemas/frontmatter.
 - Implement the ingestion workflow and runnable helper scripts.
-- Provide measurable acceptance criteria before runtime API build.
+- Define measurable acceptance criteria before runtime API build.
 
 ## Deliverables
 
@@ -20,7 +20,7 @@
 - Ingestion scaffold and runnable helper scripts.
 - Documentation for architecture, deployment intent, and milestones.
 
-## Exact folders/files intended
+## Planned folders and files
 
 - `content/**` documents with YAML frontmatter
 - `docs/content-guide.md`
@@ -73,9 +73,9 @@ Current scaffold responsibilities:
 - Ingestion design and script plan are documented and actionable.
 - Milestone 2 can begin without restructuring repository foundations.
 
-## Implementation Status
+## Implementation summary
 
-### ✅ Completed
+### Completed deliverables
 
 - **Content corpus:** All base materials in place (profile, projects, skills, FAQs)
 - **Schema documentation:** `docs/schemas-content.md` with frontmatter spec

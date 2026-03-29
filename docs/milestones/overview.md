@@ -23,7 +23,7 @@ Last updated: 2026-03-28
 - Production chat API
 - Full frontend integration
 
-## Milestone 2 — Retrieval + chat API
+## Milestone 2 — Retrieval and chat API
 
 [Details](milestone-02.md)
 
@@ -60,7 +60,7 @@ Last updated: 2026-03-28
 **Non-goals**
 - Advanced workflow graphs
 
-## Milestone 4 — Evals + polish
+## Milestone 4 — Evals and quality polish
 
 [Details](milestone-04.md)
 

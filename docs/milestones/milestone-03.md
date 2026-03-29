@@ -41,7 +41,7 @@ Integrate Ask Rich into the personal website with a recruiter-friendly chat expe
 - Suggested prompts improve first-use experience.
 - Citation rendering is clear enough for recruiter trust.
 
-## Initial implementation progress
+## Implementation summary
 
 - ✅ Recruiter-focused static web chat shell added in `apps/web/`.
 - ✅ Prompt starters and API base configuration UI added.

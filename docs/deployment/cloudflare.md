@@ -11,16 +11,19 @@ Benefits for this project:
 
 ## Target deployment model
 
-### Frontend: Next.js on Workers
+### Frontend: static assets on Workers
 
-- Host recruiter-facing site as a Next.js application deployed to Cloudflare Workers, not a traditional Node.js server.
-- Assume Cloudflare Workers edge runtime constraints (Edge APIs only; avoid direct Node.js-specific APIs, native modules, or full Node process assumptions).
+- Host recruiter-facing site from `apps/web` as Worker assets.
+- Keep frontend runtime simple (HTML/CSS/JS assets), with API calls to `/api/chat`.
 - Keep UI latency low and deployment pipeline straightforward.
 
 ### Backend: Worker API
 
 - Expose chat endpoint from Worker API (`/api/chat`).
-- API handles retrieval, prompt assembly, provider-agnostic model calls, and response formatting.
+- Current worker supports:
+  - `CHAT_BACKEND_MODE=upstream`: proxy to a FastAPI-compatible upstream service
+  - `CHAT_BACKEND_MODE=local`: serve from a built-in corpus
+- CORS/origin allowlists are controlled by `ALLOWED_ORIGINS`.
 
 ## Data service mapping
 
@@ -31,7 +34,7 @@ Benefits for this project:
 ## Monorepo shape (intended)
 
 ```text
-apps/web   -> Next.js recruiter interface
+apps/web   -> static recruiter interface + embeddable widget
 apps/api   -> Worker API (chat/retrieval/prompt assembly)
 content    -> source corpus used for ingestion
 docs       -> architecture and process documentation
@@ -50,15 +53,15 @@ Use environment-scoped credentials and indexes/databases per environment.
 
 ## Likely deployment workflow
 
-1. Merge to main branch.
-2. CI validates docs/tests/lint and packaging.
-3. Deploy API and web artifacts to Cloudflare.
-4. Run post-deploy smoke checks.
-5. Execute retrieval/eval sanity tests against current corpus.
+1. Deploy from GitHub Actions workflow `Deploy Cloudflare` (manual dispatch or push to `main` for worker/web paths).
+2. Workflow verifies required Cloudflare secrets and deploys API Worker and web assets using wrangler configs.
+3. Run post-deploy smoke checks.
+4. Execute retrieval/eval sanity tests against current corpus.
 
 ## Local development notes
 
 - Local vector persistence may use Chroma (`data/chroma`) for fast iteration.
+- The local FastAPI `/ingest` route is environment-gated (`ENABLE_INGEST_ENDPOINT`).
 - Local runs should still follow provider-agnostic adapter interfaces.
 - Keep `.env` values environment-specific; never commit secrets.
 

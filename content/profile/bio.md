@@ -4,7 +4,7 @@ title: Rich Robertson Bio
 type: profile
 summary: Senior software engineer focused on backend systems, cloud platforms, modernization programs, and engineering leadership.
 tags: [profile, bio, backend, distributed-systems, cloud, leadership]
-updated: 2026-03-29
+updated: "2026-03-29"
 ---
 
 ## Bio
@@ -29,6 +29,7 @@ He is strongest in roles that require both architecture judgment and day-to-day 
 
 - LinkedIn: https://www.linkedin.com/in/royrobertson (Seattle, WA)
 - GitHub: https://github.com/richrobertson
+- Facebook: https://www.facebook.com/rich.r.robertson/
 - Technical writing includes distributed-systems reliability topics such as backpressure and graceful degradation.
 
 ## Education and certifications

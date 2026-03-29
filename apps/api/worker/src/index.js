@@ -90,6 +90,42 @@ export default {
 
 const CORPUS = [
   {
+    id: "profile-education-degrees",
+    title: "Education and Degrees",
+    source_url: "https://www.linkedin.com/in/royrobertson",
+    text: "Rich holds two bachelor's degrees from Purdue University (2007): a Bachelor of Science in Management (Krannert School of Management) and a Bachelor of Science in Computer & Information Technology (College of Technology). This education history reflects both business and technical foundations.",
+  },
+  {
+    id: "profile-academic-history",
+    title: "Academic History",
+    source_url: "https://www.myrobertson.com",
+    text: "Academic history highlights Purdue University coursework and degree completion in both management and computer/information technology disciplines, completed in 2007.",
+  },
+  {
+    id: "profile-public-links",
+    title: "Public Profiles",
+    source_url: "https://www.linkedin.com/in/royrobertson",
+    text: "Public profile links: GitHub https://github.com/richrobertson, LinkedIn https://www.linkedin.com/in/royrobertson, and Facebook https://www.facebook.com/rich.r.robertson/. These can be shared when recruiters ask for social profiles, portfolio links, or professional profile URLs.",
+  },
+  {
+    id: "profile-technologies-current",
+    title: "Current Technology Stack",
+    source_url: "https://github.com/richrobertson",
+    text: "Recent technologies include Java, C#, JavaScript, Scala, Python, PowerShell, Bash, Kubernetes, Terraform, Istio, Prometheus, REST APIs, SQL and NoSQL systems, Azure, and Oracle Cloud Infrastructure (OCI).",
+  },
+  {
+    id: "profile-technologies-historical",
+    title: "Historical Technologies",
+    source_url: "https://www.myrobertson.com",
+    text: "Past technology experience includes VB.NET, SharePoint Services, .NET Compact Framework, ASP.NET, WPF, Windows Forms, InfoPath, Microsoft Access, Team Foundation Server (TFS), Hyper-V, System Center Virtual Machine Manager, Apigee, Cosmos Scope scripts, and FitNesse.",
+  },
+  {
+    id: "profile-technologies-enterprise",
+    title: "Enterprise Platform Technology History",
+    source_url: "https://www.linkedin.com/in/royrobertson",
+    text: "Across Oracle, Starbucks, Slalom, and Avanade engagements, Rich used Java platform modernization, Kubernetes traffic management, dependency injection patterns, CQRS microservices, OData APIs, Microsoft SQL Server, and cloud services on OCI and Azure.",
+  },
+  {
     id: "project-oracle-cns",
     title: "Oracle Customer Notification Service Migration",
     source_url: "https://www.myrobertson.com/case-studies/oracle-cns-oci-migration/",
@@ -127,6 +163,12 @@ const CORPUS = [
   },
 ];
 
+const PROFILE_LINKS = {
+  github: "https://github.com/richrobertson",
+  linkedin: "https://www.linkedin.com/in/royrobertson",
+  facebook: "https://www.facebook.com/rich.r.robertson/",
+};
+
 function getBackendMode(env) {
   return String(env.CHAT_BACKEND_MODE || "local").trim().toLowerCase();
 }
@@ -145,6 +187,32 @@ async function handleLocalChat(request) {
     return json({ success: false, error: "Question must be at least 3 characters" }, 400);
   }
 
+  if (isProfileLinksQuery(question)) {
+    return json(
+      {
+        success: true,
+        data: {
+          answer: [
+            "Here are Rich's public profile links:",
+            `- GitHub: ${PROFILE_LINKS.github}`,
+            `- LinkedIn: ${PROFILE_LINKS.linkedin}`,
+            `- Facebook: ${PROFILE_LINKS.facebook}`,
+          ].join("\n"),
+          citations: [
+            {
+              id: "profile-public-links",
+              title: "Public Profiles",
+              source_url: PROFILE_LINKS.linkedin,
+              chunk_index: 0,
+            },
+          ],
+          retrieved_chunks: 1,
+        },
+      },
+      200,
+    );
+  }
+
   const ranked = rankCorpus(question).slice(0, topK);
   if (!ranked.length) {
     return json(
@@ -152,7 +220,7 @@ async function handleLocalChat(request) {
         success: true,
         data: {
           answer:
-            "I do not have enough evidence in the deployed corpus to answer confidently yet. Try asking about Oracle migration, Java modernization, control planes, or Starbucks platform work.",
+            "I do not have enough evidence in the deployed corpus to answer confidently yet. Try asking about profile links (GitHub/LinkedIn/Facebook), education and degrees, technologies used, Oracle migration, Java modernization, control planes, or Starbucks platform work.",
           citations: [],
           retrieved_chunks: 0,
         },
@@ -213,8 +281,67 @@ function tokenize(text) {
   return new Set(matches || []);
 }
 
+function isProfileLinksQuery(question) {
+  const q = String(question || "").toLowerCase();
+  const signals = [
+    "github",
+    "linkedin",
+    "facebook",
+    "social",
+    "profile",
+    "profiles",
+    "link",
+    "links",
+    "url",
+    "urls",
+  ];
+
+  return signals.some((signal) => q.includes(signal));
+}
+
 function buildAnswer(rankedDocs) {
-  const summary = `Based on the strongest matching evidence, Rich's profile is strongest in distributed systems, cloud platform modernization, and control-plane backend delivery.`;
+  const allText = rankedDocs.map((doc) => `${doc.title} ${doc.text}`).join(" ").toLowerCase();
+  const profileSignals = [
+    "github",
+    "linkedin",
+    "facebook",
+    "profile",
+    "profiles",
+    "social",
+    "links",
+    "url",
+    "urls",
+  ];
+  const educationSignals = ["education", "degree", "degrees", "academic", "purdue", "bachelor"];
+  const technologySignals = [
+    "technology",
+    "technologies",
+    "tech stack",
+    "stack",
+    "java",
+    "c#",
+    "csharp",
+    "python",
+    "scala",
+    "kubernetes",
+    "terraform",
+    "asp.net",
+    "wpf",
+    "sharepoint",
+    "tfs",
+  ];
+  const isProfileQuery = profileSignals.some((signal) => allText.includes(signal));
+  const isEducationQuery = educationSignals.some((signal) => allText.includes(signal));
+  const isTechnologyQuery = technologySignals.some((signal) => allText.includes(signal));
+
+  let summary = "Based on the strongest matching evidence, Rich's profile is strongest in distributed systems, cloud platform modernization, and control-plane backend delivery.";
+  if (isProfileQuery) {
+    summary = "Based on the strongest matching evidence, Rich's public profiles are: GitHub https://github.com/richrobertson, LinkedIn https://www.linkedin.com/in/royrobertson, and Facebook https://www.facebook.com/rich.r.robertson/.";
+  } else if (isEducationQuery) {
+    summary = "Based on the strongest matching evidence, Rich completed two Purdue University bachelor's degrees in 2007, spanning both management and computer/information technology.";
+  } else if (isTechnologyQuery) {
+    summary = "Based on the strongest matching evidence, Rich has used a broad technology stack over time, including modern cloud/distributed platforms and earlier Microsoft enterprise technologies.";
+  }
   const bullets = rankedDocs.slice(0, 4).map((doc) => `- ${doc.text}`);
   return [summary, ...bullets].join("\n");
 }

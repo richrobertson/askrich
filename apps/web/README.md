@@ -1,6 +1,6 @@
 # apps/web
 
-Milestone 3/4 web implementation for the Ask Rich recruiter chat experience.
+Recruiter-facing web chat experience for Ask Rich.
 
 ## Current implementation
 
@@ -27,7 +27,7 @@ python -m http.server 3000
 ## Notes
 
 - API base URL is editable in the UI and persisted in local storage.
-- This static shell can be deployed as Worker assets while a future Next.js migration remains optional.
+- This app is deployed as static assets via Cloudflare Workers (`wrangler.toml`).
 
 ## Embedding on www.myrobertson.com
 
@@ -35,7 +35,7 @@ Include the widget script on any page:
 
 ```html
 <script
-	src="/apps/web/embed/askrich-widget.js"
+	src="https://www.myrobertson.com/embed/askrich-widget.js"
 	data-api-base="https://api.myrobertson.com"
 	data-title="Ask Rich"
 ></script>

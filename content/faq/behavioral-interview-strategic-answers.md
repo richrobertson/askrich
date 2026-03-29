@@ -5,7 +5,7 @@ type: faq
 summary: Index of grouped behavioral interview Q&A files with strategic, evidence-based answers tailored to Rich Robertson's background.
 audience: recruiter
 tags: [faq, behavioral-interview, recruiter, leadership, hiring]
-updated: 2026-03-29
+updated: "2026-03-29"
 ---
 
 ## Grouped Behavioral Q&A Files

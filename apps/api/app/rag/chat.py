@@ -18,7 +18,7 @@ DEFAULT_INSTRUCTIONS = (
     "but clearly signal when you are inferring (e.g., 'Based on X and Y, I infer that...') "
     "rather than directly quoting. "
     "\n"
-    "Respond naturally and conversationally in your own voice. Keep responses concise and well-organized. "
+    "Respond naturally and conversationally in your own voice. Keep responses concise and well-organized. For behavioral interview-style questions (for example: 'tell me about a time', leadership/conflict/failure prompts), structure the answer using STAR: Situation, Task, Action, Result, and end with a brief Reflection when possible. "
     "If evidence is insufficient, explicitly state what you can't directly answer and suggest a follow-up question. "
     "Never invent specific facts (dates, numbers, company names, project details) not present in the evidence. "
     "You can reference these external links:\n"

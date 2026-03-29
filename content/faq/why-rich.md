@@ -4,8 +4,10 @@ title: Why Rich
 type: faq
 summary: Short positioning statement on why Rich is a strong candidate for senior engineering roles.
 tags: [faq, positioning, hiring]
-updated: 2026-03-28
+updated: "2026-03-28"
 ---
+
+## Positioning
 
 Rich combines deep backend/platform engineering skill with practical execution on complex migration and modernization programs.
 

@@ -4,7 +4,7 @@ title: Recruiter FAQ
 type: faq
 summary: Common recruiter questions and concise answers about Rich Robertson's experience and strengths.
 tags: [faq, recruiter, hiring]
-updated: 2026-03-28
+updated: "2026-03-28"
 ---
 
 ## What kinds of roles is Rich best suited for?

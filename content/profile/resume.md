@@ -4,7 +4,7 @@ title: Rich Robertson Resume (Normalized)
 type: resume
 summary: Resume-style summary of experience, strengths, and representative project outcomes.
 tags: [profile, resume, experience]
-updated: 2026-03-29
+updated: "2026-03-29"
 ---
 
 ## Summary
@@ -43,6 +43,32 @@ Senior Software Engineer with 15+ years of experience across backend systems, di
 - MCPD: Enterprise Application Developer
 - MCTS: Team Foundation Server - Configuration and Development
 
+## Historical Resume Addendum (2010)
+
+The following items were merged from the 2010 resume archive to preserve earlier career context and capability signals.
+
+### Appendix A: Technical Skills Snapshot (2010)
+
+- Microsoft stack: C#, VB.NET, SharePoint Services, .NET Compact Framework, InfoPath (2003/2007), Access (2003/2007), Team Foundation Server (2005/2008/2010)
+- Infrastructure/tools: System Center Virtual Machine Manager, Hyper-V, PowerShell, Microsoft Project Professional
+- Engineering foundations: object-oriented analysis and design, object-oriented development, data modeling, database design and development, mobile development, FitNesse
+
+### Training (Historical)
+
+- Avanade Consulting Excellence
+- Microsoft ALM Summit
+- Essential SharePoint 2007 for Developers
+- Accenture Delivery Suite - Program Management Methods and Tools
+
+### Professional Activities and Contributions (Historical)
+
+- Avanade Technical Summit 2010 presenter
+- Author of a Visual Studio Team Server 2010 Test and Lab Management demonstration (ISS course)
+- Subject matter expert for ACM 3.0 process template for Visual Studio 2010
+- Contributor to Avanade Test Toolkit
+- Regular presenter of new and upcoming technologies to the Chicago Development Center
+- Recognized with multiple ATS Spot Awards and Heavy Lifting Awards
+
 ## Core Strengths
 
 - Backend and distributed systems architecture
@@ -51,6 +77,14 @@ Senior Software Engineer with 15+ years of experience across backend systems, di
 - Kubernetes operations and traffic management
 - Terraform-based infrastructure management
 - Legacy modernization with measurable risk reduction
+
+## Technical Skills Snapshot (Current)
+
+- Expert languages: Java, C#
+- Prior languages and scripting: JavaScript, Scala, Python, PowerShell, Bash
+- Platforms and runtime environments: Azure Cloud, Oracle Cloud Infrastructure (OCI), Linux, Kubernetes
+- Service and observability patterns: REST APIs, distributed systems design, Istio service mesh, Prometheus metrics
+- Data technologies: SQL and NoSQL database systems
 
 ## Work History
 

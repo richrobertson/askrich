@@ -1,3 +1,13 @@
+---
+id: profile-roy-robertson-resume-2010-archive
+title: Roy Robertson Resume 2010 (Archive)
+type: profile
+summary: Archived 2010 resume transcript retained for historical reference and normalization input.
+tags: [profile, resume, archive, historical]
+updated: "2026-03-28"
+---
+
+## Archived Resume Content (2010)
 
 
 **Roy R. Robertson III**

@@ -96,5 +96,59 @@
       "doc_types": ["projects", "skills"]
     },
     "tone": "focus on evidence and avoid generic wording"
+  },
+  {
+    "id": "behavioral_ambiguity_leadership",
+    "category": "behavioral-interview",
+    "question": "Tell me about a time Rich led effectively through ambiguity.",
+    "filters": {
+      "doc_types": ["faq", "projects", "skills"]
+    },
+    "tone": "use STAR-like structure and stay concise"
+  },
+  {
+    "id": "behavioral_conflict_resolution",
+    "category": "behavioral-interview",
+    "question": "How does Rich handle conflict with teammates or cross-functional partners?",
+    "filters": {
+      "doc_types": ["faq", "skills"]
+    },
+    "tone": "be recruiter-friendly and specific"
+  },
+  {
+    "id": "behavioral_failure_learning",
+    "category": "behavioral-interview",
+    "question": "Describe a setback Rich experienced and what he changed afterward.",
+    "filters": {
+      "doc_types": ["faq", "projects", "skills"]
+    },
+    "tone": "show accountability and learning"
+  },
+  {
+    "id": "behavioral_stakeholder_management",
+    "category": "behavioral-interview",
+    "question": "What is Rich's approach to stakeholder communication in high-risk migrations?",
+    "filters": {
+      "doc_types": ["faq", "projects"]
+    },
+    "tone": "highlight risk communication and decision clarity"
+  },
+  {
+    "id": "behavioral_ownership_end_to_end",
+    "category": "behavioral-interview",
+    "question": "Give an example that shows Rich's end-to-end ownership style.",
+    "filters": {
+      "doc_types": ["faq", "profile", "projects"]
+    },
+    "tone": "tie technical execution to outcomes"
+  },
+  {
+    "id": "behavioral_hire_signal",
+    "category": "behavioral-interview",
+    "question": "Why would Rich be a strong senior or staff backend hire from a behavioral standpoint?",
+    "filters": {
+      "doc_types": ["faq", "profile", "skills", "projects"]
+    },
+    "tone": "concise, evidence-grounded, and hiring-manager friendly"
   }
 ]

@@ -6,7 +6,7 @@ summary: Migration initiative to move CNS workloads to OCI with Kubernetes, Isti
 role: Senior Software Engineer
 technologies: [Kubernetes, Istio, Prometheus, Oracle GoldenGate, OCI]
 tags: [migration, cloud, distributed-systems, reliability]
-updated: 2026-03-28
+updated: "2026-03-28"
 ---
 
 ## Recruiter Summary

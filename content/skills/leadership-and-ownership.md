@@ -4,8 +4,10 @@ title: Leadership and Ownership
 type: skill
 summary: Operates with end-to-end ownership, balancing technical depth, delivery execution, and stakeholder alignment.
 tags: [leadership, ownership, delivery, collaboration]
-updated: 2026-03-28
+updated: "2026-03-28"
 ---
+
+## Overview
 
 Rich demonstrates leadership through technical ownership and pragmatic decision-making rather than title-driven authority.
 

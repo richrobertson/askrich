@@ -211,8 +211,9 @@ class OpenAICompatibleEmbeddingClient(EmbeddingClient):
     def embed_texts(self, texts: List[str]) -> List[List[float]]:
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {self._api_key}",
         }
+        if self._api_key:
+            headers["Authorization"] = f"Bearer {self._api_key}"
         payload = {"model": self._model, "input": texts}
         try:
             with httpx.Client(timeout=self._TIMEOUT) as client:
@@ -224,13 +225,28 @@ class OpenAICompatibleEmbeddingClient(EmbeddingClient):
                 response.raise_for_status()
                 data = response.json()
                 items = sorted(data["data"], key=lambda d: d["index"])
-                return [item["embedding"] for item in items]
-        except (httpx.HTTPError, KeyError, json.JSONDecodeError, IndexError) as exc:
-            logger.warning(
-                "Embedding API call failed (%s); returning zero vectors.",
-                type(exc).__name__,
-            )
-            return [[0.0] * self._dimension for _ in texts]
+                embeddings: List[List[float]] = []
+                for item in items:
+                    embedding = item["embedding"]
+                    if len(embedding) != self._dimension:
+                        raise ValueError(
+                            f"Embedding dimension mismatch: expected {self._dimension}, "
+                            f"got {len(embedding)} for index {item['index']}"
+                        )
+                    embeddings.append(embedding)
+                return embeddings
+        except (httpx.HTTPError, KeyError, json.JSONDecodeError, IndexError, ValueError) as exc:
+            if isinstance(exc, httpx.HTTPStatusError) and exc.response is not None:
+                body_snippet = exc.response.text[:500]
+                logger.error(
+                    "Embedding API call failed with HTTP %s: %s; response body snippet: %r",
+                    exc.response.status_code,
+                    exc,
+                    body_snippet,
+                )
+            else:
+                logger.error("Embedding API call failed (%s): %s", type(exc).__name__, exc)
+            raise RuntimeError("Embedding API call failed") from exc
 
     def get_embedding_dimension(self) -> int:
         return self._dimension

@@ -71,6 +71,11 @@ import {
   isContactQuery,
   isSensitiveContactQuery,
   isAllProfilesQuery,
+  buildSmallTalkResponse,
+  isGreetingQuery,
+  isHowAreYouQuery,
+  isThanksQuery,
+  isWhoAreYouQuery,
   rankCorpus,
   clipSentence,
   formatStarAnswer,
@@ -78,6 +83,24 @@ import {
 
 describe('Canned Response Quality Tests', () => {
   describe('Question Intent Detection', () => {
+    it('should detect greeting and small-talk queries', () => {
+      expect(isGreetingQuery('hello')).toBe(true);
+      expect(isGreetingQuery('good morning')).toBe(true);
+      expect(isGreetingQuery('tell me about oracle')).toBe(false);
+
+      expect(isHowAreYouQuery('how are you')).toBe(true);
+      expect(isHowAreYouQuery('how are you doing')).toBe(true);
+      expect(isHowAreYouQuery('how did you do the migration')).toBe(false);
+
+      expect(isThanksQuery('thanks')).toBe(true);
+      expect(isThanksQuery('thank you')).toBe(true);
+      expect(isThanksQuery('show me tech stack')).toBe(false);
+
+      expect(isWhoAreYouQuery('who are you')).toBe(true);
+      expect(isWhoAreYouQuery('what can you do')).toBe(true);
+      expect(isWhoAreYouQuery('what did you do at oracle')).toBe(false);
+    });
+
     it('should detect Oracle CNS outcomes questions', () => {
       expect(isOracleCnsOutcomesQuestion('what measurable outcomes from oracle cns')).toBe(true);
       expect(isOracleCnsOutcomesQuestion('what results did you achieve with oracle')).toBe(true);
@@ -246,6 +269,26 @@ describe('Canned Response Quality Tests', () => {
       expect(result).toContain('LinkedIn');
       expect(result).toContain('GitHub');
       expect(result).toContain('Facebook');
+    });
+  });
+
+  describe('Small Talk Responses', () => {
+    it('should return a friendly response for greetings', () => {
+      const response = buildSmallTalkResponse('Hello');
+
+      expect(response).toContain('Hi there');
+      expect(response).toContain('Great to chat');
+    });
+
+    it('should handle short greetings that are less than three characters', () => {
+      const response = buildSmallTalkResponse('hi');
+      expect(typeof response).toBe('string');
+      expect(response.length).toBeGreaterThan(0);
+    });
+
+    it('should return null for non-small-talk questions', () => {
+      const response = buildSmallTalkResponse('what technologies did you use at oracle');
+      expect(response).toBeNull();
     });
   });
 

@@ -35,14 +35,18 @@ export default {
       }
 
       const upstreamUrl = `${env.UPSTREAM_API_BASE.replace(/\/$/, "")}/api/chat`;
+      const upstreamHeaders = {
+        "content-type": "application/json",
+      };
+      if (env.UPSTREAM_AUTH_TOKEN) {
+        upstreamHeaders["authorization"] = `Bearer ${env.UPSTREAM_AUTH_TOKEN}`;
+      }
       let upstreamResponse;
 
       try {
         upstreamResponse = await fetch(upstreamUrl, {
           method: "POST",
-          headers: {
-            "content-type": "application/json",
-          },
+          headers: upstreamHeaders,
           body: await request.text(),
         });
       } catch (_error) {

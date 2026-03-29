@@ -1,6 +1,8 @@
 name = "askrich-web"
 compatibility_date = "2026-03-28"
 
+# Static assets worker — no [vars] or secrets allowed by Cloudflare.
+# Secrets and runtime variables belong on the API worker (apps/api/worker/wrangler.toml).
 [assets]
 directory = "."
 

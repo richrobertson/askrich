@@ -46,6 +46,10 @@ jobs:
           command: deploy --config apps/api/worker/wrangler.toml --env ${{ env.DEPLOY_ENV }}
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          secrets: |
+            UPSTREAM_AUTH_TOKEN
+        env:
+          UPSTREAM_AUTH_TOKEN: ${{ secrets.UPSTREAM_AUTH_TOKEN }}
 
   deploy-web-worker-assets:
     runs-on: ubuntu-latest

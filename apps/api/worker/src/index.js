@@ -144,6 +144,12 @@ const CORPUS = [
     text: "Academic history highlights Purdue University coursework and degree completion in both management and computer/information technology disciplines, completed in 2007.",
   },
   {
+    id: "profile-internship-sfi",
+    title: "Internship Experience",
+    source_url: "https://www.linkedin.com/in/royrobertson",
+    text: "Rich completed an internship with SFI through the Interns for Indiana program.",
+  },
+  {
     id: "profile-public-links",
     title: "Public Profiles",
     source_url: "https://www.linkedin.com/in/royrobertson",
@@ -678,6 +684,12 @@ function isShortFactualQuestion(questionLower) {
     "when",
     "which",
     "who",
+    "did",
+    "does",
+    "was",
+    "were",
+    "has",
+    "have",
   ];
 
   const firstToken = normalized.split(" ")[0];
@@ -807,6 +819,7 @@ function buildAnswer(question, rankedDocs) {
     "tfs",
   ];
   const cloudPlatformSignals = ["cloud", "platform", "control plane", "control-plane", "oci"];
+  const internshipSignals = ["internship", "intern", "interns for indiana", "sfi"];
 
   // CRITICAL: Classify intent based on USER'S QUESTION, not retrieved document text.
   // This prevents misrouting. Example: if a doc happens to mention "LinkedIn" in passing,
@@ -819,6 +832,7 @@ function buildAnswer(question, rankedDocs) {
   const isEducationQuery = includesAny(q, educationSignals);
   const isTechnologyQuery = includesAny(q, technologySignals);
   const isCloudPlatformQuery = includesAny(q, cloudPlatformSignals);
+  const isInternshipQuery = includesAny(q, internshipSignals);
   const isShortFactual = isShortFactualQuestion(q);
 
   let summary = "Rich's strongest evidence points to distributed systems, cloud modernization, and reliable backend platform delivery.";
@@ -844,6 +858,8 @@ function buildAnswer(question, rankedDocs) {
     summary = "Rich has used a broad technology stack across modern cloud/distributed platforms and earlier Microsoft enterprise technologies.";
   } else if (isCloudPlatformQuery) {
     summary = "Rich is highly relevant for cloud platform and control-plane roles, with OCI migration leadership, Kubernetes platform operations, and reusable multitenant control-plane architecture experience.";
+  } else if (isInternshipQuery) {
+    summary = "Yes. Rich completed an internship with SFI through the Interns for Indiana program.";
   }
 
   // Short factual prompts should return only the direct summary answer.

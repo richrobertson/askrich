@@ -138,6 +138,7 @@ describe('Canned Response Quality Tests', () => {
       expect(isShortFactualQuestion('where did you go to school')).toBe(true);
       expect(isShortFactualQuestion('what is your educational background')).toBe(true);
       expect(isShortFactualQuestion('what is your tech stack')).toBe(true);
+      expect(isShortFactualQuestion('did rich do an internship')).toBe(true);
       expect(isShortFactualQuestion('tell me about a time you had to convince stakeholders')).toBe(false);
       expect(isShortFactualQuestion('how did you lead the oracle migration')).toBe(false);
     });
@@ -458,6 +459,17 @@ describe('Canned Response Quality Tests', () => {
       expect(answer).toContain('Purdue University');
       expect(answer).not.toContain('\n- ');
       expect(answer.length).toBeLessThan(260);
+    });
+
+    it('should return a direct internship answer without unrelated bullets', () => {
+      const question = 'did rich do an internship?';
+      const ranked = rankCorpus(question);
+      const answer = buildAnswer(question, ranked);
+
+      expect(answer).toContain('Yes.');
+      expect(answer).toContain('SFI');
+      expect(answer).toContain('Interns for Indiana');
+      expect(answer).not.toContain('\n- ');
     });
 
     it('should deliver tech-stack answer for technology question', () => {

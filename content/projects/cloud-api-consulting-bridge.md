@@ -4,7 +4,7 @@ title: Cloud and API Consulting Bridge
 type: project
 summary: Technical leadership across Microsoft cloud/data pipeline work and Starbucks licensee rewards APIs during the bridge from enterprise consulting into product-platform engineering.
 role: Senior Consultant
-technologies: [Azure, Cosmos-Scope, REST-APIs, ASP.NET, Apigee, SQL-Server]
+technologies: [Azure, Cosmos Scope, REST APIs, ASP.NET, Apigee, Microsoft SQL Server]
 tags: [cloud, api, consulting, microsoft, starbucks]
 updated: "2026-03-30"
 ---

@@ -2448,6 +2448,10 @@ function withCors(response, request, env) {
 
   headers.set("access-control-allow-methods", "POST, GET, OPTIONS");
   headers.set("access-control-allow-headers", "content-type");
+  headers.set(
+    "access-control-expose-headers",
+    "x-question-event-id, x-answer-event-id, retry-after",
+  );
   headers.set("access-control-max-age", "86400");
 
   return new Response(response.body, {

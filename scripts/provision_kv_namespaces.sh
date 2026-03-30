@@ -32,7 +32,7 @@ parse_envs() {
 
 extract_id() {
   local output="$1"
-  printf '%s\n' "$output" | sed -nE 's/.*id\s*=\s*"([a-f0-9]{32})".*/\1/p' | head -n1
+  printf '%s\n' "$output" | sed -nE 's/.*id[[:space:]]*=[[:space:]]*"([a-f0-9]{32})".*/\1/p' | head -n1
 }
 
 while [[ $# -gt 0 ]]; do

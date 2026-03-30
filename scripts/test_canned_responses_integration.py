@@ -53,15 +53,33 @@ from urllib.error import URLError
 
 
 class CannedResponseValidator:
-    def __init__(self, base_url="http://localhost:8787"):
+    def __init__(self, base_url="http://localhost:8787", origin=None, user_agent=None):
         self.base_url = base_url.rstrip("/")
         self.endpoint = f"{self.base_url}/api/chat"
+        self.origin = origin.strip() if isinstance(origin, str) and origin.strip() else None
+        self.user_agent = user_agent or (
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/123.0.0.0 Safari/537.36"
+        )
+
+    def _build_headers(self, include_json=True):
+        headers = {
+            "Accept": "application/json",
+            "User-Agent": self.user_agent,
+        }
+        if include_json:
+            headers["Content-Type"] = "application/json"
+        if self.origin:
+            headers["Origin"] = self.origin
+            headers["Referer"] = f"{self.origin.rstrip('/')}/"
+        return headers
 
     def test_health(self):
         """Check if worker is reachable."""
         try:
             health_url = f"{self.base_url}/health"
-            req = Request(health_url, method="GET")
+            req = Request(health_url, headers=self._build_headers(include_json=False), method="GET")
             with urlopen(req, timeout=5) as response:  # nosec B310
                 data = json.loads(response.read().decode())
                 return data.get("status") == "ok"
@@ -75,7 +93,7 @@ class CannedResponseValidator:
         req = Request(
             self.endpoint,
             data=payload,
-            headers={"Content-Type": "application/json"},
+            headers=self._build_headers(include_json=True),
             method="POST",
         )
 
@@ -252,15 +270,27 @@ def main():
         description="Test canned response quality against a live worker instance"
     )
     parser.add_argument("--url", default="http://localhost:8787", help="Worker base URL")
+    parser.add_argument("--origin", default=None, help="Optional Origin header for prod edge routes")
+    parser.add_argument(
+        "--user-agent",
+        default=(
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/123.0.0.0 Safari/537.36"
+        ),
+        help="User-Agent header used for requests",
+    )
     args = parser.parse_args()
 
     print("=" * 60)
     print("Canned Response Quality Integration Test")
     print("=" * 60)
     print(f"Worker URL: {args.url}")
+    if args.origin:
+        print(f"Origin header: {args.origin}")
     print()
 
-    validator = CannedResponseValidator(args.url)
+    validator = CannedResponseValidator(args.url, origin=args.origin, user_agent=args.user_agent)
 
     # Health check
     print("Checking worker health...")

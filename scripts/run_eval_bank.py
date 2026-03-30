@@ -32,6 +32,8 @@ class EvalConfig:
     output_dir: Path
     top_k: int | None
     fail_fast: bool
+    origin: str | None
+    user_agent: str
 
 
 def parse_args() -> EvalConfig:
@@ -62,6 +64,20 @@ def parse_args() -> EvalConfig:
         action="store_true",
         help="Stop on first request failure",
     )
+    parser.add_argument(
+        "--origin",
+        default=None,
+        help="Optional Origin header for edge/CORS protected prod endpoints",
+    )
+    parser.add_argument(
+        "--user-agent",
+        default=(
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/123.0.0.0 Safari/537.36"
+        ),
+        help="User-Agent header used for requests",
+    )
 
     args = parser.parse_args()
     return EvalConfig(
@@ -70,6 +86,8 @@ def parse_args() -> EvalConfig:
         output_dir=Path(args.output_dir),
         top_k=args.top_k,
         fail_fast=bool(args.fail_fast),
+        origin=str(args.origin).strip() if args.origin else None,
+        user_agent=str(args.user_agent).strip(),
     )
 
 
@@ -113,12 +131,27 @@ def load_question_bank(path: Path) -> list[dict[str, Any]]:
     return validated
 
 
-def post_json(url: str, body: dict[str, Any], timeout_seconds: float = 30.0) -> tuple[int, dict[str, Any]]:
+def post_json(
+    url: str,
+    body: dict[str, Any],
+    timeout_seconds: float = 30.0,
+    origin: str | None = None,
+    user_agent: str | None = None,
+) -> tuple[int, dict[str, Any]]:
     payload = json.dumps(body).encode("utf-8")
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "User-Agent": user_agent or "askrich-eval-runner/1.0",
+    }
+    if origin:
+        headers["Origin"] = origin
+        headers["Referer"] = f"{origin.rstrip('/')}/"
+
     req = request.Request(
         url=url,
         data=payload,
-        headers={"Content-Type": "application/json"},
+        headers=headers,
         method="POST",
     )
 
@@ -225,7 +258,12 @@ def run_eval(config: EvalConfig, questions: list[dict[str, Any]]) -> dict[str, A
             body["top_k"] = normalized_top_k
 
         started = time.perf_counter()
-        status, payload = post_json(f"{config.api_base}/api/chat", body)
+        status, payload = post_json(
+            f"{config.api_base}/api/chat",
+            body,
+            origin=config.origin,
+            user_agent=config.user_agent,
+        )
         latency_ms = round((time.perf_counter() - started) * 1000)
 
         success = bool(payload.get("success")) and status == 200
@@ -267,6 +305,8 @@ def run_eval(config: EvalConfig, questions: list[dict[str, Any]]) -> dict[str, A
         "run_started_utc": run_started.isoformat(),
         "run_finished_utc": datetime.now(timezone.utc).isoformat(),
         "api_base": config.api_base,
+        "origin": config.origin,
+        "user_agent": config.user_agent,
         "question_bank": str(config.question_bank),
         "summary": {
             "total": len(results),
@@ -347,6 +387,8 @@ def main() -> int:
     print("Ask Rich Evaluation Runner")
     print("=" * 68)
     print(f"API base: {config.api_base}")
+    if config.origin:
+        print(f"Origin header: {config.origin}")
     print(f"Question bank: {config.question_bank}")
     print(f"Questions: {len(questions)}")
 

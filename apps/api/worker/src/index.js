@@ -438,6 +438,73 @@ async function handleOpenAiChat(request, env) {
 
   const apiBase = String(env.OPENAI_API_BASE || "https://api.openai.com/v1").replace(/\/$/, "");
   const model = String(env.OPENAI_MODEL || "gpt-5.4").trim() || "gpt-5.4";
+  const topK = clampTopK(payload?.top_k);
+
+  const requestedProfiles = getRequestedProfiles(question);
+  const asksForAllProfiles = isAllProfilesQuery(question);
+  const isContactRequest = isContactQuery(question);
+  const isSensitiveContactRequest = isSensitiveContactQuery(question);
+  const isGenericProfileRequest = isProfileLinksQuery(question);
+  if (
+    requestedProfiles.length ||
+    asksForAllProfiles ||
+    isContactRequest ||
+    isSensitiveContactRequest ||
+    isGenericProfileRequest
+  ) {
+    const answer = buildProfileResponse({
+      requestedProfiles,
+      asksForAllProfiles,
+      isContactRequest,
+      isSensitiveContactRequest,
+      isGenericProfileRequest,
+    });
+    return json(
+      {
+        success: true,
+        data: {
+          answer,
+          citations: [
+            {
+              id: "profile-public-links",
+              title: "Public Profiles",
+              source_url: PROFILE_LINKS.linkedin,
+              chunk_index: 0,
+            },
+          ],
+          retrieved_chunks: 1,
+        },
+      },
+      200,
+    );
+  }
+
+  const ranked = rankCorpus(question).slice(0, topK);
+  if (!ranked.length) {
+    return json(
+      {
+        success: true,
+        data: {
+          answer:
+            "I do not have enough evidence in the deployed corpus to answer confidently yet. Try asking about profile links (GitHub/LinkedIn/Facebook), education and degrees, technologies used, Oracle migration, Java modernization, control planes, or Starbucks platform work.",
+          citations: [],
+          retrieved_chunks: 0,
+        },
+      },
+      200,
+    );
+  }
+
+  const citations = ranked.map((doc, index) => ({
+    id: doc.id,
+    title: doc.title,
+    source_url: doc.source_url,
+    chunk_index: index,
+  }));
+
+  const evidence = ranked
+    .map((doc, index) => `[${index + 1}] ${doc.title}\nSource: ${doc.source_url}\nEvidence: ${doc.text}`)
+    .join("\n\n");
 
   let openAiResponse;
   try {
@@ -453,11 +520,11 @@ async function handleOpenAiChat(request, env) {
           {
             role: "system",
             content:
-              "You are Ask Rich, the recruiter-facing assistant for Rich Robertson. Never identify yourself as ChatGPT or another generic assistant. Keep answers concise, professional, and focused on Rich's background, outcomes, and projects.",
+              "You are Ask Rich, the recruiter-facing assistant for Rich Robertson. Never identify yourself as ChatGPT or another generic assistant. Rich always refers to Rich Robertson in this chat, never the Python library named rich. Use only the provided evidence; if evidence is insufficient, state that clearly. Keep responses concise, recruiter-friendly, and factual. Do not invent projects, employers, dates, or personal details.",
           },
           {
             role: "user",
-            content: question,
+            content: `Question:\n${question}\n\nEvidence (use only this evidence):\n${evidence}`,
           },
         ],
       }),
@@ -478,13 +545,15 @@ async function handleOpenAiChat(request, env) {
     return json({ success: false, error: "OpenAI returned no answer text" }, 502);
   }
 
+  const normalizedAnswer = clipSentence(answer.replace(/\s+/g, " "), 1800);
+
   return json(
     {
       success: true,
       data: {
-        answer,
-        citations: [],
-        retrieved_chunks: 0,
+        answer: normalizedAnswer,
+        citations,
+        retrieved_chunks: ranked.length,
       },
     },
     200,

@@ -309,7 +309,11 @@ export default {
         return withCors(json({ success: false, error: 'Invalid JSON payload' }, 400), request, env);
       }
 
-      if (!feedbackPayload || typeof feedbackPayload !== 'object' || Array.isArray(feedbackPayload)) {
+      if (
+        !feedbackPayload ||
+        typeof feedbackPayload !== 'object' ||
+        Array.isArray(feedbackPayload)
+      ) {
         return withCors(json({ success: false, error: 'Invalid JSON payload' }, 400), request, env);
       }
 

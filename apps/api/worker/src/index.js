@@ -502,6 +502,65 @@ async function handleOpenAiChat(request, env) {
     chunk_index: index,
   }));
 
+  const q = question.toLowerCase();
+  const educationSignals = [
+    "education",
+    "degree",
+    "degrees",
+    "academic",
+    "purdue",
+    "bachelor",
+    "school",
+    "college",
+    "university",
+    "alma mater",
+    "studied",
+  ];
+  const technologySignals = [
+    "technology",
+    "technologies",
+    "tech stack",
+    "stack",
+    "java",
+    "c#",
+    "csharp",
+    "python",
+    "scala",
+    "kubernetes",
+    "terraform",
+    "asp.net",
+    "wpf",
+    "sharepoint",
+    "tfs",
+  ];
+  const internshipSignals = ["internship", "intern", "interns for indiana", "sfi"];
+
+  const isEducationQuery = includesAny(q, educationSignals);
+  const isTechnologyQuery = includesAny(q, technologySignals);
+  const isInternshipQuery = includesAny(q, internshipSignals);
+
+  // Keep high-precision factual paths deterministic for stability and brevity.
+  if (
+    isOracleCnsOutcomesQuestion(q) ||
+    isEducationQuery ||
+    isTechnologyQuery ||
+    isTechnologyPassionQuestion(q) ||
+    isInternshipQuery ||
+    isShortFactualQuestion(q)
+  ) {
+    return json(
+      {
+        success: true,
+        data: {
+          answer: buildAnswer(question, ranked),
+          citations,
+          retrieved_chunks: ranked.length,
+        },
+      },
+      200,
+    );
+  }
+
   const evidence = ranked
     .map((doc, index) => `[${index + 1}] ${doc.title}\nSource: ${doc.source_url}\nEvidence: ${doc.text}`)
     .join("\n\n");

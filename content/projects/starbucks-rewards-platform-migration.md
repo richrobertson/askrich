@@ -4,7 +4,7 @@ title: Starbucks Rewards Platform Migration
 type: project
 summary: Architecture and backend leadership supporting migration of My Starbucks Rewards in the U.S. and Canada from Oracle-backed systems to the Starbucks Unified Commerce Platform.
 role: Engineer Lead
-technologies: [Java, REST-APIs, loyalty-platforms, backend-services, migration]
+technologies: [Java, REST APIs, loyalty platforms, backend services, migration]
 tags: [starbucks, migration, backend, architecture, loyalty]
 updated: "2026-03-30"
 ---

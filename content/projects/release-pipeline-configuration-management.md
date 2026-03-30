@@ -4,7 +4,7 @@ title: Release Pipeline and Configuration Management
 type: project
 summary: Built continuous delivery pipelines, deployment automation, environment dashboards, and ALM enablement practices across enterprise delivery teams.
 role: Project Manager, Delivery Tools Lead, and Configuration Manager
-technologies: [Team Foundation Server, PowerShell, SQL Server, SQL Server Integration Services, release-management, cloud-virtual-machines]
+technologies: [Team Foundation Server, PowerShell, SQL Server, SQL Server Integration Services, release management, cloud virtual machines]
 tags: [delivery, release-engineering, devops, configuration-management, platform]
 updated: "2026-03-30"
 ---

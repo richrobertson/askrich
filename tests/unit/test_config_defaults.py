@@ -1,5 +1,4 @@
 import importlib
-import os
 import sys
 from pathlib import Path
 
@@ -33,15 +32,45 @@ def test_dev_defaults_do_not_force_openai(monkeypatch):
     assert s.llm_model == ""
 
 
-def test_prod_defaults_to_openai_gpt_5_4(monkeypatch):
+def test_prod_without_api_key_does_not_force_openai(monkeypatch):
     monkeypatch.setenv("APP_ENV", "prod")
+    monkeypatch.delenv("LLM_PROVIDER", raising=False)
+    monkeypatch.delenv("LLM_API_BASE", raising=False)
+    monkeypatch.delenv("LLM_API_KEY", raising=False)
+    monkeypatch.delenv("LLM_MODEL", raising=False)
+
+    config = _reload_config()
+    s = config.Settings()
+    assert s.app_env == "prod"
+    assert s.llm_provider == ""
+    assert s.llm_api_base == ""
+    assert s.llm_model == ""
+
+
+def test_prod_defaults_to_openai_gpt_5_4_when_api_key_present(monkeypatch):
+    monkeypatch.setenv("APP_ENV", "prod")
+    monkeypatch.setenv("LLM_API_KEY", "sk-test")
     monkeypatch.delenv("LLM_PROVIDER", raising=False)
     monkeypatch.delenv("LLM_API_BASE", raising=False)
     monkeypatch.delenv("LLM_MODEL", raising=False)
 
     config = _reload_config()
     s = config.Settings()
-    assert s.app_env == "prod"
+    assert s.llm_provider == "openai"
+    assert s.llm_api_base == "https://api.openai.com/v1"
+    assert s.llm_model == "gpt-5.4"
+    assert s.llm_api_key == "sk-test"
+
+
+def test_prod_empty_llm_vars_are_treated_as_unset(monkeypatch):
+    monkeypatch.setenv("APP_ENV", "prod")
+    monkeypatch.setenv("LLM_API_KEY", "sk-test")
+    monkeypatch.setenv("LLM_PROVIDER", "")
+    monkeypatch.setenv("LLM_API_BASE", " ")
+    monkeypatch.setenv("LLM_MODEL", "")
+
+    config = _reload_config()
+    s = config.Settings()
     assert s.llm_provider == "openai"
     assert s.llm_api_base == "https://api.openai.com/v1"
     assert s.llm_model == "gpt-5.4"

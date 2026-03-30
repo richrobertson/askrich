@@ -88,7 +88,7 @@
    - Estimate cost per question for each backend
    - Implement intelligent backend selection
    - Cache responses for repeated questions
-   - Monitor T o cost trends
+   - Monitor cost trends
 
 2. **Concurrent Traffic**
    - Test and load-profile for 10-100x current volume

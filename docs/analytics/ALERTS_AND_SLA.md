@@ -290,22 +290,17 @@ python3 scripts/run_local_alerts.py --verbose
 
 ### Production Monitoring
 
-Alerts run via GitHub Actions workflow (M7 implementation):
+Automated alert orchestration is planned but not yet implemented in this repository. Current M7 workflow uses manual/periodic reporting via CLI scripts and dashboard review.
 
-```bash
-.github/workflows/alerts-and-monitoring.yml
-```
-
-Scheduled to run:
-- Every 5 minutes (critical metrics)
-- Every hour (quality metrics)
-- Every day at 09:00 UTC (weekly summary)
+Suggested cadence until automation is added:
+- Every day: run `python3 scripts/analytics_daily_report.py --range 7`
+- Every week: export triage data via `python3 scripts/analytics_export_feedback.py --weeks 1 --output /tmp/triage.csv`
 
 ## Configuration
 
-Alert thresholds can be tuned in:
-- `docs/analytics/alerts-config.yaml` — Alert rule definitions
-- Environment variables — Overrides for specific metrics in deployment
+Alert thresholds can be tuned via:
+- Environment variables — overrides for deployment-specific behavior
+- Documentation updates in this file for policy-level thresholds
 
 ## See Also
 

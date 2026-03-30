@@ -52,9 +52,11 @@ python3 scripts/analytics_daily_report.py
 ## Scripts
 
 - `scripts/analytics_export_feedback.py` — Export feedback for triage
-- `scripts/analytics_experiment_report.py` — Analyze A/B test results
 - `scripts/analytics_daily_report.py` — Daily metrics summary
-- `scripts/run_triage_analysis.py` — Full weekly triage (planned)
+
+Planned scripts (not yet implemented in this repository):
+- `scripts/analytics_experiment_report.py` — Analyze A/B test results
+- `scripts/run_triage_analysis.py` — Full weekly triage
 
 ## Database Schema (M7)
 
@@ -68,9 +70,9 @@ See [SCHEMA.md](SCHEMA.md) for detailed format.
 
 ## Integration Points
 
-- **Worker**: Records events in M6, tags with variant assignment (M7)
-- **Ingestion**: Reads corpus versioning metadata ([CORPUS_VERSIONING.md](CORPUS_VERSIONING.md))
-- **Operations**: Alert rules trigger incidents ([ALERTS_AND_SLA.md](ALERTS_AND_SLA.md))
+- **Worker**: Records events in M6
+- **Ingestion**: Corpus versioning metadata integration is planned ([CORPUS_VERSIONING.md](CORPUS_VERSIONING.md))
+- **Operations**: SLA policy and manual runbook process are defined ([ALERTS_AND_SLA.md](ALERTS_AND_SLA.md))
 
 ## Future Enhancements (M8+)
 

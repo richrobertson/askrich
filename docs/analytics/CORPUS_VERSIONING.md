@@ -190,7 +190,7 @@ changelog:
 Original content...
 ```
 
-The ingestion pipeline will:
+Planned ingestion behavior (not yet implemented) will:
 - Flag deprecated documents
 - Note successor reference in metadata
 - Still index content (for historical searches)
@@ -213,9 +213,9 @@ git log --oneline content/profile/technologies.md
 git log --since="2026-03-01" --until="2026-03-31" --oneline -- content/
 ```
 
-### Versioning Query Script
+### Versioning Query Script (planned)
 
-(To be implemented in M7 analytics)
+(Not yet implemented in current repository)
 
 ```python
 from analytics import CorpusVersionClient
@@ -274,7 +274,7 @@ Retained in archive for reference and historical context."
 
 ## Integration with Ingestion
 
-The ingestion pipeline (`scripts/ingest_all.py`) will:
+Planned ingestion pipeline enhancements (`scripts/ingest_all.py`) include:
 
 1. Read frontmatter metadata including versioning info
 2. Parse `deprecated` flag and `successor_ref`

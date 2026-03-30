@@ -34,7 +34,7 @@ Each experiment defines:
 
 ### Variant Routing
 
-**In Worker** (`apps/api/worker/src/index.js`):
+**Worker Pseudocode (planned, not implemented yet in `apps/api/worker/src/index.js`)**:
 
 ```javascript
 // Deterministic variant assignment based on client hash
@@ -91,9 +91,9 @@ All events record variant assignment:
 
 ## Experiment Configuration
 
-### Configuration File Format
+### Configuration File Format (planned)
 
-`docs/analytics/experiments.yaml`:
+Proposed file: `docs/analytics/experiments.yaml` (not yet present in this repository):
 
 ```yaml
 experiments:
@@ -155,9 +155,9 @@ experiments:
 
 ## Running an Experiment
 
-### Step 1: Define Experiment
+### Step 1: Define Experiment (planned workflow)
 
-Create entry in `docs/analytics/experiments.yaml` and commit:
+Create entry in `docs/analytics/experiments.yaml` and commit once the experiment config file is added:
 
 ```bash
 git add docs/analytics/experiments.yaml
@@ -209,14 +209,7 @@ git commit -m "feat(worker): add variant logic for exp_retrieval_top_k
 
 ### Step 4: Analyze Results
 
-After experiment runs for 1-2 weeks (or hits min sample size):
-
-```bash
-python3 scripts/analytics_experiment_report.py \
-  --experiment exp_retrieval_top_k \
-  --start_date 2026-04-01 \
-  --end_date 2026-04-15
-```
+After experiment runs for 1-2 weeks (or hits min sample size), use the planned experiment reporting script once implemented, or analyze exported events manually in the meantime.
 
 Generates:
 
@@ -330,6 +323,8 @@ For larger variants (e.g., prompt rewrites affecting many questions):
 
 ## Tools and Scripts
 
+Planned helper scripts (not yet implemented in this repository):
+
 ```bash
 # List active experiments
 python3 scripts/analytics_list_experiments.py
@@ -339,6 +334,13 @@ python3 scripts/analytics_experiment_report.py --experiment <id>
 
 # Summarize concurrent experiment interactions
 python3 scripts/analytics_interaction_analysis.py
+```
+
+Current available tooling for M7 is:
+
+```bash
+python3 scripts/analytics_daily_report.py --range 7
+python3 scripts/analytics_export_feedback.py --weeks 1 --output /tmp/triage.csv
 ```
 
 ## Experiments Launch Calendar

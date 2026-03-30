@@ -1,7 +1,7 @@
 # Placeholder make targets for implementation milestones.
 # These commands intentionally echo intent until wiring is added.
 
-.PHONY: install lint test docs ingest dev
+.PHONY: install lint test docs ingest dev provision-kv
 
 install:
 	@echo "[placeholder] install dependencies (to be wired in milestone implementation)"
@@ -31,3 +31,6 @@ ingest:
 
 dev:
 	@echo "[placeholder] run local app/api development workflow (to be wired in milestone implementation)"
+
+provision-kv:
+	./scripts/provision_kv_namespaces.sh

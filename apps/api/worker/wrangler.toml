@@ -21,9 +21,8 @@ name = "askrich-dev-api"
 
 [[env.dev.kv_namespaces]]
 binding = "EVENTS_KV"
-# Replace with real KV namespace ID from: wrangler kv namespace create "askrich-events-dev"
-id = "00000000000000000000000000000000"
-preview_id = "00000000000000000000000000000000"
+id = "e9d7573ab9554708924ab145164665a5"
+preview_id = "562e06854d574356991234377e968883"
 
 [env.dev.vars]
 UPSTREAM_API_BASE = "http://127.0.0.1:8000"
@@ -39,9 +38,8 @@ name = "askrich-staging-api"
 
 [[env.staging.kv_namespaces]]
 binding = "EVENTS_KV"
-# Replace with real KV namespace ID from: wrangler kv namespace create "askrich-events-staging"
-id = "00000000000000000000000000000000"
-preview_id = "00000000000000000000000000000000"
+id = "6c2bd0e5ee5f4a1399cffe47c26fc79f"
+preview_id = "b5ecfdc28e2049dc8dded2a83437cdcb"
 
 [env.staging.vars]
 UPSTREAM_API_BASE = "https://staging-api.myrobertson.com"
@@ -57,9 +55,8 @@ name = "askrich-prod-api"
 
 [[env.prod.kv_namespaces]]
 binding = "EVENTS_KV"
-# Replace with real KV namespace ID from: wrangler kv namespace create "askrich-events-prod"
-id = "00000000000000000000000000000000"
-preview_id = "00000000000000000000000000000000"
+id = "b1d00665a03240e0803f74abba6b45f4"
+preview_id = "93c5dd4461e3449fb9bb14956ce7c918"
 
 [env.prod.vars]
 UPSTREAM_API_BASE = "https://api.myrobertson.com"

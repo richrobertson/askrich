@@ -342,6 +342,21 @@ describe('Canned Response Quality Tests', () => {
       const response = buildSmallTalkResponse('what technologies did you use at oracle');
       expect(response).toBeNull();
     });
+
+    it('should return cloud engineer and dad jokes when asked for something funny', () => {
+      const response = buildSmallTalkResponse('tell a joke');
+
+      expect(response).toContain('senior cloud engineer joke');
+      expect(response).toContain('Dad joke');
+      expect(response).toContain('Want another one?');
+    });
+
+    it('should detect funny prompt variants for joke mode', () => {
+      const response = buildSmallTalkResponse('say something funny');
+
+      expect(typeof response).toBe('string');
+      expect(response).toContain('dad joke');
+    });
   });
 
   describe('Sensitive Contact Handling', () => {

@@ -291,6 +291,16 @@ const WHO_ARE_YOU_SIGNALS = new Set([
   "what do you do",
 ]);
 
+const JOKE_SIGNALS = [
+  "joke",
+  "something funny",
+  "make me laugh",
+  "dad joke",
+  "cloud engineer joke",
+  "senior cloud engineer joke",
+  "funny",
+];
+
 const AFFIRMATION_SIGNALS = new Set([
   "yes",
   "y",
@@ -843,6 +853,15 @@ function buildSmallTalkResponse(question) {
     return null;
   }
 
+  if (isJokeQuery(q)) {
+    return [
+      "Absolutely. Here is one senior cloud engineer joke and one dad joke:",
+      "- Senior cloud engineer joke: I said our Kubernetes cluster was self-healing, so finance asked if it could also fix the AWS bill.",
+      "- Dad joke: I would tell you a UDP joke, but you might not get it.",
+      "Want another one?",
+    ].join("\n");
+  }
+
   if (isGreetingQuery(q)) {
     return "Hi there 👋 Great to chat with you. Ask me about Rich's experience, projects, technology stack, or public profile links any time.";
   }
@@ -1014,6 +1033,10 @@ function isThanksQuery(questionLower) {
 
 function isWhoAreYouQuery(questionLower) {
   return WHO_ARE_YOU_SIGNALS.has(questionLower);
+}
+
+function isJokeQuery(questionLower) {
+  return JOKE_SIGNALS.some((signal) => questionLower.includes(signal));
 }
 
 function isProfileLinksQuery(question) {

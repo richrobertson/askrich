@@ -227,8 +227,9 @@ Information changed as of [date]; corpus reflects [old information].
 
 ## Tools and Scripts
 
-See [scripts/analytics_export_feedback.py](../../scripts/analytics_export_feedback.py)
-and [scripts/run_triage_analysis.py](../../scripts/run_triage_analysis.py).
+See [scripts/analytics_export_feedback.py](../../scripts/analytics_export_feedback.py).
+
+A separate `scripts/run_triage_analysis.py` helper is planned but is not yet included in this repository.
 
 ## Feedback Loop Metrics
 

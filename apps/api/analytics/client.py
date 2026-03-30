@@ -18,10 +18,9 @@ Usage:
 """
 
 import json
-import itertools
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
-from dataclasses import dataclass, field, asdict
+from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
 from collections import defaultdict
 import statistics
 
@@ -60,7 +59,7 @@ class FeedbackEvent(Event):
     questionEventId: str
     answerEventId: str
     sentiment: str
-    optionalNote: str
+    optionalNote: Optional[str] = ""
 
 
 @dataclass
@@ -138,7 +137,7 @@ class CloudflareKVClient:
         
         try:
             req = urllib.request.Request(url, headers=headers)
-            with urllib.request.urlopen(req, timeout=30) as resp:
+            with urllib.request.urlopen(req, timeout=30) as resp:  # nosec B310
                 return resp.read().decode()
         except urllib.error.HTTPError:
             return None
@@ -156,7 +155,7 @@ class CloudflareKVClient:
         
         try:
             req = urllib.request.Request(url, headers=headers)
-            with urllib.request.urlopen(req, timeout=30) as resp:
+            with urllib.request.urlopen(req, timeout=30) as resp:  # nosec B310
                 data = json_lib.loads(resp.read().decode())
                 return [item["name"] for item in data.get("result", [])]
         except Exception:
@@ -191,17 +190,45 @@ class AnalyticsClient:
         try:
             data = json.loads(line)
             event_type = data.get("type")
-            
+
             if event_type == "question":
                 return QuestionEvent(**data)
             elif event_type == "answer":
                 return AnswerEvent(**data)
             elif event_type == "feedback":
+                data.setdefault("optionalNote", "")
                 return FeedbackEvent(**data)
         except Exception:
             pass
         return None
-    
+
+    def _events_by_date(
+        self,
+        start_date: str,
+        end_date: str,
+    ) -> Dict[str, List[Event]]:
+        """Read and parse each date once, returning parsed events grouped by date."""
+        events_by_date: Dict[str, List[Event]] = {}
+        current = datetime.fromisoformat(start_date)
+        end = datetime.fromisoformat(end_date)
+
+        while current <= end:
+            date_str = current.strftime("%Y-%m-%d")
+            ndjson = self._get_events_ndjson(date_str)
+            parsed: List[Event] = []
+
+            for line in ndjson.strip().split("\n"):
+                if not line:
+                    continue
+                event = self.parse_event(line)
+                if event:
+                    parsed.append(event)
+
+            events_by_date[date_str] = parsed
+            current += timedelta(days=1)
+
+        return events_by_date
+
     def _get_events_ndjson(self, date: str) -> str:
         """
         Fetch NDJSON events for a given date.
@@ -241,22 +268,11 @@ class AnalyticsClient:
             List of Event objects
         """
         events = []
-        current = datetime.fromisoformat(start_date)
-        end = datetime.fromisoformat(end_date)
-        
-        while current <= end:
-            date_str = current.strftime("%Y-%m-%d")
-            ndjson = self._get_events_ndjson(date_str)
-            
-            for line in ndjson.strip().split("\n"):
-                if not line:
-                    continue
-                event = self.parse_event(line)
-                if event and (event_type is None or event.type == event_type):
+        for date_events in self._events_by_date(start_date, end_date).values():
+            for event in date_events:
+                if event_type is None or event.type == event_type:
                     events.append(event)
-            
-            current += timedelta(days=1)
-        
+
         return events
     
     def daily_summary(self, date: str) -> DailySummary:
@@ -341,28 +357,39 @@ class AnalyticsClient:
                 "trend": [daily summary, ...]
             }
         """
-        feedbacks = self.get_events(start_date, end_date, event_type="feedback")
-        
         sentiments = defaultdict(int)
+        daily_counts: Dict[str, Dict[str, int]] = defaultdict(
+            lambda: {"helpful": 0, "unhelpful": 0, "neutral": 0, "total": 0}
+        )
+
+        for date_str, events in self._events_by_date(start_date, end_date).items():
+            for event in events:
+                if not isinstance(event, FeedbackEvent):
+                    continue
+                sentiments[event.sentiment] += 1
+                if event.sentiment in ("helpful", "unhelpful", "neutral"):
+                    daily_counts[date_str][event.sentiment] += 1
+                daily_counts[date_str]["total"] += 1
+
         trend = []
         current = datetime.fromisoformat(start_date)
         end = datetime.fromisoformat(end_date)
-        
         while current <= end:
             date_str = current.strftime("%Y-%m-%d")
-            daily = self.daily_summary(date_str)
-            trend.append({
-                "date": date_str,
-                "helpful": daily.helpful_count,
-                "unhelpful": daily.unhelpful_count,
-                "neutral": daily.neutral_count,
-                "total": daily.feedback_count,
-            })
+            counts = daily_counts.get(
+                date_str,
+                {"helpful": 0, "unhelpful": 0, "neutral": 0, "total": 0},
+            )
+            trend.append(
+                {
+                    "date": date_str,
+                    "helpful": counts["helpful"],
+                    "unhelpful": counts["unhelpful"],
+                    "neutral": counts["neutral"],
+                    "total": counts["total"],
+                }
+            )
             current += timedelta(days=1)
-        
-        for fb in feedbacks:
-            if isinstance(fb, FeedbackEvent):
-                sentiments[fb.sentiment] += 1
         
         total = sum(sentiments.values())
         helpful = sentiments.get("helpful", 0)
@@ -398,12 +425,18 @@ class AnalyticsClient:
         if not end_date:
             end_date = datetime.now().strftime("%Y-%m-%d")
         
-        feedback_events = self.get_events(start_date, end_date, event_type="feedback")
-        question_events = self.get_events(start_date, end_date, event_type="question")
-        answer_events = self.get_events(start_date, end_date, event_type="answer")
-        
-        questions_by_id = {q.eventId: q for q in question_events if isinstance(q, QuestionEvent)}
-        answers_by_id = {a.eventId: a for a in answer_events if isinstance(a, AnswerEvent)}
+        feedback_events: List[FeedbackEvent] = []
+        questions_by_id: Dict[str, QuestionEvent] = {}
+        answers_by_id: Dict[str, AnswerEvent] = {}
+
+        for events in self._events_by_date(start_date, end_date).values():
+            for event in events:
+                if isinstance(event, FeedbackEvent):
+                    feedback_events.append(event)
+                elif isinstance(event, QuestionEvent):
+                    questions_by_id[event.eventId] = event
+                elif isinstance(event, AnswerEvent):
+                    answers_by_id[event.eventId] = event
         
         triage_items = []
         

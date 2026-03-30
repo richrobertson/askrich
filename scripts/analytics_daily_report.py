@@ -16,7 +16,7 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "apps" / "api"))
 
-from analytics import AnalyticsClient
+from analytics import AnalyticsClient  # noqa: E402
 
 
 def format_percentage(value, precision=1):
@@ -80,13 +80,18 @@ def main():
         volume = client.question_volume(start_date, end_date)
         sentiment = client.feedback_sentiment_ratio(start_date, end_date)
         
+        if volume["total"] > 0:
+            feedback_rate_display = f"{(sentiment['total_feedback'] / volume['total'] * 100):.1f}%"
+        else:
+            feedback_rate_display = "0.0%"
+
         print(f"\n📊 VOLUME ({args.range} days)")
         print(f"  Total questions:     {volume['total']}")
         print(f"  Daily average:       {volume['daily_average']}")
         print(f"  Total feedback:      {sentiment['total_feedback']}")
-        print(f"  Feedback rate:       {(sentiment['total_feedback'] / volume['total'] * 100):.1f}%")
-        
-        print(f"\n😊 QUALITY")
+        print(f"  Feedback rate:       {feedback_rate_display}")
+
+        print("\n😊 QUALITY")
         print(f"  Satisfaction ratio:  {format_percentage(sentiment['satisfaction_ratio'])}")
         print(f"  Helpful:             {sentiment['helpful']}")
         print(f"  Unhelpful:           {sentiment['unhelpful']}")
@@ -94,7 +99,7 @@ def main():
         
         # Backend performance
         perf = client.backend_performance(start_date, end_date)
-        print(f"\n⚡ BACKEND PERFORMANCE")
+        print("\n⚡ BACKEND PERFORMANCE")
         for backend, metrics in sorted(perf.items()):
             print(f"  {backend}:")
             print(f"    Count:             {metrics['count']}")
@@ -104,12 +109,12 @@ def main():
         
         # Domains
         domains = client.question_domains_and_patterns(start_date, end_date, limit=5)
-        print(f"\n🎯 QUESTION DOMAINS")
+        print("\n🎯 QUESTION DOMAINS")
         for domain, count in sorted(domains['domains'].items(), key=lambda x: x[1], reverse=True):
             print(f"  {domain:20s} {count:4d}")
         
         if domains['recurring_patterns']:
-            print(f"\n🔄 TOP RECURRING PATTERNS")
+            print("\n🔄 TOP RECURRING PATTERNS")
             for item in domains['recurring_patterns'][:3]:
                 print(f"  {item['count']:2d}x {item['pattern'][:40]}")
     
@@ -119,14 +124,14 @@ def main():
         print(f"Ask Rich Daily Report — {report_date}\n")
         print("=" * 70)
         
-        print(f"\n📊 VOLUME")
+        print("\n📊 VOLUME")
         print(f"  Questions:           {summary.question_count}")
         print(f"  Answers:             {summary.answer_count}")
         print(f"  Feedback:            {summary.feedback_count}")
         print(f"  Unique questions:    {summary.unique_questions}")
         print(f"  Unique clients:      {summary.unique_clients}")
-        
-        print(f"\n😊 QUALITY")
+
+        print("\n😊 QUALITY")
         helpful_ratio = (
             summary.helpful_count / (summary.helpful_count + summary.unhelpful_count)
             if (summary.helpful_count + summary.unhelpful_count) > 0
@@ -137,7 +142,7 @@ def main():
         print(f"  Unhelpful:           {summary.unhelpful_count}")
         print(f"  Neutral:             {summary.neutral_count}")
         
-        print(f"\n⚡ PERFORMANCE")
+        print("\n⚡ PERFORMANCE")
         print(f"  Avg latency:         {format_duration(summary.avg_duration_ms)}")
         print(f"  p95 latency:         {format_duration(summary.p95_duration_ms)}")
         print(f"  p99 latency:         {format_duration(summary.p99_duration_ms)}")
@@ -146,7 +151,7 @@ def main():
         if summary.question_count == 0:
             print(f"\n⚠️  No activity on {report_date}")
     
-    print(f"\n" + "=" * 70)
+    print("\n" + "=" * 70)
     return 0
 
 

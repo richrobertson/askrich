@@ -166,15 +166,17 @@ wrangler kv:key list --namespace-id "<namespace-id>" --prefix "events:" --json
 
 ## Aggregation and Storage
 
-### Lightweight Aggregation
+### Lightweight Aggregation (planned design)
 
-Instead of storing precomputed aggregate tables, Milestone 7 uses on-demand queries:
+Milestone 7 currently uses on-demand queries from NDJSON event data. The caching and scheduled aggregation strategy below is planned future work and is not yet implemented in `apps/api/analytics/`.
 
 1. **Real-time queries**: Python scripts read NDJSON directly from KV
-2. **Caching**: Important aggregates cached in KV with 24-hour TTL (e.g., `analytics:daily_2026-03-30`)
-3. **Batch operations**: Nightly scheduled aggregations for slow queries
+2. **Caching (planned)**: Important aggregates cached in KV with 24-hour TTL (e.g., `analytics:daily_2026-03-30`)
+3. **Batch operations (planned)**: Nightly scheduled aggregations for slow queries
 
-### Aggregate Cache Keys
+### Aggregate Cache Keys (planned)
+
+These key patterns are reserved for planned cache support and are not active in the current implementation:
 
 ```
 analytics:daily:<date>
@@ -228,4 +230,4 @@ See:
 - [Corpus Versioning](CORPUS_VERSIONING.md)
 - [A/B Testing Framework](AB_TESTING.md)
 - [Operational Alerts](ALERTS_AND_SLA.md)
-- [Dashboard Usage Guide](DASHBOARDS.md)
+- Dashboard usage guide (planned)

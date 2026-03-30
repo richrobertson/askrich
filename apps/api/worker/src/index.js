@@ -672,7 +672,15 @@ function formatRecruiterAnswer(answer, maxChars) {
     }
   }
 
-  return clipSentence(text, maxChars);
+  return clipPreserveFormatting(text, maxChars);
+}
+
+function clipPreserveFormatting(text, maxLen) {
+  const value = String(text || "").trim();
+  if (value.length <= maxLen) {
+    return value;
+  }
+  return `${value.slice(0, Math.max(0, maxLen - 3)).trimEnd()}...`;
 }
 
 function clampTopK(value) {

@@ -26,30 +26,52 @@ import {
   recordAnswerEvent,
 } from './index.js';
 
-// Mock KV Store for testing
+/**
+ * Mock KV Store for testing
+ *
+ * Simulates Cloudflare Workers KV namespace without external dependencies.
+ * Used to validate event recording, rate limiting, and data persistence.
+ *
+ * Features:
+ *   - In-memory Map-based storage (fast, isolated tests)
+ *   - Tracks all put/get/delete operations for assertion validation
+ *   - Supports NDJSON parsing for event record retrieval
+ *   - Includes TTL options (stored but not enforced in mock)
+ *
+ * Usage example:
+ *   const kv = new MockKVStore();
+ *   await kv.put('key', 'value', { expirationTtl: 3600 });
+ *   const records = kv.getRecords('2026-03-29');
+ */
 class MockKVStore {
   constructor() {
+    // In-memory storage for key-value pairs
     this.storage = new Map();
+    // Track all operations for test assertion (e.g., verify correct keys were accessed)
     this.putCalls = [];
     this.getCalls = [];
     this.deleteCalls = [];
   }
 
+  // Retrieve value by key. Returns null if not found. Tracks access for assertions.
   async get(key) {
     this.getCalls.push(key);
     return this.storage.get(key) || null;
   }
 
+  // Store key-value pair with optional TTL metadata. Tracks all writes for assertions.
   async put(key, value, options = {}) {
     this.putCalls.push({ key, value, options });
     this.storage.set(key, value);
   }
 
+  // Remove key from storage. Tracks deletions for assertions.
   async delete(key) {
     this.deleteCalls.push(key);
     this.storage.delete(key);
   }
 
+  // Reset mock: clear all storage and operation history for new test
   clear() {
     this.storage.clear();
     this.putCalls = [];
@@ -57,6 +79,7 @@ class MockKVStore {
     this.deleteCalls = [];
   }
 
+  // Parse NDJSON events for a given date. Each line is a separate JSON object.
   getRecords(dateKey) {
     const ndjson = this.storage.get(`events:${dateKey}`) || '';
     return ndjson
@@ -66,8 +89,24 @@ class MockKVStore {
   }
 }
 
-// Mock Request object
+/**
+ * Mock request builder
+ *
+ * Creates a minimal HTTP request object with headers matching Cloudflare Worker
+ * environment. Used to simulate different client scenarios (IP, origin, user-agent).
+ *
+ * Parameters:
+ *   - ip: Client IP address (defaults to 192.168.1.1)
+ *   - origin: HTTP origin header (defaults to http://localhost:3000)
+ *   - userAgent: User-Agent string (defaults to Mozilla/5.0)
+ *   - headers: Additional headers as key-value object
+ *   - method: HTTP method (defaults to GET)
+ *
+ * Example:
+ *   const req = createMockRequest({ ip: '203.0.113.1', origin: 'https://example.com' });
+ */
 function createMockRequest(options = {}) {
+  // Store headers in Map for case-insensitive lookup
   const headers = new Map([
     ['cf-connecting-ip', options.ip || '192.168.1.1'],
     ['origin', options.origin || 'http://localhost:3000'],
@@ -76,6 +115,7 @@ function createMockRequest(options = {}) {
   ]);
 
   return {
+    // Case-insensitive header getter (headers are lowercased)
     headers: {
       get: (name) => headers.get(name.toLowerCase()),
     },
@@ -83,13 +123,30 @@ function createMockRequest(options = {}) {
   };
 }
 
-// Mock environment
+/**
+ * Mock Cloudflare Worker environment
+ *
+ * Creates a test environment with M6 configuration flags and KV binding.
+ * Allows testing both enabled and disabled feature scenarios.
+ *
+ * Configuration:
+ *   - RATE_LIMIT_ENABLED: true|false (control rate limiting feature)
+ *   - RATE_LIMIT_QPS_HOUR: number (questions per hour limit, default 30)
+ *   - RATE_LIMIT_BURST_SECONDS: number (min seconds between requests, default 1)
+ *   - EVENT_LOGGING_ENABLED: true|false (control event recording feature)
+ *   - EVENTS_KV: MockKVStore instance (provides event persistence)
+ *
+ * Example:
+ *   const env = createMockEnv({ rateLimitEnabled: true, qpsHour: 50 });
+ */
 function createMockEnv(options = {}) {
   return {
+    // Feature flags: enable/disable M6 functionality for scenario testing
     RATE_LIMIT_ENABLED: options.rateLimitEnabled !== false ? 'true' : 'false',
     RATE_LIMIT_QPS_HOUR: options.qpsHour ?? '30',
     RATE_LIMIT_BURST_SECONDS: options.burstSeconds ?? '1',
     EVENT_LOGGING_ENABLED: options.eventLoggingEnabled !== false ? 'true' : 'false',
+    // Mock KV store for event recording (reuses or creates new MockKVStore)
     EVENTS_KV: options.kv || new MockKVStore(),
   };
 }

@@ -1,46 +1,87 @@
 /**
  * Acceptance Tests for Milestone 6: Complete User Workflows
  *
- * This test suite validates complete end-to-end user workflows:
- * - User asks question, gets answer, provides feedback
- * - Rate limiting protects against abuse
- * - Privacy controls are maintained
- * - Data is properly retained and can be analyzed
+ * OVERVIEW:
+ * This test suite validates end-to-end user workflows from the user's perspective.
+ * Unlike unit tests (isolated functions) and integration tests (API contracts),
+ * acceptance tests simulate real recruiter interactions with the Ask Rich system
+ * to verify the complete feature works as designed.
  *
- * These tests simulate real user interactions and verify the system
- * works as designed from the user's perspective.
+ * TEST PYRAMID STRUCTURE:
+ * ┌─────────────────────────────────────┐
+ * │   ACCEPTANCE TESTS (Current)        │  Real-world scenarios & workflows
+ * │   - User Q&A flows                  │  - Rate limiting protection
+ * │   - Feedback submission             │  - Privacy safeguards
+ * ├─────────────────────────────────────┤
+ * │   INTEGRATION TESTS                 │  API contracts & data flow
+ * │   - /api/feedback endpoint          │  - Event schema validation
+ * │   - Request/response handling       │  - Error scenarios
+ * ├─────────────────────────────────────┤
+ * │   UNIT TESTS                        │  Individual functions
+ * │   - generateEventId()               │  - getClientId()
+ * │   - checkRateLimit()                │  - recordQuestionEvent()
+ * └─────────────────────────────────────┘
  *
  * RUNNING TESTS:
  *   npm test -- milestone-6-acceptance.test.js
  *   npm test:watch -- milestone-6-acceptance.test.js
+ *   npm run test:coverage
  *
- * COVERAGE TARGET: 95%+
+ * COVERAGE:
+ *   Target: 95%+
+ *   Includes: All branches, edge cases, error handling
+ *
+ * TEST SCENARIOS:
+ *   1. Recruiter Q&A Flow: Question → Answer → Feedback
+ *   2. Rate Limiting: Normal users vs. abusive patterns
+ *   3. Privacy Protection: PII redaction, hashing, truncation
+ *   4. Data Retention: 90-day TTL, compliance
+ *   5. Operations: Weekly review, incident response
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-// ============================================================================
-// TEST SCENARIO: User asks a question
-// ============================================================================
-
+/**
+ * TEST SECTION: User Question & Answer Flow
+ *
+ * Verifies that questions and answers are captured correctly with all metadata,
+ * linked via stable event IDs, and suitable for later analysis/feedback.
+ *
+ * Key Events Validated:
+ *   - Question event: Topic, timestamp, client ID
+ *   - Answer event: Content, latency, backend mode
+ *   - Event linking: Both events share questionEventId or reference
+ */
 describe('Acceptance: User Question & Answer Flow', () => {
+  /**
+   * SCENARIO: Recruiter asks technical question
+   *
+   * User journey:
+   *   1. Recruiter asks "What is your experience with Kubernetes?"
+   *   2. System captures question with metadata (timestamp, client ID, etc.)
+   *   3. System generates answer with relevant experience
+   *   4. Answer is linked to question via event IDs
+   *   5. Data is ready for feedback and analytics
+   */
   describe('Scenario: Recruiter asks technical question', () => {
     it('should capture question with metadata', () => {
       // User: "What is your experience with Kubernetes?"
       const userQuestion = 'What is your experience with Kubernetes?';
       const timestamp = new Date().toISOString();
-      const clientId = '192.168_15'; // Hashed
+      const clientId = '192.168_15'; // Hashed IP + origin (privacy-safe)
 
+      // Event structure: immutable record of question
       const questionEvent = {
-        eventId: 'q_1234567_abc123',
-        type: 'question',
-        timestamp,
-        clientId,
-        question: userQuestion,
-        topK: 5,
-        humorMode: 'clean_professional',
+        eventId: 'q_1234567_abc123',    // Stable identifier for feedback/linking
+        type: 'question',                 // Event type
+        timestamp,                        // When question was asked
+        clientId,                         // Hashed client identifier
+        question: userQuestion,           // Sanitized question text
+        topK: 5,                         // Retrieval parameter
+        humorMode: 'clean_professional', // Response style
       };
 
+      // Assertions: event has correct structure
       expect(questionEvent.eventId).toMatch(/^q_/);
       expect(questionEvent.type).toBe('question');
       expect(questionEvent.timestamp).toBeDefined();
@@ -49,22 +90,25 @@ describe('Acceptance: User Question & Answer Flow', () => {
     });
 
     it('should record answer linked to question', () => {
+      // System generates answer with references to source question
       const questionEventId = 'q_1234567_abc123';
       const answerText =
         'I have extensive Kubernetes experience including cluster management, deployment orchestration, and service mesh implementation.';
 
+      // Event structure: answer linked to question
       const answerEvent = {
-        eventId: 'a_1234568_def456',
-        type: 'answer',
-        timestamp: new Date().toISOString(),
-        questionEventId,
-        clientId: '192.168_15',
-        answer: answerText,
-        citationCount: 2,
-        durationMs: 234,
-        backendMode: 'upstream',
+        eventId: 'a_1234568_def456',               // Unique answer ID
+        type: 'answer',                             // Event type
+        timestamp: new Date().toISOString(),        // When answer was generated
+        questionEventId,                            // Link back to question
+        clientId: '192.168_15',                    // Same client
+        answer: answerText,                         // Truncated answer text
+        citationCount: 2,                           // Number of sources used
+        durationMs: 234,                            // Latency (response time)
+        backendMode: 'upstream',                    // Source: local vs. upstream
       };
 
+      // Assertions: answer properly linked to question
       expect(answerEvent.eventId).toMatch(/^a_/);
       expect(answerEvent.questionEventId).toBe(questionEventId);
       expect(answerEvent.answer).toBe(answerText);
@@ -73,6 +117,7 @@ describe('Acceptance: User Question & Answer Flow', () => {
     });
 
     it('should preserve Q&A relationship for analytics', () => {
+      // Analytics use case: Join questions with answers for quality analysis
       const qa = {
         questionId: 'q_1234567_abc123',
         answerId: 'a_1234568_def456',
@@ -80,7 +125,8 @@ describe('Acceptance: User Question & Answer Flow', () => {
         answerText: 'I have extensive Kubernetes experience...',
       };
 
-      // Later analysis can join these records
+      // Assertions: records are correctly linked for later analysis
+      // E.g., "Which questions got helpful answers?" "What topics need better coverage?"
       expect(qa.questionId).toMatch(/^q_/);
       expect(qa.answerId).toMatch(/^a_/);
       expect(qa.questionText.length).toBeGreaterThan(0);

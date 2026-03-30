@@ -17,34 +17,55 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-// Mock KV Store
+/**
+ * Mock KV Store for integration testing
+ *
+ * Simulates Cloudflare KV namespace for testing the complete feedback API flow.
+ * Used to validate that feedback events are correctly persisted in NDJSON format.
+ *
+ * Methods:
+ *   - get(key): Retrieve stored value
+ *   - put(key, value, options): Store value with optional TTL
+ *   - delete(key): Remove key
+ *   - clear(): Reset for new test
+ *   - getRecords(dateKey): Parse and return NDJSON events for a date
+ */
 class MockKVStore {
   constructor() {
+    // In-memory storage for key-value pairs
     this.storage = new Map();
+    // Track write operations for assertion validation
     this.putCalls = [];
+    // Track read operations for assertion validation
     this.getCalls = [];
   }
 
+  // Retrieve value by key, tracking access for test assertions
   async get(key) {
     this.getCalls.push(key);
     return this.storage.get(key) || null;
   }
 
+  // Store key-value pair with optional TTL, tracking writes for assertions
   async put(key, value, options = {}) {
     this.putCalls.push({ key, value, options });
     this.storage.set(key, value);
   }
 
+  // Delete key from storage
   async delete(key) {
     this.storage.delete(key);
   }
 
+  // Reset mock state for next test
   clear() {
     this.storage.clear();
     this.putCalls = [];
     this.getCalls = [];
   }
 
+  // Parse NDJSON event records for a given date key
+  // Returns array of parsed JSON objects (one per line)
   getRecords(dateKey) {
     const ndjson = this.storage.get(`events:${dateKey}`) || '';
     return ndjson
@@ -54,8 +75,23 @@ class MockKVStore {
   }
 }
 
-// Mock Request builder
+/**
+ * Feedback request builder for integration tests
+ *
+ * Creates a POST request with JSON payload to simulate POST /api/feedback.
+ * Allows customization of payload content and request origin.
+ *
+ * Parameters:
+ *   - payload: JSON body (e.g., { questionEventId, sentiment })
+ *   - origin: HTTP origin header (defaults to localhost:3000)
+ *
+ * Example:
+ *   const req = createFeedbackRequest({
+ *     payload: { sentiment: 'helpful', questionEventId: 'q_123' }
+ *   });
+ */
 function createFeedbackRequest(options = {}) {
+  // Request payload and headers for feedback API call
   const payload = options.payload || {};
   const headers = new Map([
     ['origin', options.origin || 'http://localhost:3000'],
@@ -63,20 +99,34 @@ function createFeedbackRequest(options = {}) {
   ]);
 
   return {
+    // Case-insensitive header getter
     headers: {
       get: (name) => headers.get(name.toLowerCase()),
     },
+    // Async method to parse request body as JSON
     json: async () => payload,
+    // HTTP method for feedback submission
     method: 'POST',
   };
 }
 
-// Mock Response helper
+/**
+ * Mock fetch helper for testing HTTP responses
+ *
+ * Records all requests and provides mock responses.
+ * Used to verify that feedback API responds correctly to different payloads.
+ *
+ * Returns:
+ *   - fetch(request): Accepts request, records it, returns 200 response
+ *   - getResponses(): Returns array of all recorded requests
+ */
 function createMockFetch() {
+  // Track all requests for assertion validation
   const responses = [];
 
   return {
     async fetch(request) {
+      // Record request and return success response
       responses.push(request);
       return new Response(JSON.stringify({ success: true }), { status: 200 });
     },

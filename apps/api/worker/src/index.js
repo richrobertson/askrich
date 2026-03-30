@@ -920,6 +920,12 @@ const CAREER_BREAK_QUERY_SIGNALS = [
   "adversity",
 ];
 
+/**
+ * Determine which chat backend mode to use.
+ *
+ * Normalizes `CHAT_BACKEND_MODE` to a lowercase string and defaults to
+ * `local` when unset.
+ */
 function getBackendMode(env) {
   return String(env.CHAT_BACKEND_MODE || "local").trim().toLowerCase();
 }
@@ -2441,6 +2447,12 @@ function toFirstPerson(text) {
   return result;
 }
 
+/**
+ * Normalize upstream chat path configuration.
+ *
+ * Ensures a usable path by trimming whitespace, defaulting to `/api/chat`,
+ * and enforcing a leading slash.
+ */
 function normalizeUpstreamPath(path) {
   if (!path || typeof path !== "string") {
     return "/api/chat";
@@ -2454,6 +2466,9 @@ function normalizeUpstreamPath(path) {
   return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
 }
 
+/**
+ * Create a JSON response with UTF-8 content type.
+ */
 function json(payload, status = 200) {
   return new Response(JSON.stringify(payload), {
     status,
@@ -2463,6 +2478,12 @@ function json(payload, status = 200) {
   });
 }
 
+/**
+ * Validate request origin against configured allowlist.
+ *
+ * If no Origin header is present, request is allowed. If an Origin header is
+ * present and allowlist is empty, request is denied.
+ */
 function isAllowedOrigin(request, env) {
   const origin = request.headers.get("origin");
   const allowed = parseAllowedOrigins(env.ALLOWED_ORIGINS);
@@ -2478,6 +2499,9 @@ function isAllowedOrigin(request, env) {
   return allowed.has(origin);
 }
 
+/**
+ * Parse comma-separated origins into a Set for fast lookup.
+ */
 function parseAllowedOrigins(value) {
   const origins = new Set();
   if (!value || typeof value !== "string") {
@@ -2493,6 +2517,9 @@ function parseAllowedOrigins(value) {
   return origins;
 }
 
+/**
+ * Apply CORS headers to a response based on request origin and allowlist.
+ */
 function withCors(response, request, env) {
   const headers = new Headers(response.headers);
   const origin = request.headers.get("origin");

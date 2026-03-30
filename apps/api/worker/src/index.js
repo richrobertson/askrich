@@ -1,241 +1,59 @@
 /**
  * Ask Rich Cloudflare Worker: Chat API Handler
  *
- * This worker handles two modes:
- * 1. UPSTREAM mode: Proxies requests to a retrieval-backed API (e.g., FastAPI server)
- * 2. LOCAL mode: Serves canned responses from hardcoded CORPUS and rules
+ * Runtime modes:
+ * - `upstream`: proxy chat requests to an upstream API
+ * - `openai`: call OpenAI directly
+ * - `local`: answer from the in-repo corpus and routing rules
  *
- * QUALITY ASSURANCE:
- *   The local mode contains hardcoded response paths for specific question types.
- *   These are extensively tested to ensure focused, concise, and safe answers.
- *
- *   Test suites (see docs/testing/CANNED_RESPONSES.md):
- *     - scripts/test_canned_responses.py: Specification validation
- *     - scripts/test_canned_responses_integration.py: Live worker response validation
- *     - src/index.test.js: JavaScript unit tests (40+ assertions)
- *
- *   Response quality guarantees:
- *     - Oracle CNS outcomes questions → focused metrics (not profile link noise)
- *     - Profile queries → profile links only (no project details)
- *     - Education queries → degree info (no unrelated content)
- *     - Sensitive contact → refuse PII, redirect to LinkedIn
- *     - All fallback answers → stay under 600-800 characters
- *
- * KEY FUNCTIONS:
- *   - buildAnswer(): Routes questions based on intent (behavioral, outcomes, education, etc.)
- *   - buildProfileResponse(): Handles profile/contact queries
- *   - buildBehavioralAnswer(): Returns STAR-formatted answers for behavioral questions
- *   - rankCorpus(): Token-based relevance ranking of CORPUS documents
- *   - isOracleCnsOutcomesQuestion(): Intent detection for Oracle outcomes
- *
- * DOCUMENTATION & CROSSLINKS:
- *   - docs/testing/CANNED_RESPONSES.md: Complete testing guide
- *   - docs/architecture.md: System design overview
- *   - README.md: Quality assurance section
- *   - apps/api/worker/package.json: Test dependencies
- *
- * ENVIRONMENT:
- *   - CHAT_BACKEND_MODE: "upstream", "openai", or "local" (defaults to "local")
- *   - UPSTREAM_API_BASE: Base URL for upstream (e.g., http://127.0.0.1:8000)
- *   - OPENAI_API_KEY: API key for direct OpenAI mode
- *   - OPENAI_API_BASE: Optional OpenAI base URL (defaults to https://api.openai.com/v1)
- *   - OPENAI_MODEL: Optional model for direct OpenAI mode (defaults to gpt-5.4)
- *   - ALLOWED_ORIGINS: CORS whitelist (comma-separated)
- *   - RATE_LIMIT_ENABLED: Enable rate limiting (default: true)
- *   - EVENT_LOGGING_ENABLED: Enable event recording (default: true)
- *   - RATE_LIMIT_QPS_HOUR: Rate limit questions per hour (default: 30)
- *   - RATE_LIMIT_BURST_SECONDS: Minimum seconds between submissions (default: 1)
+ * Quality checks are covered by tests in `docs/testing/CANNED_RESPONSES.md`.
+ * Key env vars: `CHAT_BACKEND_MODE`, `UPSTREAM_API_BASE`, `OPENAI_*`,
+ * `ALLOWED_ORIGINS`, `RATE_LIMIT_*`, and `EVENT_LOGGING_ENABLED`.
  */
 
 /**
  * Milestone 6: Rate Limiting and Event Recording
  *
- * RATE LIMITING:
- *   - Hybrid client identification: IP + origin header
- *   - Per-client rate limit: 30 questions/hour (configurable)
- *   - Burst protection: 1 second minimum between submissions
- *   - Action: Count events but allow execution (lenient degradation)
- *   - Response: 429 with Retry-After when limit reached
- *
- * EVENT RECORDING:
- *   - Question events: ts, question, client identity
- *   - Answer events: linked to question, response metadata, latency
- *   - Feedback events: thumbs up/down with optional note
- *   - Storage: Cloudflare KV daily partitioned records
- *   - Event IDs: Returned in response headers for client linking
- *
- * PRIVACY:
- *   - No PII stored (questions sanitized, no auth info)
- *   - Client identity hashed (not stored as-is)
- *   - 90-day TTL on stored events (configurable)
+ * - Rate limits are per client (`30/hour` + `1s` burst guard).
+ * - Events are written as daily NDJSON records in KV with a 90-day TTL.
+ * - Question/answer/feedback event IDs are used to link the request lifecycle.
  */
 
 /**
- * MILESTONE 6 FUNCTIONS: Rate Limiting, Client Identification, and Event Recording
- *
- * These functions implement the core M6 functionality for protecting Ask Rich
- * from abuse while capturing usage patterns for product learning.
- *
- * ARCHITECTURE:
- *   1. generateEventId(type, content) → Stable event identifier
- *   2. getClientId(request) → Privacy-safe client fingerprint
- *   3. checkRateLimit(clientId, env, kv) → Rate limit enforcement
- *   4. recordQuestionEvent(...) → Question event logging
- *   5. recordAnswerEvent(...) → Answer event logging
- *
- * DATA FLOW:
- *   request → getClientId() → clientId
- *          → generateEventId() → questionEventId
- *          → checkRateLimit() → allow/reject
- *          → recordQuestionEvent() → KV storage
- *          ↓
- *   answer → generateEventId() → answerEventId
- *          → recordAnswerEvent() → KV storage
- *          ↓
- *   feedback → POST /api/feedback
- *           → recordFeedbackEvent() → KV storage
- *
- * STORAGE FORMAT: NDJSON (newline-delimited JSON)
- *   - One event per line for append-only records
- *   - Daily partitions: events:2026-03-29
- *   - 90-day TTL per event
+ * Create an event ID for question/answer/feedback linkage.
+ * Format: `<typePrefix>_<timestampMs>_<random6>`.
  */
-
-/**
- * Generate a stable event identifier
- *
- * PURPOSE:
- *   Create unique, reproducible event IDs for questions, answers, and feedback.
- *   IDs are used to link events together (Q→A→Feedback) and identify duplicates.
- *
- * DESIGN:
- *   - Type prefix: q_ (question), a_ (answer), f_ (feedback)
- *   - Timestamp: Unix milliseconds for temporal ordering
- *   - Random suffix: Ensures uniqueness even for rapid-fire events
- *
- * PARAMETERS:
- *   type: Event type ("question", "answer", "feedback")
- *   content: Event content (question text, answer text, etc.)
- *
- * RETURNS:
- *   Event ID: Format "q_1234567890_abc123"
- *
- * EXAMPLE:
- *   const qId = generateEventId("question", "What is Kubernetes?");
- *   // → "q_1711785600000_xyz789"
- */
-function generateEventId(type, content) {
-  // Capture current timestamp for temporal ordering
+function generateEventId(type, _content) {
   const timestamp = Date.now().toString();
-  // Create seed from type, content, and timestamp (truncate for ID length limit)
-  const seed = `${type}:${content}:${timestamp}`.substring(0, 50);
-  // Build ID: type_prefix + timestamp + random_suffix
-  // Type prefix: first character of type (q/a/f)
-  // Timestamp: milliseconds since epoch
-  // Random: Base-36 encoded random number (6 chars)
   const baseId = `${type.charAt(0)}_${timestamp}_${Math.random().toString(36).substring(2, 8)}`;
   return baseId;
 }
 
 /**
- * Extract and hash client identity from request
+ * Build a privacy-preserving client key from request headers.
  *
- * PURPOSE:
- *   Identify unique clients for rate limiting without storing raw IP addresses.
- *   Uses IP + origin fingerprinting for hybrid identification.
- *
- * PRIVACY DESIGN:
- *   ✓ No raw IP storage (uses truncated prefix only)
- *   ✓ No user authentication required
- *   ✓ Session-independent (based on request context)
- *   ✓ Deterministic (same IP/origin = same clientId)
- *   ✗ Not reversible (cannot reconstruct original IP)
- *
- * HEADER PRECEDENCE:
- *   1. CF-Connecting-IP: Cloudflare's client IP (most reliable)
- *   2. X-Forwarded-For: Proxy chain (first IP is client)
- *   3. X-Real-IP: Fallback reverse proxy header
- *   4. "unknown": If all headers missing
- *
- * FINGERPRINTING:
- *   Combines IP + origin header to distinguish:
- *   - Same IP from different origins → Different clients
- *   - Same origin from different IPs → Different clients
- *   - Spoofed headers → May bypass (acceptable tradeoff)
- *
- * RETURNS:
- *   Client ID: Format "192.0.2_18" (truncated IP + origin length)
- *
- * EXAMPLE:
- *   const req = { headers: { get: (name) => '203.0.113.42' } };
- *   const clientId = getClientId(req);
- *   // → "203.0.11_25"
+ * Uses IP header precedence (`cf-connecting-ip`, `x-forwarded-for`,
+ * `x-real-ip`), truncates the IP prefix, and combines with origin length.
  */
 function getClientId(request) {
-  // Extract IP from headers (Cloudflare worker environment)
-  // CF-Connecting-IP is most reliable in production Cloudflare Workers
   let ip = request.headers.get("cf-connecting-ip") || 
            request.headers.get("x-forwarded-for") || 
            request.headers.get("x-real-ip") || 
            "unknown";
   
-  // Handle X-Forwarded-For with multiple IPs separated by commas
-  // Format: "203.0.113.1, 198.51.100.1, 192.0.2.1"
-  // Take first (client) IP only
   ip = ip.split(",")[0].trim();
   
-  // Extract origin for additional fingerprinting
-  // Example: "https://askrich.com" → length = 18
   const origin = request.headers.get("origin") || "";
-  const userAgent = request.headers.get("user-agent") || "";
   
-  // Create privacy-safe client ID
-  // Use first 10 chars of IP (prevents full IP storage) + origin length
-  // Example: "192.0.2_42" (IP prefix + origin header length)
-  // This prevents IP reversal while distinguishing different origins
   return `${ip.substring(0, 10)}_${origin.length}`;
 }
 
 /**
- * Check and enforce rate limits for a client
+ * Enforce per-client rate limits backed by KV sliding window state.
  *
- * PURPOSE:
- *   Prevent abuse by limiting questions per client to:
- *   - 30 questions per hour (configurable)
- *   - 1 second minimum between requests (burst protection)
- * 
- * ENFORCEMENT STRATEGY:
- *   - Lenient: Count violations but allow execution
- *   - Graceful degradation: If KV unavailable, allow request
- *   - Return: Allowed status + reset time when limited
- *
- * RATE LIMIT TIERS:
- *   Hourly limit:
- *     Normal recruiter: ~1-2 questions per minute (well under 30/hour)
- *     Heavy user: 30 questions in 1 hour = HIT LIMIT
- *   Burst protection:
- *     Rapid-fire: 5 questions in 1 second = HITS burst limit
- *     Normal: 1 question per second = no burst violation
- *
- * STORAGE:
- *   Key: ratelimit:{clientId}
- *   Value: { requests: [timestamp1, timestamp2, ...] }
- *   TTL: 24 hours (keeps old timestamps for sliding window)
- *
- * RETURNS:
- *   { allowed: true } - Request can proceed
- *   { allowed: false, resetTime: 3600 } - Limited, retry in 3600 seconds
- *
- * PARAMETERS:
- *   clientId: Client identifier from getClientId()
- *   env: Cloudflare Worker environment with rate limit config
- *   kv: KV store for tracking per-client request history
- *
- * EXAMPLE:
- *   const result = await checkRateLimit("192.0.2_42", env, kv);
- *   if (!result.allowed) {
- *     return error(429, "Rate limited. Retry in", result.resetTime, "seconds");
- *   }
+ * Returns `{ allowed: false, resetTime }` when either:
+ * - hourly quota (`RATE_LIMIT_QPS_HOUR`, default 30) is exceeded, or
+ * - burst interval (`RATE_LIMIT_BURST_SECONDS`, default 1) is violated.
  */
 async function checkRateLimit(clientId, env, kv) {
   // Feature flag: allow disabling rate limiting in development

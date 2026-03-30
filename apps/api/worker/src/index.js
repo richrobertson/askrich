@@ -291,6 +291,21 @@ const WHO_ARE_YOU_SIGNALS = new Set([
   "what do you do",
 ]);
 
+const AFFIRMATION_SIGNALS = new Set([
+  "yes",
+  "y",
+  "yep",
+  "yeah",
+  "yup",
+  "sure",
+  "ok",
+  "okay",
+  "go ahead",
+  "do it",
+  "please",
+  "sounds good",
+]);
+
 const OUT_OF_SCOPE_PERSONAL_SIGNALS = [
   "favorite color",
   "favourite color",
@@ -322,7 +337,24 @@ async function handleLocalChat(request) {
   }
 
   const question = String(payload?.question || "").trim();
-  const smallTalkResponse = buildSmallTalkResponse(question);
+  const resolved = resolveFollowUpQuestion(question, payload?.history);
+  if (resolved.needsClarification) {
+    return json(
+      {
+        success: true,
+        data: {
+          answer: buildAmbiguousAffirmationResponse(),
+          citations: [],
+          retrieved_chunks: 0,
+        },
+      },
+      200,
+    );
+  }
+
+  const effectiveQuestion = resolved.effectiveQuestion;
+
+  const smallTalkResponse = buildSmallTalkResponse(effectiveQuestion);
   if (smallTalkResponse) {
     return json(
       {
@@ -337,7 +369,7 @@ async function handleLocalChat(request) {
     );
   }
 
-  const outOfScopeResponse = buildOutOfScopeResponse(question);
+  const outOfScopeResponse = buildOutOfScopeResponse(effectiveQuestion);
   if (outOfScopeResponse) {
     return json(
       {
@@ -353,15 +385,15 @@ async function handleLocalChat(request) {
   }
 
   const topK = clampTopK(payload?.top_k);
-  if (question.length < 3) {
+  if (effectiveQuestion.length < 3) {
     return json({ success: false, error: "Question must be at least 3 characters" }, 400);
   }
 
-  const requestedProfiles = getRequestedProfiles(question);
-  const asksForAllProfiles = isAllProfilesQuery(question);
-  const isContactRequest = isContactQuery(question);
-  const isSensitiveContactRequest = isSensitiveContactQuery(question);
-  const isGenericProfileRequest = isProfileLinksQuery(question);
+  const requestedProfiles = getRequestedProfiles(effectiveQuestion);
+  const asksForAllProfiles = isAllProfilesQuery(effectiveQuestion);
+  const isContactRequest = isContactQuery(effectiveQuestion);
+  const isSensitiveContactRequest = isSensitiveContactQuery(effectiveQuestion);
+  const isGenericProfileRequest = isProfileLinksQuery(effectiveQuestion);
 
   if (
     requestedProfiles.length ||
@@ -398,7 +430,7 @@ async function handleLocalChat(request) {
     );
   }
 
-  const ranked = rankCorpus(question).slice(0, topK);
+  const ranked = rankCorpus(effectiveQuestion).slice(0, topK);
   if (!ranked.length) {
     return json(
       {
@@ -414,7 +446,7 @@ async function handleLocalChat(request) {
     );
   }
 
-  const answer = buildAnswer(question, ranked);
+  const answer = buildAnswer(effectiveQuestion, ranked);
   const citations = ranked.map((doc, index) => ({
     id: doc.id,
     title: doc.title,
@@ -444,11 +476,28 @@ async function handleOpenAiChat(request, env) {
   }
 
   const question = String(payload?.question || "").trim();
-  if (question.length < 3) {
+  const resolved = resolveFollowUpQuestion(question, payload?.history);
+  if (resolved.needsClarification) {
+    return json(
+      {
+        success: true,
+        data: {
+          answer: buildAmbiguousAffirmationResponse(),
+          citations: [],
+          retrieved_chunks: 0,
+        },
+      },
+      200,
+    );
+  }
+
+  const effectiveQuestion = resolved.effectiveQuestion;
+
+  if (effectiveQuestion.length < 3) {
     return json({ success: false, error: "Question must be at least 3 characters" }, 400);
   }
 
-  const smallTalkResponse = buildSmallTalkResponse(question);
+  const smallTalkResponse = buildSmallTalkResponse(effectiveQuestion);
   if (smallTalkResponse) {
     return json(
       {
@@ -463,7 +512,7 @@ async function handleOpenAiChat(request, env) {
     );
   }
 
-  const outOfScopeResponse = buildOutOfScopeResponse(question);
+  const outOfScopeResponse = buildOutOfScopeResponse(effectiveQuestion);
   if (outOfScopeResponse) {
     return json(
       {
@@ -487,11 +536,11 @@ async function handleOpenAiChat(request, env) {
   const model = String(env.OPENAI_MODEL || "gpt-5.4").trim() || "gpt-5.4";
   const topK = clampTopK(payload?.top_k);
 
-  const requestedProfiles = getRequestedProfiles(question);
-  const asksForAllProfiles = isAllProfilesQuery(question);
-  const isContactRequest = isContactQuery(question);
-  const isSensitiveContactRequest = isSensitiveContactQuery(question);
-  const isGenericProfileRequest = isProfileLinksQuery(question);
+  const requestedProfiles = getRequestedProfiles(effectiveQuestion);
+  const asksForAllProfiles = isAllProfilesQuery(effectiveQuestion);
+  const isContactRequest = isContactQuery(effectiveQuestion);
+  const isSensitiveContactRequest = isSensitiveContactQuery(effectiveQuestion);
+  const isGenericProfileRequest = isProfileLinksQuery(effectiveQuestion);
   if (
     requestedProfiles.length ||
     asksForAllProfiles ||
@@ -532,11 +581,11 @@ async function handleOpenAiChat(request, env) {
     "rif", "layoff", "laid off", "reduction in force", "transition", "between jobs",
     "what have you been doing", "since oracle", "after oracle", "adversity",
   ];
-  const questionLower = String(question).toLowerCase();
+  const questionLower = String(effectiveQuestion).toLowerCase();
   const isCareerBreakQuery = careerBreakSignals.some((s) => questionLower.includes(s));
   const SUPPRESSED_UNLESS_ASKED = new Set(["profile-career-transition-rif"]);
 
-  const ranked = rankCorpus(question)
+  const ranked = rankCorpus(effectiveQuestion)
     .slice(0, topK)
     .filter((doc) => isCareerBreakQuery || !SUPPRESSED_UNLESS_ASKED.has(doc.id));
 
@@ -562,7 +611,7 @@ async function handleOpenAiChat(request, env) {
     chunk_index: index,
   }));
 
-  const q = question.toLowerCase();
+  const q = effectiveQuestion.toLowerCase();
   const educationSignals = [
     "education",
     "degree",
@@ -612,7 +661,7 @@ async function handleOpenAiChat(request, env) {
       {
         success: true,
         data: {
-          answer: buildAnswer(question, ranked),
+          answer: buildAnswer(effectiveQuestion, ranked),
           citations,
           retrieved_chunks: ranked.length,
         },
@@ -643,7 +692,7 @@ async function handleOpenAiChat(request, env) {
           },
           {
             role: "user",
-            content: `Question:\n${question}\n\nEvidence (use only this evidence):\n${evidence}`,
+            content: `Question:\n${effectiveQuestion}\n\nEvidence (use only this evidence):\n${evidence}`,
           },
         ],
       }),
@@ -811,6 +860,115 @@ function buildSmallTalkResponse(question) {
   }
 
   return null;
+}
+
+function buildAmbiguousAffirmationResponse() {
+  return [
+    "Happy to continue.",
+    "I need a little more direction to resolve 'yes'.",
+    "Pick one and I will answer quickly:",
+    "- API-related experience",
+    "- Oracle migration outcomes",
+    "- leadership examples",
+  ].join("\n");
+}
+
+function resolveFollowUpQuestion(question, history) {
+  const current = String(question || "").trim();
+  const normalizedCurrent = normalizeIntentText(current);
+  if (!isAffirmationQuery(normalizedCurrent)) {
+    return { effectiveQuestion: current, needsClarification: false };
+  }
+
+  const normalizedHistory = normalizeConversationHistory(history);
+  const pendingIntent = extractAssistantPendingIntent(normalizedHistory);
+  if (pendingIntent) {
+    return { effectiveQuestion: pendingIntent, needsClarification: false };
+  }
+
+  const fallbackUserQuestion = extractPriorUserQuestion(normalizedHistory);
+  if (fallbackUserQuestion) {
+    return { effectiveQuestion: fallbackUserQuestion, needsClarification: false };
+  }
+
+  return { effectiveQuestion: current, needsClarification: true };
+}
+
+function isAffirmationQuery(normalizedQuestion) {
+  return AFFIRMATION_SIGNALS.has(String(normalizedQuestion || ""));
+}
+
+function normalizeConversationHistory(history) {
+  if (!Array.isArray(history)) {
+    return [];
+  }
+
+  return history
+    .map((entry) => {
+      const role = String(entry?.role || "").toLowerCase();
+      const content = String(entry?.content || entry?.text || "").trim();
+      return { role, content };
+    })
+    .filter((entry) => (entry.role === "assistant" || entry.role === "user") && entry.content.length > 0);
+}
+
+function extractAssistantPendingIntent(history) {
+  for (let i = history.length - 1; i >= 0; i -= 1) {
+    const item = history[i];
+    if (item.role !== "assistant") {
+      continue;
+    }
+
+    const questionLine = extractLastQuestionLine(item.content);
+    if (!questionLine) {
+      continue;
+    }
+
+    const wantMatch = questionLine.match(/want me to\s+(.+?)\?/i);
+    if (wantMatch?.[1]) {
+      return wantMatch[1].trim();
+    }
+
+    const likeMatch = questionLine.match(/would you like me to\s+(.+?)\?/i);
+    if (likeMatch?.[1]) {
+      return likeMatch[1].trim();
+    }
+  }
+
+  return "";
+}
+
+function extractPriorUserQuestion(history) {
+  for (let i = history.length - 1; i >= 0; i -= 1) {
+    const item = history[i];
+    if (item.role !== "user") {
+      continue;
+    }
+
+    const normalized = normalizeIntentText(item.content);
+    if (!normalized || isAffirmationQuery(normalized)) {
+      continue;
+    }
+
+    return item.content;
+  }
+
+  return "";
+}
+
+function extractLastQuestionLine(text) {
+  const lines = String(text || "")
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  for (let i = lines.length - 1; i >= 0; i -= 1) {
+    if (lines[i].endsWith("?")) {
+      return lines[i];
+    }
+  }
+
+  return "";
 }
 
 function buildOutOfScopeResponse(question) {

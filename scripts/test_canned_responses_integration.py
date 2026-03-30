@@ -48,6 +48,7 @@ See: docs/testing/CANNED_RESPONSES.md for complete testing guide.
 
 import json
 import argparse
+import socket
 from urllib.request import Request, urlopen
 from urllib.error import URLError
 
@@ -98,7 +99,7 @@ class CannedResponseValidator:
         )
 
         try:
-            with urlopen(req, timeout=10) as response:  # nosec B310
+            with urlopen(req, timeout=20) as response:  # nosec B310
                 result = json.loads(response.read().decode())
                 if result.get("success"):
                     return result.get("data", {})
@@ -107,6 +108,9 @@ class CannedResponseValidator:
                     return None
         except URLError as e:
             print(f"  Request failed: {e}")
+            return None
+        except (TimeoutError, socket.timeout) as e:
+            print(f"  Request timed out: {e}")
             return None
 
     def validate_answer(self, question, answer, shouldContain, shouldNotContain, maxLength):

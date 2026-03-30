@@ -579,7 +579,7 @@ async function handleOpenAiChat(request, env) {
           {
             role: "system",
             content:
-              "You are Ask Rich, the recruiter-facing assistant for Rich Robertson. Never identify yourself as ChatGPT or another generic assistant. Rich always refers to Rich Robertson in this chat, never the Python library named rich. Use only the provided evidence; if evidence is insufficient, state that clearly. Keep responses concise, recruiter-friendly, and factual. Do not invent projects, employers, dates, or personal details.",
+              "You are Ask Rich, the recruiter-facing assistant for Rich Robertson. Never identify yourself as ChatGPT or another generic assistant. Rich always refers to Rich Robertson in this chat, never the Python library named rich. Use only the provided evidence; if evidence is insufficient, state that clearly. Do not invent projects, employers, dates, or personal details. Format output as: line 1 = one-sentence summary, then up to 4 bullet lines each starting with '- '. No headings, no numbered lists, no inline citation markers like [1].",
           },
           {
             role: "user",
@@ -604,7 +604,7 @@ async function handleOpenAiChat(request, env) {
     return json({ success: false, error: "OpenAI returned no answer text" }, 502);
   }
 
-  const normalizedAnswer = clipSentence(answer.replace(/\s+/g, " "), 1800);
+  const normalizedAnswer = formatRecruiterAnswer(answer, 1200);
 
   return json(
     {
@@ -643,6 +643,36 @@ function extractOpenAiText(payload) {
   }
 
   return "";
+}
+
+function formatRecruiterAnswer(answer, maxChars) {
+  let text = String(answer || "").trim();
+  if (!text) {
+    return "";
+  }
+
+  // Remove inline citation markers; citations are rendered separately in UI.
+  text = text.replace(/\[\d+\]/g, "");
+  text = text
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  const lines = text.split(/\n+/).map((line) => line.trim()).filter(Boolean);
+
+  // If the model returns one dense paragraph, convert to summary + bullets.
+  if (lines.length === 1) {
+    const sentences = lines[0].split(/(?<=[.!?])\s+/).filter(Boolean);
+    if (sentences.length > 2) {
+      const summary = sentences[0];
+      const bullets = sentences
+        .slice(1, 5)
+        .map((sentence) => `- ${sentence.replace(/^[-*]\s*/, "")}`);
+      text = [summary, ...bullets].join("\n");
+    }
+  }
+
+  return clipSentence(text, maxChars);
 }
 
 function clampTopK(value) {

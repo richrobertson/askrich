@@ -416,6 +416,21 @@ async function handleOpenAiChat(request, env) {
     return json({ success: false, error: "Question must be at least 3 characters" }, 400);
   }
 
+  const smallTalkResponse = buildSmallTalkResponse(question);
+  if (smallTalkResponse) {
+    return json(
+      {
+        success: true,
+        data: {
+          answer: smallTalkResponse,
+          citations: [],
+          retrieved_chunks: 0,
+        },
+      },
+      200,
+    );
+  }
+
   const apiKey = String(env.OPENAI_API_KEY || env.LLM_API_KEY || "").trim();
   if (!apiKey) {
     return json({ success: false, error: "OPENAI_API_KEY is not configured" }, 500);
@@ -434,7 +449,17 @@ async function handleOpenAiChat(request, env) {
       },
       body: JSON.stringify({
         model,
-        input: question,
+        input: [
+          {
+            role: "system",
+            content:
+              "You are Ask Rich, the recruiter-facing assistant for Rich Robertson. Never identify yourself as ChatGPT or another generic assistant. Keep answers concise, professional, and focused on Rich's background, outcomes, and projects.",
+          },
+          {
+            role: "user",
+            content: question,
+          },
+        ],
       }),
     });
   } catch (_error) {

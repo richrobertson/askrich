@@ -33,7 +33,8 @@ Milestone status as of 2026-03-30:
 - ✅ Milestone 5 completed (Cloudflare deployment + production hardening docs and runbooks)
 - ✅ Milestone 6 completed (rate limiting, question recording, thumbs up/down feedback, and privacy/feedback operations)
 - ✅ Milestone 7 completed (analytics dashboards, feedback-driven insights, corpus evolution, A/B testing)
-- 📅 Milestone 8 planned (performance optimization, query understanding, advanced scaling)
+- ✅ Milestone 8 completed (response caching, intent-aware retrieval/ranking, scalability tooling)
+- 📅 Milestone 9 planned (steady-state operations, reliability governance, next-phase roadmap)
 
 ## Implementation status
 
@@ -136,6 +137,8 @@ data/
 - **M5:** Cloudflare deployment and production hardening
 - **M6:** Usage controls, question analytics, feedback capture, and privacy/review workflows
 - **M7:** Analytics dashboards, feedback-driven insights, corpus evolution, A/B testing
+- **M8:** Advanced optimization and scalability baseline implementation
+- **M9:** Maintenance and future vision planning
 
 See [docs/milestones/overview.md](docs/milestones/overview.md).
 
@@ -147,6 +150,8 @@ Milestone detail pages:
 - [docs/milestones/milestone-05.md](docs/milestones/milestone-05.md)
 - [docs/milestones/milestone-06.md](docs/milestones/milestone-06.md)
 - [docs/milestones/milestone-07.md](docs/milestones/milestone-07.md)
+- [docs/milestones/milestone-08.md](docs/milestones/milestone-08.md)
+- [docs/milestones/milestone-09.md](docs/milestones/milestone-09.md)
 
 Milestone-1 planning details are expanded in:
 - [docs/milestones/milestone-01.md](docs/milestones/milestone-01.md)

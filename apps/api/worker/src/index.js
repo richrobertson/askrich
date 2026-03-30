@@ -419,7 +419,7 @@ export default {
           method: request.method,
           headers: request.headers,
           body: requestText,
-        }));
+        }), env);
 
         const latencyMs = Date.now() - startTime;
         const body = await result.text();
@@ -776,7 +776,81 @@ function getBackendMode(env) {
   return String(env.CHAT_BACKEND_MODE || "local").trim().toLowerCase();
 }
 
-async function handleLocalChat(request) {
+function getChatCacheKv(env) {
+  if (!env) {
+    return null;
+  }
+  return env.CHAT_CACHE_KV || env.EVENTS_KV || null;
+}
+
+function isChatCacheEnabled(env) {
+  if (!env) {
+    return false;
+  }
+  const raw = String(env.CHAT_CACHE_ENABLED || "true").trim().toLowerCase();
+  return raw !== "false";
+}
+
+function getChatCacheTtlSeconds(env) {
+  const raw = Number.parseInt(String(env?.CHAT_CACHE_TTL_SECONDS || "300"), 10);
+  if (!Number.isFinite(raw) || raw <= 0) {
+    return 300;
+  }
+  return Math.min(3600, Math.max(30, raw));
+}
+
+function buildChatCacheKey(question, topK, humorMode) {
+  const normalizedQuestion = normalizeIntentText(question).slice(0, 300);
+  const signature = `${normalizedQuestion}|${topK}|${humorMode}`;
+  return `chatcache:v1:${hashString(signature)}`;
+}
+
+async function getCachedChatData(env, key) {
+  if (!isChatCacheEnabled(env)) {
+    return null;
+  }
+  const kv = getChatCacheKv(env);
+  if (!kv || !key) {
+    return null;
+  }
+
+  try {
+    const raw = await kv.get(key);
+    if (!raw) {
+      return null;
+    }
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") {
+      return null;
+    }
+    if (typeof parsed.answer !== "string" || !Array.isArray(parsed.citations)) {
+      return null;
+    }
+    return parsed;
+  } catch (_error) {
+    return null;
+  }
+}
+
+async function putCachedChatData(env, key, data) {
+  if (!isChatCacheEnabled(env)) {
+    return;
+  }
+  const kv = getChatCacheKv(env);
+  if (!kv || !key || !data) {
+    return;
+  }
+
+  try {
+    await kv.put(key, JSON.stringify(data), {
+      expirationTtl: getChatCacheTtlSeconds(env),
+    });
+  } catch (_error) {
+    // Best effort cache write only.
+  }
+}
+
+async function handleLocalChat(request, env) {
   let payload;
   try {
     payload = await request.json();
@@ -879,17 +953,32 @@ async function handleLocalChat(request) {
     );
   }
 
-  const ranked = applyCareerBreakSuppression(effectiveQuestion, rankCorpus(effectiveQuestion).slice(0, topK));
-  if (!ranked.length) {
+  const hasConversationHistory = Array.isArray(payload?.history) && payload.history.length > 0;
+  const cacheKey = !hasConversationHistory ? buildChatCacheKey(effectiveQuestion, topK, humorMode) : "";
+  const cachedData = cacheKey ? await getCachedChatData(env, cacheKey) : null;
+  if (cachedData) {
     return json(
       {
         success: true,
-        data: {
-          answer:
-            "I do not have enough evidence in the deployed corpus to answer confidently yet. Try asking about profile links (GitHub/LinkedIn), education and degrees, technologies used, Oracle migration, Java modernization, control planes, or Starbucks platform work.",
-          citations: [],
-          retrieved_chunks: 0,
-        },
+        data: cachedData,
+      },
+      200,
+    );
+  }
+
+  const ranked = applyCareerBreakSuppression(effectiveQuestion, rankCorpus(effectiveQuestion).slice(0, topK));
+  if (!ranked.length) {
+    const responseData = {
+      answer:
+        "I do not have enough evidence in the deployed corpus to answer confidently yet. Try asking about profile links (GitHub/LinkedIn), education and degrees, technologies used, Oracle migration, Java modernization, control planes, or Starbucks platform work.",
+      citations: [],
+      retrieved_chunks: 0,
+    };
+    await putCachedChatData(env, cacheKey, responseData);
+    return json(
+      {
+        success: true,
+        data: responseData,
       },
       200,
     );
@@ -903,14 +992,16 @@ async function handleLocalChat(request) {
     chunk_index: index,
   }));
 
+  const responseData = {
+    answer,
+    citations,
+    retrieved_chunks: ranked.length,
+  };
+  await putCachedChatData(env, cacheKey, responseData);
   return json(
     {
       success: true,
-      data: {
-        answer,
-        citations,
-        retrieved_chunks: ranked.length,
-      },
+      data: responseData,
     },
     200,
   );
@@ -1252,20 +1343,157 @@ function clampTopK(value) {
   return Math.min(20, Math.max(1, parsed));
 }
 
-function rankCorpus(question) {
-  const qTokens = tokenize(question);
-  return CORPUS.map((doc) => {
-    const textTokens = tokenize(`${doc.title} ${doc.text}`);
-    let score = 0;
-    for (const token of qTokens) {
-      if (textTokens.has(token)) {
-        score += 1;
+const QUERY_EXPANSION_RULES = [
+  { signal: "k8s", expansions: ["kubernetes"] },
+  { signal: "platform", expansions: ["control plane", "infrastructure"] },
+  { signal: "oci", expansions: ["oracle cloud", "oracle cloud infrastructure"] },
+  { signal: "rif", expansions: ["reduction in force", "layoff", "career transition"] },
+  { signal: "career gap", expansions: ["work gap", "career break"] },
+  { signal: "github", expansions: ["repository", "repositories", "projects"] },
+  { signal: "linkedin", expansions: ["profile", "professional profile"] },
+];
+
+function expandQueryTokens(question) {
+  const normalized = normalizeIntentText(question);
+  const expanded = tokenize(normalized);
+
+  for (const rule of QUERY_EXPANSION_RULES) {
+    if (!normalized.includes(rule.signal)) {
+      continue;
+    }
+    for (const expansion of rule.expansions) {
+      const expansionTokens = tokenize(expansion);
+      for (const token of expansionTokens) {
+        expanded.add(token);
       }
     }
+  }
+
+  return expanded;
+}
+
+function classifyQuestionIntent(questionLower) {
+  if (isBehavioralQuestion(questionLower)) {
+    return "behavioral";
+  }
+
+  if (isProfileLinksQuery(questionLower) || isContactQuery(questionLower)) {
+    return "profiles";
+  }
+
+  if (isCareerBreakQuestion(questionLower)) {
+    return "career_transition";
+  }
+
+  const educationSignals = ["education", "degree", "purdue", "university", "school", "college"];
+  if (includesAny(questionLower, educationSignals)) {
+    return "education";
+  }
+
+  const cloudSignals = ["cloud", "platform", "control plane", "oci", "kubernetes", "terraform"];
+  if (includesAny(questionLower, cloudSignals)) {
+    return "cloud_platform";
+  }
+
+  const technologySignals = ["technology", "tech", "java", "python", "c", "csharp", "scala", "stack"];
+  if (includesAny(questionLower, technologySignals)) {
+    return "technology";
+  }
+
+  const projectSignals = ["project", "oracle", "starbucks", "migration", "modernization", "outcome"];
+  if (includesAny(questionLower, projectSignals)) {
+    return "projects";
+  }
+
+  return "general";
+}
+
+function getIntentDocBoost(intent, doc) {
+  const id = String(doc?.id || "");
+  if (!id) {
+    return 0;
+  }
+
+  if (intent === "profiles" && id.startsWith("profile-")) {
+    return 3;
+  }
+  if (intent === "education" && (id.includes("education") || id.includes("academic"))) {
+    return 3;
+  }
+  if (intent === "technology" && (id.includes("technologies") || id.includes("skills"))) {
+    return 2;
+  }
+  if (intent === "cloud_platform" && (id.includes("control-plane") || id.includes("cloud") || id.includes("oracle"))) {
+    return 2;
+  }
+  if (intent === "projects" && id.startsWith("project-")) {
+    return 2;
+  }
+  if (intent === "career_transition" && id.includes("career-transition")) {
+    return 4;
+  }
+  return 0;
+}
+
+function computePhraseOverlapScore(questionLower, docText) {
+  const questionTerms = String(questionLower || "").split(/\s+/).filter(Boolean);
+  if (questionTerms.length < 2) {
+    return 0;
+  }
+
+  const docLower = String(docText || "").toLowerCase();
+  let overlap = 0;
+  for (let i = 0; i < questionTerms.length - 1; i += 1) {
+    const bigram = `${questionTerms[i]} ${questionTerms[i + 1]}`;
+    if (bigram.length >= 5 && docLower.includes(bigram)) {
+      overlap += 1;
+    }
+  }
+  return overlap;
+}
+
+function rerankTopDocs(questionLower, docs, topWindow = 8) {
+  if (!Array.isArray(docs) || docs.length <= 1) {
+    return Array.isArray(docs) ? docs : [];
+  }
+
+  const windowSize = Math.min(Math.max(2, topWindow), docs.length);
+  const head = docs.slice(0, windowSize).map((doc) => {
+    const phraseBoost = computePhraseOverlapScore(questionLower, `${doc.title} ${doc.text}`);
+    return {
+      ...doc,
+      score: doc.score + phraseBoost,
+    };
+  });
+
+  head.sort((a, b) => b.score - a.score);
+  return [...head, ...docs.slice(windowSize)];
+}
+
+function rankCorpus(question) {
+  const questionLower = normalizeIntentText(question);
+  const baseTokens = tokenize(questionLower);
+  const expandedTokens = expandQueryTokens(questionLower);
+  const intent = classifyQuestionIntent(questionLower);
+
+  const ranked = CORPUS.map((doc) => {
+    const textTokens = tokenize(`${doc.title} ${doc.text}`);
+    let lexicalScore = 0;
+
+    for (const token of expandedTokens) {
+      if (textTokens.has(token)) {
+        lexicalScore += baseTokens.has(token) ? 2 : 1;
+      }
+    }
+
+    const intentBoost = getIntentDocBoost(intent, doc);
+    const score = lexicalScore + intentBoost;
     return { ...doc, score };
   })
     .filter((doc) => doc.score > 0)
     .sort((a, b) => b.score - a.score);
+
+  return rerankTopDocs(questionLower, ranked, 8);
 }
 
 function tokenize(text) {
@@ -2418,4 +2646,5 @@ export {
   rankCorpus,
   clipSentence,
   formatStarAnswer,
+  getChatCacheTtlSeconds,
 };

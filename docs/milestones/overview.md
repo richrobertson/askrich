@@ -156,10 +156,33 @@ Last updated: 2026-03-30
 - Infrastructure scaling for high concurrency
 - Cost analysis and optimization strategies
 
-**Status**: Planned
+**Status**: Implemented (baseline)
 
 **Non-goals**
 - Multi-language support
 - Custom model training
 - Advanced MLOps and model retraining pipelines
 - Real-time personalization
+
+## Milestone 9 — Maintenance and future vision
+
+[Details](milestone-09.md)
+
+**Scope**
+- Transition from implementation velocity to steady-state reliability
+- Institutionalize quality governance and recurring corpus refresh workflows
+- Improve observability, cost control, and release safety with lightweight automation
+- Define roadmap themes for the next major platform evolution
+
+**Deliverables**
+- Reliability and quality SLO policy for chat and feedback workflows
+- Runbook automation for recurring weekly/monthly operator tasks
+- Production readiness scorecard and quarterly architecture review cadence
+- Milestone 10 candidate roadmap with prioritized experiments and constraints
+
+**Status**: Planned
+
+**Non-goals**
+- Large platform rewrites during maintenance window
+- Broad feature expansion without measurable quality impact
+- Major model training programs or custom ML infrastructure

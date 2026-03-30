@@ -241,7 +241,7 @@ describe('Milestone 6 Integration: Feedback API', () => {
         timestamp: new Date().toISOString(),
         questionEventId: 'q_123456_abc',
         answerEventId: 'a_123456_def',
-        clientId: '192.168_15',
+        clientId: 'a1b2c3d4',
         sentiment: 'helpful',
         optionalNote: 'Clear and concise',
       };
@@ -528,13 +528,13 @@ describe('Milestone 6 Integration: Feedback API', () => {
       const feedback = {
         eventId: 'f_privacy_1',
         type: 'feedback',
-        clientId: '192.168_15', // Should be hashed/truncated, not raw IP
+        clientId: 'a1b2c3d4', // FNV-1a hex hash of IP + origin + user-agent
       };
 
       // Raw IP should not appear
       expect(feedback.clientId).not.toContain('192.168.1.1');
-      // Only truncated prefix
-      expect(feedback.clientId).toMatch(/^\d{1,10}_\d+$/);
+      // Should be 8-char hex hash format
+      expect(feedback.clientId).toMatch(/^[0-9a-f]{8}$/i);
     });
 
     it('should truncate optional notes containing PII', () => {
@@ -589,9 +589,9 @@ describe('Milestone 6 Integration: Feedback API', () => {
       const dateKey = new Date().toISOString().split('T')[0];
 
       const feedbacks = [
-        { eventId: 'f_1', clientId: '192.168_15' },
-        { eventId: 'f_2', clientId: '203.0.1_20' },
-        { eventId: 'f_3', clientId: '198.51.1_25' },
+        { eventId: 'f_1', clientId: 'a1b2c3d4' },
+        { eventId: 'f_2', clientId: 'b2c3d4e5' },
+        { eventId: 'f_3', clientId: 'c3d4e5f6' },
       ];
 
       const ndjson = feedbacks.map(f => JSON.stringify(f)).join('\n');

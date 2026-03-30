@@ -68,7 +68,7 @@ describe('Acceptance: User Question & Answer Flow', () => {
       // User: "What is your experience with Kubernetes?"
       const userQuestion = 'What is your experience with Kubernetes?';
       const timestamp = new Date().toISOString();
-      const clientId = '192.168_15'; // Hashed IP + origin (privacy-safe)
+      const clientId = 'a1b2c3d4'; // Hashed IP + origin (privacy-safe)
 
       // Event structure: immutable record of question
       const questionEvent = {
@@ -101,7 +101,7 @@ describe('Acceptance: User Question & Answer Flow', () => {
         type: 'answer',                             // Event type
         timestamp: new Date().toISOString(),        // When answer was generated
         questionEventId,                            // Link back to question
-        clientId: '192.168_15',                    // Same client
+        clientId: 'a1b2c3d4',                    // Same client
         answer: answerText,                         // Truncated answer text
         citationCount: 2,                           // Number of sources used
         durationMs: 234,                            // Latency (response time)
@@ -182,7 +182,7 @@ describe('Acceptance: User Feedback Flow', () => {
         timestamp: new Date().toISOString(),
         questionEventId: 'q_1234567_abc123',
         answerEventId: 'a_1234568_def456',
-        clientId: '192.168_15',
+        clientId: 'a1b2c3d4',
         sentiment: 'helpful',
         optionalNote: 'Clear and comprehensive answer!',
       };
@@ -221,7 +221,7 @@ describe('Acceptance: User Feedback Flow', () => {
         type: 'feedback',
         questionEventId: 'q_test',
         answerEventId: 'a_test',
-        clientId: '192.168_15',
+        clientId: 'a1b2c3d4',
         sentiment: 'unhelpful',
         optionalNote: 'Did not address my question',
       };
@@ -351,10 +351,10 @@ describe('Acceptance: Privacy and Data Protection', () => {
   describe('Scenario: User privacy is protected', () => {
     it('should not expose raw IP addresses', () => {
       // System stores hashed client ID, not raw IP
-      const clientId = '192.168_15'; // Truncated IP + origin length
+      const clientId = 'a1b2c3d4'; // FNV-1a hex hash of IP + origin + user-agent
 
       expect(clientId).not.toContain('192.168.1.1'); // Raw IP should not appear
-      expect(clientId).toMatch(/^\d{1,10}_\d+$/);
+      expect(clientId).toMatch(/^[0-9a-f]{8}$/i); // 8-char hex hash format
     });
 
     it('should truncate questions containing PII', () => {
@@ -458,7 +458,7 @@ describe('Acceptance: Data Retention & Compliance', () => {
     });
 
     it('should support GDPR data deletion requests', () => {
-      const clientId = '192.168_15';
+      const clientId = 'a1b2c3d4';
 
       // Can search and delete all events for a client
       const deletionRequest = {
@@ -473,7 +473,7 @@ describe('Acceptance: Data Retention & Compliance', () => {
 
     it('should track data subject requests', () => {
       const dsvRequest = {
-        clientId: '192.168_15',
+        clientId: 'a1b2c3d4',
         type: 'data_subject_access',
         timestamp: new Date().toISOString(),
         status: 'pending',
@@ -574,7 +574,7 @@ describe('Acceptance: Complete User Journey', () => {
   it('should support full recruiter interaction cycle', () => {
     // 1. Recruiter visits site
     const session = {
-      clientId: '192.168_15',
+      clientId: 'a1b2c3d4',
       startTime: new Date().toISOString(),
       events: [],
     };

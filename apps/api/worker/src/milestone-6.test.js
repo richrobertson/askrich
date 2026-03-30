@@ -223,7 +223,11 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
       const req = createMockRequest({ ip: '203.0.113.42' });
       const clientId = getClientId(req);
 
-      expect(clientId).toContain('203.0.11'); // Truncated IP prefix
+      // Should return an 8-char hex hash (FNV-1a), not expose the raw IP
+      expect(clientId).toMatch(/^[0-9a-f]{8}$/i);
+      // Different IPs should produce different hashes
+      const otherReq = createMockRequest({ ip: '10.0.0.1' });
+      expect(getClientId(otherReq)).not.toBe(clientId);
     });
 
     it('should fallback to x-forwarded-for header', () => {
@@ -239,7 +243,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
       };
 
       const clientId = getClientId(req);
-      expect(clientId).toContain('198.51.10');
+      expect(clientId).toMatch(/^[0-9a-f]{8}$/i);
     });
 
     it('should handle multiple IPs in x-forwarded-for', () => {
@@ -254,9 +258,20 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
         },
       };
 
+      const singleIpReq = {
+        headers: {
+          get: (name) => {
+            if (name === 'cf-connecting-ip') return null;
+            if (name === 'x-forwarded-for') return '192.0.2.1';
+            if (name === 'origin') return 'http://example.com';
+            return null;
+          },
+        },
+      };
+
       const clientId = getClientId(req);
-      // Should use first IP
-      expect(clientId).toContain('192.0.2.1'.substring(0, 10));
+      // Should use first IP - same hash as single-IP request with that address
+      expect(clientId).toBe(getClientId(singleIpReq));
     });
 
     it('should use origin for additional fingerprinting', () => {
@@ -317,11 +332,20 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
       const clientId = 'client-flood';
       const qpsHour = 30;
 
+      vi.useFakeTimers();
+      let currentTime = Date.now();
+      vi.setSystemTime(currentTime);
+
       for (let i = 0; i < qpsHour; i++) {
         const result = await checkRateLimit(clientId, env, kv);
         expect(result.allowed).toBe(true);
         expect(result.resetTime).toBeUndefined();
+        // Advance time by 1100ms (1.1 s) between requests to avoid burst protection
+        currentTime += 1100;
+        vi.setSystemTime(currentTime);
       }
+
+      vi.useRealTimers();
     });
 
     it('should deny request exceeding hourly limit', async () => {

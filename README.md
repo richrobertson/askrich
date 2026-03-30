@@ -32,7 +32,8 @@ Milestone status as of 2026-03-30:
 - ✅ Milestone 4 completed (eval harness + quality loop)
 - ✅ Milestone 5 completed (Cloudflare deployment + production hardening docs and runbooks)
 - ✅ Milestone 6 completed (rate limiting, question recording, thumbs up/down feedback, and privacy/feedback operations)
-- 📅 Milestone 7 planned (analytics dashboards, feedback-driven insights, corpus evolution, A/B testing)
+- ✅ Milestone 7 completed (analytics dashboards, feedback-driven insights, corpus evolution, A/B testing)
+- 📅 Milestone 8 planned (performance optimization, query understanding, advanced scaling)
 
 ## Implementation status
 

@@ -203,7 +203,7 @@ class CannedResponseValidator:
         return self.validate_answer(
             question,
             answer,
-            ["LinkedIn", "GitHub", "Facebook"],
+            ["LinkedIn", "GitHub"],
             [],
             500,
         )

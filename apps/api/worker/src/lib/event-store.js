@@ -57,7 +57,7 @@ const normalizeFeedbackSentiment = (feedbackPayload) =>
 const createQuestionEvent = (eventId, clientId, question, payload) => ({
   ...buildCommonFields(eventId, clientId),
   type: 'question',
-  question: question.substring(0, 2_000),
+  question: String(question ?? '').substring(0, 2_000),
   topK: payload?.top_k || 5,
   humorMode: payload?.humor_mode || 'clean_professional',
 });
@@ -77,9 +77,9 @@ const createAnswerEvent = (
   ...buildCommonFields(eventId, clientId),
   type: 'answer',
   questionEventId,
-  answer: answer.substring(0, 4_000),
+  answer: String(answer ?? '').substring(0, 4_000),
   citationCount: (citations || []).length,
-  answerHash: answer.substring(0, 20),
+  answerHash: String(answer ?? '').substring(0, 20),
   durationMs: latencyMs || 0,
   backendMode: backendMode || 'local',
 });

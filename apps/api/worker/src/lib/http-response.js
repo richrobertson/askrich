@@ -81,7 +81,7 @@ function withCors(response, request, env) {
 
   if (!origin) {
     headers.set('access-control-allow-origin', '*');
-  } else if (allowed.size === 0 || allowed.has(origin)) {
+  } else if (allowed.has(origin)) {
     headers.set('access-control-allow-origin', origin);
     headers.set('vary', 'origin');
   }

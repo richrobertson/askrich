@@ -309,6 +309,10 @@ export default {
         return withCors(json({ success: false, error: 'Invalid JSON payload' }, 400), request, env);
       }
 
+      if (!feedbackPayload || typeof feedbackPayload !== 'object' || Array.isArray(feedbackPayload)) {
+        return withCors(json({ success: false, error: 'Invalid JSON payload' }, 400), request, env);
+      }
+
       const feedbackEventId = generateEventId('feedback', `${Date.now()}`);
       const clientId = getClientId(request);
       const kv = env.EVENTS_KV;

@@ -1034,10 +1034,6 @@ async function handleOpenAiChat(request, env) {
 
   const effectiveQuestion = resolved.effectiveQuestion;
 
-  if (effectiveQuestion.length < 3) {
-    return json({ success: false, error: "Question must be at least 3 characters" }, 400);
-  }
-
   const smallTalkResponse = buildSmallTalkResponse(effectiveQuestion, { humorMode });
   if (smallTalkResponse) {
     return json(
@@ -1051,6 +1047,10 @@ async function handleOpenAiChat(request, env) {
       },
       200,
     );
+  }
+
+  if (effectiveQuestion.length < 3) {
+    return json({ success: false, error: "Question must be at least 3 characters" }, 400);
   }
 
   const outOfScopeResponse = buildOutOfScopeResponse(effectiveQuestion);

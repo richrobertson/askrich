@@ -346,6 +346,7 @@ async function handleLocalChat(request) {
   }
 
   const question = String(payload?.question || "").trim();
+  const humorMode = normalizeHumorMode(payload?.humor_mode);
   const resolved = resolveFollowUpQuestion(question, payload?.history);
   if (resolved.needsClarification) {
     return json(
@@ -363,7 +364,7 @@ async function handleLocalChat(request) {
 
   const effectiveQuestion = resolved.effectiveQuestion;
 
-  const smallTalkResponse = buildSmallTalkResponse(effectiveQuestion);
+  const smallTalkResponse = buildSmallTalkResponse(effectiveQuestion, { humorMode });
   if (smallTalkResponse) {
     return json(
       {
@@ -485,6 +486,7 @@ async function handleOpenAiChat(request, env) {
   }
 
   const question = String(payload?.question || "").trim();
+  const humorMode = normalizeHumorMode(payload?.humor_mode);
   const resolved = resolveFollowUpQuestion(question, payload?.history);
   if (resolved.needsClarification) {
     return json(
@@ -506,7 +508,7 @@ async function handleOpenAiChat(request, env) {
     return json({ success: false, error: "Question must be at least 3 characters" }, 400);
   }
 
-  const smallTalkResponse = buildSmallTalkResponse(effectiveQuestion);
+  const smallTalkResponse = buildSmallTalkResponse(effectiveQuestion, { humorMode });
   if (smallTalkResponse) {
     return json(
       {
@@ -846,30 +848,49 @@ function tokenize(text) {
   return new Set(matches || []);
 }
 
-function buildSmallTalkResponse(question) {
+function buildSmallTalkResponse(question, options = {}) {
   const q = normalizeIntentText(question);
+  const humorMode = normalizeHumorMode(options?.humorMode);
   if (!q) {
     return null;
   }
 
   if (isJokeQuery(q)) {
+    if (humorMode === "clean_professional") {
+      return [
+        "Absolutely. Here is one senior cloud engineer joke and one dad joke:",
+        "- Senior cloud engineer joke: I said our Kubernetes cluster was self-healing, so finance asked if it could also fix the AWS bill.",
+        "- Dad joke: I would tell you a UDP joke, but you might not get it.",
+        "Want another one?",
+      ].join("\n");
+    }
+
     return [
-      "Absolutely. Here is one senior cloud engineer joke and one dad joke:",
-      "- Senior cloud engineer joke: I said our Kubernetes cluster was self-healing, so finance asked if it could also fix the AWS bill.",
-      "- Dad joke: I would tell you a UDP joke, but you might not get it.",
+      "Sure. Here is one cloud engineer joke and one dad joke:",
+      "- Cloud engineer joke: We finally hit five nines, then someone changed one Terraform variable.",
+      "- Dad joke: Why do programmers prefer dark mode? Because light attracts bugs.",
       "Want another one?",
     ].join("\n");
   }
 
   if (isGreetingQuery(q)) {
+    if (humorMode === "clean_professional") {
+      return "Hello. I can help with Rich's experience, project outcomes, technology depth, and profile links.";
+    }
     return "Hi there 👋 Great to chat with you. Ask me about Rich's experience, projects, technology stack, or public profile links any time.";
   }
 
   if (isHowAreYouQuery(q)) {
+    if (humorMode === "clean_professional") {
+      return "Doing well and ready to help. I can provide a concise role-fit summary or project-specific details.";
+    }
     return "I'm doing well and ready to help. If you want, I can share a quick summary of Rich's background or dive into a specific project.";
   }
 
   if (isThanksQuery(q)) {
+    if (humorMode === "clean_professional") {
+      return "You're welcome. If useful, I can follow up with Oracle outcomes, platform engineering depth, or leadership examples.";
+    }
     return "You're welcome — happy to help. If you'd like, ask a follow-up about Oracle migration, platform engineering, or leadership examples.";
   }
 
@@ -1032,6 +1053,14 @@ function isThanksQuery(questionLower) {
 
 function isWhoAreYouQuery(questionLower) {
   return WHO_ARE_YOU_SIGNALS.has(questionLower);
+}
+
+function normalizeHumorMode(value) {
+  const raw = String(value || "").trim().toLowerCase();
+  if (raw === "standard" || raw === "casual") {
+    return "standard";
+  }
+  return "clean_professional";
 }
 
 function isJokeQuery(questionLower) {

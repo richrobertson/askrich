@@ -325,8 +325,22 @@ describe('Canned Response Quality Tests', () => {
   });
 
   describe('Small Talk Responses', () => {
-    it('should return a friendly response for greetings', () => {
-      const response = buildSmallTalkResponse('Hello');
+    it('should return a friendly response for greetings in standard mode', () => {
+      const response = buildSmallTalkResponse('Hello', { humorMode: 'standard' });
+
+      expect(response).toContain('Hi there');
+      expect(response).toContain('Great to chat');
+    });
+
+    it('should default to clean/professional tone for greetings', () => {
+      const response = buildSmallTalkResponse('hello');
+
+      expect(response).toContain('Hello. I can help with Rich\'s experience');
+      expect(response).not.toContain('👋');
+    });
+
+    it('should use standard greeting tone when requested', () => {
+      const response = buildSmallTalkResponse('hello', { humorMode: 'standard' });
 
       expect(response).toContain('Hi there');
       expect(response).toContain('Great to chat');
@@ -349,6 +363,14 @@ describe('Canned Response Quality Tests', () => {
       expect(response).toContain('senior cloud engineer joke');
       expect(response).toContain('Dad joke');
       expect(response).toContain('Want another one?');
+    });
+
+    it('should use standard joke wording when standard mode is set', () => {
+      const response = buildSmallTalkResponse('tell a joke', { humorMode: 'standard' });
+
+      expect(response).toContain('one cloud engineer joke and one dad joke');
+      expect(response).toContain('five nines');
+      expect(response).not.toContain('self-healing');
     });
 
     it('should detect funny prompt variants for joke mode', () => {

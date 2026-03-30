@@ -16,6 +16,8 @@ const telemetry = {
 
 const conversationHistory = [];
 const MAX_CONVERSATION_HISTORY = 20;
+const DEFAULT_HUMOR_MODE = "clean_professional";
+const HUMOR_MODE_STORAGE_KEY = "askrich.humorMode";
 
 let isRequestInFlight = false;
 
@@ -31,6 +33,7 @@ const els = {
   apiBase: document.querySelector("#api-base"),
   topK: document.querySelector("#top-k"),
   tone: document.querySelector("#tone"),
+  humorMode: document.querySelector("#humor-mode"),
   metrics: {
     sent: document.querySelector("#metric-sent"),
     received: document.querySelector("#metric-received"),
@@ -205,6 +208,34 @@ function initApiBase() {
   });
 }
 
+function normalizeHumorMode(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (normalized === "standard") {
+    return "standard";
+  }
+  return DEFAULT_HUMOR_MODE;
+}
+
+function initHumorMode() {
+  let storedMode = DEFAULT_HUMOR_MODE;
+  try {
+    storedMode = localStorage.getItem(HUMOR_MODE_STORAGE_KEY) || DEFAULT_HUMOR_MODE;
+  } catch (_error) {
+    storedMode = DEFAULT_HUMOR_MODE;
+  }
+
+  els.humorMode.value = normalizeHumorMode(storedMode);
+  els.humorMode.addEventListener("change", () => {
+    const mode = normalizeHumorMode(els.humorMode.value);
+    els.humorMode.value = mode;
+    try {
+      localStorage.setItem(HUMOR_MODE_STORAGE_KEY, mode);
+    } catch (_error) {
+      // Keep working even if storage cannot be written.
+    }
+  });
+}
+
 function initPromptChips() {
   for (const prompt of SUGGESTED_PROMPTS) {
     const button = document.createElement("button");
@@ -237,6 +268,7 @@ async function askQuestion(question) {
     question,
     top_k: parseTopK(),
     history: conversationHistory,
+    humor_mode: normalizeHumorMode(els.humorMode.value),
   };
 
   const tone = (els.tone.value || "").trim();
@@ -339,6 +371,7 @@ function bindComposerShortcuts() {
 
 function init() {
   initApiBase();
+  initHumorMode();
   initPromptChips();
   bindComposerShortcuts();
   els.form.addEventListener("submit", onSubmit);

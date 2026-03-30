@@ -79,6 +79,35 @@ Outputs:
 
 The question bank is stored at [docs/evals/question_bank.json](../docs/evals/question_bank.json) and is designed to be portable across model providers.
 
+### [run_conversation_eval.py](run_conversation_eval.py)
+
+Run a multi-turn recruiter and hiring-manager conversation QA suite against `POST /api/chat`.
+
+```bash
+python scripts/run_conversation_eval.py
+```
+
+Optional flags:
+
+```bash
+python scripts/run_conversation_eval.py \
+  --api-base http://127.0.0.1:8000 \
+  --conversation-bank docs/evals/recruiter_hiring_manager_conversation_bank_public.json \
+  --output-dir data/evals \
+  --top-k 5
+```
+
+Outputs:
+
+- `data/evals/conversation_eval_run_<timestamp>.json` full per-turn results
+- `data/evals/conversation_eval_turns_<timestamp>.csv` turn-level review sheet
+- `data/evals/conversation_eval_signal_strength_<timestamp>.csv` cross-reference of signal strengths by desired signal
+
+Conversation bank:
+
+- [docs/evals/recruiter_hiring_manager_conversation_bank_public.json](../docs/evals/recruiter_hiring_manager_conversation_bank_public.json)
+- Includes sourced, paraphrased public recruiter/interview conversation themes with per-turn checks and source URLs.
+
 ## Future Script Categories
 
 - **Deployment helpers**

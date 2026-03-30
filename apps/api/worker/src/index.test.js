@@ -290,6 +290,16 @@ describe('Canned Response Quality Tests', () => {
       const response = buildOutOfScopeResponse('what outcomes did rich deliver at oracle');
       expect(response).toBeNull();
     });
+
+    it('should not false-positive on in-scope words containing age substring', () => {
+      const response = buildOutOfScopeResponse('how do you manage migration risk in distributed systems?');
+      expect(response).toBeNull();
+    });
+
+    it('should still detect explicit age question phrasing', () => {
+      const response = buildOutOfScopeResponse('what is your age?');
+      expect(response).toContain('personal-preference questions');
+    });
   });
 
   describe('Affirmation Follow-up Resolution', () => {
@@ -322,11 +332,35 @@ describe('Canned Response Quality Tests', () => {
       expect(resolved.needsClarification).toBe(true);
       expect(resolved.effectiveQuestion).toBe('yes');
     });
+
+    it('should resolve follow-up intent without regex dependence', () => {
+      const noisyPrompt = `Context noted. Would you like me to ${'  '.repeat(80)}summarize platform outcomes?`;
+      const resolved = resolveFollowUpQuestion('yes', [
+        { role: 'assistant', content: noisyPrompt },
+      ]);
+
+      expect(resolved.needsClarification).toBe(false);
+      expect(resolved.effectiveQuestion.toLowerCase()).toContain('summarize platform outcomes');
+    });
   });
 
   describe('Small Talk Responses', () => {
-    it('should return a friendly response for greetings', () => {
-      const response = buildSmallTalkResponse('Hello');
+    it('should return a friendly response for greetings in standard mode', () => {
+      const response = buildSmallTalkResponse('Hello', { humorMode: 'standard' });
+
+      expect(response).toContain('Hi there');
+      expect(response).toContain('Great to chat');
+    });
+
+    it('should default to clean/professional tone for greetings', () => {
+      const response = buildSmallTalkResponse('hello');
+
+      expect(response).toContain('Hello. I can help with Rich\'s experience');
+      expect(response).not.toContain('👋');
+    });
+
+    it('should use standard greeting tone when requested', () => {
+      const response = buildSmallTalkResponse('hello', { humorMode: 'standard' });
 
       expect(response).toContain('Hi there');
       expect(response).toContain('Great to chat');
@@ -341,6 +375,29 @@ describe('Canned Response Quality Tests', () => {
     it('should return null for non-small-talk questions', () => {
       const response = buildSmallTalkResponse('what technologies did you use at oracle');
       expect(response).toBeNull();
+    });
+
+    it('should return cloud engineer and dad jokes when asked for something funny', () => {
+      const response = buildSmallTalkResponse('tell a joke');
+
+      expect(response).toContain('senior cloud engineer joke');
+      expect(response).toContain('Dad joke');
+      expect(response).toContain('Want another one?');
+    });
+
+    it('should use standard joke wording when standard mode is set', () => {
+      const response = buildSmallTalkResponse('tell a joke', { humorMode: 'standard' });
+
+      expect(response).toContain('one cloud engineer joke and one dad joke');
+      expect(response).toContain('five nines');
+      expect(response).not.toContain('self-healing');
+    });
+
+    it('should detect funny prompt variants for joke mode', () => {
+      const response = buildSmallTalkResponse('say something funny');
+
+      expect(typeof response).toBe('string');
+      expect(response).toContain('dad joke');
     });
   });
 

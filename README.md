@@ -25,13 +25,14 @@ The system retrieves relevant documents, assembles context, and returns concise 
 
 ## Current status
 
-Milestone status as of 2026-03-28:
+Milestone status as of 2026-03-30:
 - ✅ Milestone 1 completed (corpus + schemas + ingestion scaffold)
 - ✅ Milestone 2 completed (MVP retrieval + `/api/chat` + citations)
 - ✅ Milestone 3 completed (web chat integration + embeddable widget)
 - ✅ Milestone 4 completed (eval harness + quality loop)
 - ✅ Milestone 5 completed (Cloudflare deployment + production hardening docs and runbooks)
-- Planned next: Milestone 6 (rate limiting, question recording, thumbs up/down feedback, and privacy/feedback operations)
+- ✅ Milestone 6 completed (rate limiting, question recording, thumbs up/down feedback, and privacy/feedback operations)
+- 📅 Milestone 7 planned (analytics dashboards, feedback-driven insights, corpus evolution, A/B testing)
 
 ## Implementation status
 
@@ -133,6 +134,7 @@ data/
 - **M4:** Evaluation harness and quality polish
 - **M5:** Cloudflare deployment and production hardening
 - **M6:** Usage controls, question analytics, feedback capture, and privacy/review workflows
+- **M7:** Analytics dashboards, feedback-driven insights, corpus evolution, A/B testing
 
 See [docs/milestones/overview.md](docs/milestones/overview.md).
 
@@ -143,6 +145,7 @@ Milestone detail pages:
 - [docs/milestones/milestone-04.md](docs/milestones/milestone-04.md)
 - [docs/milestones/milestone-05.md](docs/milestones/milestone-05.md)
 - [docs/milestones/milestone-06.md](docs/milestones/milestone-06.md)
+- [docs/milestones/milestone-07.md](docs/milestones/milestone-07.md)
 
 Milestone-1 planning details are expanded in:
 - [docs/milestones/milestone-01.md](docs/milestones/milestone-01.md)

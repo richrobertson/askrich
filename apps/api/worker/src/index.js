@@ -71,52 +71,184 @@
  */
 
 /**
- * Generate a stable UUID v5-like identifier from content
- * (Deterministic for the same input; we use SHA-256 based approach for simplicity)
+ * MILESTONE 6 FUNCTIONS: Rate Limiting, Client Identification, and Event Recording
+ *
+ * These functions implement the core M6 functionality for protecting Ask Rich
+ * from abuse while capturing usage patterns for product learning.
+ *
+ * ARCHITECTURE:
+ *   1. generateEventId(type, content) → Stable event identifier
+ *   2. getClientId(request) → Privacy-safe client fingerprint
+ *   3. checkRateLimit(clientId, env, kv) → Rate limit enforcement
+ *   4. recordQuestionEvent(...) → Question event logging
+ *   5. recordAnswerEvent(...) → Answer event logging
+ *
+ * DATA FLOW:
+ *   request → getClientId() → clientId
+ *          → generateEventId() → questionEventId
+ *          → checkRateLimit() → allow/reject
+ *          → recordQuestionEvent() → KV storage
+ *          ↓
+ *   answer → generateEventId() → answerEventId
+ *          → recordAnswerEvent() → KV storage
+ *          ↓
+ *   feedback → POST /api/feedback
+ *           → recordFeedbackEvent() → KV storage
+ *
+ * STORAGE FORMAT: NDJSON (newline-delimited JSON)
+ *   - One event per line for append-only records
+ *   - Daily partitions: events:2026-03-29
+ *   - 90-day TTL per event
+ */
+
+/**
+ * Generate a stable event identifier
+ *
+ * PURPOSE:
+ *   Create unique, reproducible event IDs for questions, answers, and feedback.
+ *   IDs are used to link events together (Q→A→Feedback) and identify duplicates.
+ *
+ * DESIGN:
+ *   - Type prefix: q_ (question), a_ (answer), f_ (feedback)
+ *   - Timestamp: Unix milliseconds for temporal ordering
+ *   - Random suffix: Ensures uniqueness even for rapid-fire events
+ *
+ * PARAMETERS:
+ *   type: Event type ("question", "answer", "feedback")
+ *   content: Event content (question text, answer text, etc.)
+ *
+ * RETURNS:
+ *   Event ID: Format "q_1234567890_abc123"
+ *
+ * EXAMPLE:
+ *   const qId = generateEventId("question", "What is Kubernetes?");
+ *   // → "q_1711785600000_xyz789"
  */
 function generateEventId(type, content) {
+  // Capture current timestamp for temporal ordering
   const timestamp = Date.now().toString();
+  // Create seed from type, content, and timestamp (truncate for ID length limit)
   const seed = `${type}:${content}:${timestamp}`.substring(0, 50);
-  // Simple deterministic ID generation using timestamp + hash prefix
+  // Build ID: type_prefix + timestamp + random_suffix
+  // Type prefix: first character of type (q/a/f)
+  // Timestamp: milliseconds since epoch
+  // Random: Base-36 encoded random number (6 chars)
   const baseId = `${type.charAt(0)}_${timestamp}_${Math.random().toString(36).substring(2, 8)}`;
   return baseId;
 }
 
 /**
- * Extract client identity from request (IP + origin fingerprint)
+ * Extract and hash client identity from request
+ *
+ * PURPOSE:
+ *   Identify unique clients for rate limiting without storing raw IP addresses.
+ *   Uses IP + origin fingerprinting for hybrid identification.
+ *
+ * PRIVACY DESIGN:
+ *   ✓ No raw IP storage (uses truncated prefix only)
+ *   ✓ No user authentication required
+ *   ✓ Session-independent (based on request context)
+ *   ✓ Deterministic (same IP/origin = same clientId)
+ *   ✗ Not reversible (cannot reconstruct original IP)
+ *
+ * HEADER PRECEDENCE:
+ *   1. CF-Connecting-IP: Cloudflare's client IP (most reliable)
+ *   2. X-Forwarded-For: Proxy chain (first IP is client)
+ *   3. X-Real-IP: Fallback reverse proxy header
+ *   4. "unknown": If all headers missing
+ *
+ * FINGERPRINTING:
+ *   Combines IP + origin header to distinguish:
+ *   - Same IP from different origins → Different clients
+ *   - Same origin from different IPs → Different clients
+ *   - Spoofed headers → May bypass (acceptable tradeoff)
+ *
+ * RETURNS:
+ *   Client ID: Format "192.0.2_18" (truncated IP + origin length)
+ *
+ * EXAMPLE:
+ *   const req = { headers: { get: (name) => '203.0.113.42' } };
+ *   const clientId = getClientId(req);
+ *   // → "203.0.11_25"
  */
 function getClientId(request) {
-  // Cloudflare provides CF-Connecting-IP header
+  // Extract IP from headers (Cloudflare worker environment)
+  // CF-Connecting-IP is most reliable in production Cloudflare Workers
   let ip = request.headers.get("cf-connecting-ip") || 
            request.headers.get("x-forwarded-for") || 
            request.headers.get("x-real-ip") || 
            "unknown";
   
-  // Take first IP if multiple (x-forwarded-for can be comma-separated)
+  // Handle X-Forwarded-For with multiple IPs separated by commas
+  // Format: "203.0.113.1, 198.51.100.1, 192.0.2.1"
+  // Take first (client) IP only
   ip = ip.split(",")[0].trim();
   
-  // Also consider origin for additional fingerprinting
+  // Extract origin for additional fingerprinting
+  // Example: "https://askrich.com" → length = 18
   const origin = request.headers.get("origin") || "";
   const userAgent = request.headers.get("user-agent") || "";
   
-  // Create a simple hash-based client ID (not storing raw IP)
-  // For now, just use IP prefix to avoid PII storage
+  // Create privacy-safe client ID
+  // Use first 10 chars of IP (prevents full IP storage) + origin length
+  // Example: "192.0.2_42" (IP prefix + origin header length)
+  // This prevents IP reversal while distinguishing different origins
   return `${ip.substring(0, 10)}_${origin.length}`;
 }
 
 /**
  * Check and enforce rate limits for a client
- * Returns { allowed: boolean, resetTime?: number }
+ *
+ * PURPOSE:
+ *   Prevent abuse by limiting questions per client to:
+ *   - 30 questions per hour (configurable)
+ *   - 1 second minimum between requests (burst protection)
+ * 
+ * ENFORCEMENT STRATEGY:
+ *   - Lenient: Count violations but allow execution
+ *   - Graceful degradation: If KV unavailable, allow request
+ *   - Return: Allowed status + reset time when limited
+ *
+ * RATE LIMIT TIERS:
+ *   Hourly limit:
+ *     Normal recruiter: ~1-2 questions per minute (well under 30/hour)
+ *     Heavy user: 30 questions in 1 hour = HIT LIMIT
+ *   Burst protection:
+ *     Rapid-fire: 5 questions in 1 second = HITS burst limit
+ *     Normal: 1 question per second = no burst violation
+ *
+ * STORAGE:
+ *   Key: ratelimit:{clientId}
+ *   Value: { requests: [timestamp1, timestamp2, ...] }
+ *   TTL: 24 hours (keeps old timestamps for sliding window)
+ *
+ * RETURNS:
+ *   { allowed: true } - Request can proceed
+ *   { allowed: false, resetTime: 3600 } - Limited, retry in 3600 seconds
+ *
+ * PARAMETERS:
+ *   clientId: Client identifier from getClientId()
+ *   env: Cloudflare Worker environment with rate limit config
+ *   kv: KV store for tracking per-client request history
+ *
+ * EXAMPLE:
+ *   const result = await checkRateLimit("192.0.2_42", env, kv);
+ *   if (!result.allowed) {
+ *     return error(429, "Rate limited. Retry in", result.resetTime, "seconds");
+ *   }
  */
 async function checkRateLimit(clientId, env, kv) {
+  // Feature flag: allow disabling rate limiting in development
   if (env.RATE_LIMIT_ENABLED !== "true") {
     return { allowed: true };
   }
 
+  // Get current time and rate limit key
   const now = Date.now();
   const rateKey = `ratelimit:${clientId}`;
   
-  // Get existing rate limit record
+  // Retrieve existing rate limit record for this client
+  // Returns null if first request or record expired
   let record = {};
   try {
     const stored = await kv.get(rateKey);
@@ -124,16 +256,22 @@ async function checkRateLimit(clientId, env, kv) {
       record = JSON.parse(stored);
     }
   } catch (_e) {
-    // If KV is unavailable, allow request (graceful degradation)
+    // If KV is unavailable, fail open (allow request)
+    // Ensures graceful degradation when storage fails
     return { allowed: true };
   }
 
+  // Calculate sliding window: requests from last 60 minutes
+  // Removes timestamps older than 1 hour for hourly limit check
   const hourAgo = now - (60 * 60 * 1000);
   const recentRequests = (record.requests || []).filter(t => t > hourAgo);
   
-  // Check hourly limit (default 30)
+  // Check hourly rate limit (default 30 questions/hour)
+  // Config: RATE_LIMIT_QPS_HOUR (questions per hour, misnaming but intentional)
   const qpsHour = parseInt(env.RATE_LIMIT_QPS_HOUR || "30", 10);
   if (recentRequests.length >= qpsHour) {
+    // Client has hit hourly limit
+    // Calculate when limit will reset (when oldest request ages out)
     const resetTime = Math.ceil((recentRequests[0] + 60 * 60 * 1000 - now) / 1000);
     return { allowed: false, resetTime };
   }

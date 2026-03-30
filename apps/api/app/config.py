@@ -33,19 +33,17 @@ class Settings:
         return stripped or None
 
     app_env: str = (_getenv_nonempty.__func__("APP_ENV") or _getenv_nonempty.__func__("ENVIRONMENT") or "dev").lower()
+    _is_prod: bool = app_env == "prod"
     _llm_api_key_nonempty: str | None = _getenv_nonempty.__func__("LLM_API_KEY")
-    _enable_prod_openai_defaults: bool = app_env == "prod" and bool(_llm_api_key_nonempty)
 
     # LLM Provider (abstract)
     # Default to local extractive fallback; set LLM_PROVIDER + LLM_API_BASE + LLM_MODEL
     # to enable an external LLM (e.g. Ollama, OpenAI-compatible). See .env.example.
-    # In prod, OpenAI defaults are only applied when a non-empty LLM_API_KEY is provided.
-    llm_provider: str = _getenv_nonempty.__func__("LLM_PROVIDER") or ("openai" if _enable_prod_openai_defaults else "")
-    llm_api_base: str = _getenv_nonempty.__func__("LLM_API_BASE") or (
-        "https://api.openai.com/v1" if _enable_prod_openai_defaults else ""
-    )
+    # In prod, force OpenAI GPT-5.4 regardless optional env overrides.
+    llm_provider: str = "openai" if _is_prod else (_getenv_nonempty.__func__("LLM_PROVIDER") or "")
+    llm_api_base: str = "https://api.openai.com/v1" if _is_prod else (_getenv_nonempty.__func__("LLM_API_BASE") or "")
     llm_api_key: str = _llm_api_key_nonempty or ""
-    llm_model: str = _getenv_nonempty.__func__("LLM_MODEL") or ("gpt-5.4" if _enable_prod_openai_defaults else "")
+    llm_model: str = "gpt-5.4" if _is_prod else (_getenv_nonempty.__func__("LLM_MODEL") or "")
     llm_temperature: float = float(os.getenv("LLM_TEMPERATURE", "0.0"))
 
     # Embedding Provider (abstract)

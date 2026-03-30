@@ -35,8 +35,11 @@
  *   - apps/api/worker/package.json: Test dependencies
  *
  * ENVIRONMENT:
- *   - CHAT_BACKEND_MODE: "upstream" or "local" (defaults to "local")
+ *   - CHAT_BACKEND_MODE: "upstream", "openai", or "local" (defaults to "local")
  *   - UPSTREAM_API_BASE: Base URL for upstream (e.g., http://127.0.0.1:8000)
+ *   - OPENAI_API_KEY: API key for direct OpenAI mode
+ *   - OPENAI_API_BASE: Optional OpenAI base URL (defaults to https://api.openai.com/v1)
+ *   - OPENAI_MODEL: Optional model for direct OpenAI mode (defaults to gpt-5.4)
  *   - ALLOWED_ORIGINS: CORS whitelist (comma-separated)
  */
 
@@ -121,6 +124,10 @@ export default {
           request,
           env,
         );
+      }
+
+      if (backendMode === "openai") {
+        return withCors(await handleOpenAiChat(request, env), request, env);
       }
 
       return withCors(await handleLocalChat(request), request, env);
@@ -394,6 +401,95 @@ async function handleLocalChat(request) {
     },
     200,
   );
+}
+
+async function handleOpenAiChat(request, env) {
+  let payload;
+  try {
+    payload = await request.json();
+  } catch (_error) {
+    return json({ success: false, error: "Invalid JSON payload" }, 400);
+  }
+
+  const question = String(payload?.question || "").trim();
+  if (question.length < 3) {
+    return json({ success: false, error: "Question must be at least 3 characters" }, 400);
+  }
+
+  const apiKey = String(env.OPENAI_API_KEY || env.LLM_API_KEY || "").trim();
+  if (!apiKey) {
+    return json({ success: false, error: "OPENAI_API_KEY is not configured" }, 500);
+  }
+
+  const apiBase = String(env.OPENAI_API_BASE || "https://api.openai.com/v1").replace(/\/$/, "");
+  const model = String(env.OPENAI_MODEL || "gpt-5.4").trim() || "gpt-5.4";
+
+  let openAiResponse;
+  try {
+    openAiResponse = await fetch(`${apiBase}/responses`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        input: question,
+      }),
+    });
+  } catch (_error) {
+    return json({ success: false, error: "OpenAI service unavailable" }, 502);
+  }
+
+  const openAiPayload = await openAiResponse.json().catch(() => ({}));
+  if (!openAiResponse.ok) {
+    const errorMessage =
+      openAiPayload?.error?.message || openAiPayload?.error || `OpenAI request failed (${openAiResponse.status})`;
+    return json({ success: false, error: String(errorMessage) }, openAiResponse.status);
+  }
+
+  const answer = extractOpenAiText(openAiPayload);
+  if (!answer) {
+    return json({ success: false, error: "OpenAI returned no answer text" }, 502);
+  }
+
+  return json(
+    {
+      success: true,
+      data: {
+        answer,
+        citations: [],
+        retrieved_chunks: 0,
+      },
+    },
+    200,
+  );
+}
+
+function extractOpenAiText(payload) {
+  if (typeof payload?.output_text === "string" && payload.output_text.trim()) {
+    return payload.output_text.trim();
+  }
+
+  const output = Array.isArray(payload?.output) ? payload.output : [];
+  for (const item of output) {
+    const content = Array.isArray(item?.content) ? item.content : [];
+    for (const part of content) {
+      if (part?.type === "output_text" && typeof part?.text === "string" && part.text.trim()) {
+        return part.text.trim();
+      }
+      if (part?.type === "text" && typeof part?.text === "string" && part.text.trim()) {
+        return part.text.trim();
+      }
+    }
+  }
+
+  const choiceText = payload?.choices?.[0]?.message?.content;
+  if (typeof choiceText === "string" && choiceText.trim()) {
+    return choiceText.trim();
+  }
+
+  return "";
 }
 
 function clampTopK(value) {

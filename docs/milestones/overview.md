@@ -1,6 +1,6 @@
 # Milestone Overview
 
-Last updated: 2026-03-28
+Last updated: 2026-03-30
 
 ## Milestone 1 — Content corpus + schemas + ingestion scaffold
 
@@ -110,7 +110,30 @@ Last updated: 2026-03-28
 - Feedback submission flow and stored feedback events
 - Review workflow for negative feedback and follow-up improvements
 
-**Status**: Planned
+**Status**: Implemented
 
 **Non-goals**
 - Full analytics platform or user account system
+
+## Milestone 7 — Analytics, insights, and corpus evolution
+
+[Details](milestone-07.md)
+
+**Scope**
+- Transform captured feedback signals into actionable insights
+- Enable data-driven corpus and prompt improvements
+- Support A/B testing and hypothesis-driven optimization
+
+**Deliverables**
+- Operational dashboards for question volume and answer quality
+- Feedback-driven content planning process
+- Lightweight corpus versioning and evolution tracking
+- A/B testing framework for retrieval strategies
+- Domain-specific insights and performance reporting
+
+**Status**: Planned
+
+**Non-goals**
+- Real-time predictive modeling
+- User profiling or personalized answers
+- Complex multi-armed bandit testing

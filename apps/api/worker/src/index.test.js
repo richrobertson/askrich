@@ -768,4 +768,76 @@ describe('Canned Response Quality Tests', () => {
       expect(getChatCacheTtlSeconds({ CHAT_CACHE_TTL_SECONDS: 'abc' })).toBe(300);
     });
   });
+
+  describe('OpenAI mode small-talk routing', () => {
+    function buildChatRequest(payload) {
+      return new Request('https://example.com/api/chat', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    }
+
+    it('should answer "hi" in openai mode without min-length rejection', async () => {
+      const response = await worker.fetch(
+        buildChatRequest({
+          question: 'hi',
+          top_k: 5,
+          history: [],
+          humor_mode: 'clean_professional',
+        }),
+        {
+          CHAT_BACKEND_MODE: 'openai',
+        },
+      );
+
+      const body = await response.json();
+      expect(response.status).toBe(200);
+      expect(body.success).toBe(true);
+      expect(body.data.answer).toContain('Hello.');
+    });
+
+    it('should still reject short non-small-talk input in openai mode', async () => {
+      const response = await worker.fetch(
+        buildChatRequest({
+          question: 'ab',
+          top_k: 5,
+          history: [],
+          humor_mode: 'clean_professional',
+        }),
+        {
+          CHAT_BACKEND_MODE: 'openai',
+        },
+      );
+
+      const body = await response.json();
+      expect(response.status).toBe(400);
+      expect(body.success).toBe(false);
+      expect(body.error).toContain('at least 3 characters');
+    });
+
+    it('should route short greeting through top-level /api/chat in openai mode', async () => {
+      const response = await worker.fetch(
+        new Request('https://example.com/api/chat', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            question: 'hi',
+            top_k: 5,
+            history: [],
+            humor_mode: 'clean_professional',
+          }),
+        }),
+        {
+          CHAT_BACKEND_MODE: 'openai',
+          RATE_LIMIT_ENABLED: 'false',
+        },
+      );
+
+      const body = await response.json();
+      expect(response.status).toBe(200);
+      expect(body.success).toBe(true);
+      expect(body.data.answer).toContain('Hello.');
+    });
+  });
 });

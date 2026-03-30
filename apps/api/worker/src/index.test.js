@@ -290,6 +290,16 @@ describe('Canned Response Quality Tests', () => {
       const response = buildOutOfScopeResponse('what outcomes did rich deliver at oracle');
       expect(response).toBeNull();
     });
+
+    it('should not false-positive on in-scope words containing age substring', () => {
+      const response = buildOutOfScopeResponse('how do you manage migration risk in distributed systems?');
+      expect(response).toBeNull();
+    });
+
+    it('should still detect explicit age question phrasing', () => {
+      const response = buildOutOfScopeResponse('what is your age?');
+      expect(response).toContain('personal-preference questions');
+    });
   });
 
   describe('Affirmation Follow-up Resolution', () => {
@@ -321,6 +331,16 @@ describe('Canned Response Quality Tests', () => {
 
       expect(resolved.needsClarification).toBe(true);
       expect(resolved.effectiveQuestion).toBe('yes');
+    });
+
+    it('should resolve follow-up intent without regex dependence', () => {
+      const noisyPrompt = `Context noted. Would you like me to ${'  '.repeat(80)}summarize platform outcomes?`;
+      const resolved = resolveFollowUpQuestion('yes', [
+        { role: 'assistant', content: noisyPrompt },
+      ]);
+
+      expect(resolved.needsClarification).toBe(false);
+      expect(resolved.effectiveQuestion.toLowerCase()).toContain('summarize platform outcomes');
     });
   });
 

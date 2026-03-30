@@ -328,9 +328,38 @@ const OUT_OF_SCOPE_PERSONAL_SIGNALS = [
   "astrology",
   "horoscope",
   "birthday",
-  "age",
+  "how old are you",
+  "what is your age",
+  "your age",
   "religion",
   "politics",
+];
+
+const MAX_NORMALIZED_HISTORY_TURNS = 50;
+const MAX_NORMALIZED_HISTORY_CHARS = 12000;
+
+const SUPPRESSED_UNLESS_ASKED_IDS = new Set(["profile-career-transition-rif"]);
+
+const CAREER_BREAK_QUERY_SIGNALS = [
+  "career break",
+  "career gap",
+  "employment gap",
+  "resume gap",
+  "work gap",
+  "break in my career",
+  "break from work",
+  "break from my career",
+  "time off",
+  "unemployed",
+  "rif",
+  "layoff",
+  "laid off",
+  "reduction in force",
+  "between jobs",
+  "what have you been doing",
+  "since oracle",
+  "after oracle",
+  "adversity",
 ];
 
 function getBackendMode(env) {
@@ -440,7 +469,7 @@ async function handleLocalChat(request) {
     );
   }
 
-  const ranked = rankCorpus(effectiveQuestion).slice(0, topK);
+  const ranked = applyCareerBreakSuppression(effectiveQuestion, rankCorpus(effectiveQuestion).slice(0, topK));
   if (!ranked.length) {
     return json(
       {
@@ -586,19 +615,7 @@ async function handleOpenAiChat(request, env) {
     );
   }
 
-  // Only surface career-break/gap content when the question explicitly asks about it.
-  const careerBreakSignals = [
-    "gap", "break", "career break", "work gap", "time off", "leave", "unemployed",
-    "rif", "layoff", "laid off", "reduction in force", "transition", "between jobs",
-    "what have you been doing", "since oracle", "after oracle", "adversity",
-  ];
-  const questionLower = String(effectiveQuestion).toLowerCase();
-  const isCareerBreakQuery = careerBreakSignals.some((s) => questionLower.includes(s));
-  const SUPPRESSED_UNLESS_ASKED = new Set(["profile-career-transition-rif"]);
-
-  const ranked = rankCorpus(effectiveQuestion)
-    .slice(0, topK)
-    .filter((doc) => isCareerBreakQuery || !SUPPRESSED_UNLESS_ASKED.has(doc.id));
+  const ranked = applyCareerBreakSuppression(effectiveQuestion, rankCorpus(effectiveQuestion).slice(0, topK));
 
   if (!ranked.length) {
     return json(
@@ -942,13 +959,68 @@ function normalizeConversationHistory(history) {
     return [];
   }
 
-  return history
-    .map((entry) => {
-      const role = String(entry?.role || "").toLowerCase();
-      const content = String(entry?.content || entry?.text || "").trim();
-      return { role, content };
-    })
-    .filter((entry) => (entry.role === "assistant" || entry.role === "user") && entry.content.length > 0);
+  const recentHistory = history.slice(-MAX_NORMALIZED_HISTORY_TURNS);
+  const normalizedNewestFirst = [];
+  let totalChars = 0;
+
+  for (let i = recentHistory.length - 1; i >= 0; i -= 1) {
+    const entry = recentHistory[i];
+    const role = String(entry?.role || "").toLowerCase();
+    const content = String(entry?.content || entry?.text || "").trim();
+    if ((role !== "assistant" && role !== "user") || content.length === 0) {
+      continue;
+    }
+
+    if (totalChars + content.length > MAX_NORMALIZED_HISTORY_CHARS) {
+      continue;
+    }
+
+    totalChars += content.length;
+    normalizedNewestFirst.push({ role, content });
+  }
+
+  return normalizedNewestFirst.reverse();
+}
+
+function applyCareerBreakSuppression(question, docs) {
+  const allowCareerBreakDoc = isCareerBreakQuestion(question);
+  return (Array.isArray(docs) ? docs : []).filter(
+    (doc) => allowCareerBreakDoc || !SUPPRESSED_UNLESS_ASKED_IDS.has(doc.id),
+  );
+}
+
+function isCareerBreakQuestion(question) {
+  const normalized = normalizeIntentText(question);
+  if (!normalized) {
+    return false;
+  }
+
+  return CAREER_BREAK_QUERY_SIGNALS.some((signal) => normalized.includes(signal));
+}
+
+function extractIntentFromAssistantQuestionLine(questionLine) {
+  const text = String(questionLine || "").trim();
+  if (!text) {
+    return "";
+  }
+
+  const lower = text.toLowerCase();
+  const prefixes = ["want me to ", "would you like me to "];
+  for (const prefix of prefixes) {
+    const start = lower.indexOf(prefix);
+    if (start < 0) {
+      continue;
+    }
+
+    const remainder = text.slice(start + prefix.length);
+    const questionMarkIndex = remainder.indexOf("?");
+    const intent = (questionMarkIndex >= 0 ? remainder.slice(0, questionMarkIndex) : remainder).trim();
+    if (intent) {
+      return intent;
+    }
+  }
+
+  return "";
 }
 
 function extractAssistantPendingIntent(history) {
@@ -963,14 +1035,9 @@ function extractAssistantPendingIntent(history) {
       continue;
     }
 
-    const wantMatch = questionLine.match(/want me to\s+(.+?)\?/i);
-    if (wantMatch?.[1]) {
-      return wantMatch[1].trim();
-    }
-
-    const likeMatch = questionLine.match(/would you like me to\s+(.+?)\?/i);
-    if (likeMatch?.[1]) {
-      return likeMatch[1].trim();
+    const intent = extractIntentFromAssistantQuestionLine(questionLine);
+    if (intent) {
+      return intent;
     }
   }
 

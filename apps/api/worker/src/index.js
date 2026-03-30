@@ -1810,6 +1810,8 @@ export {
   buildAnswer,
   buildBehavioralAnswer,
   buildProfileResponse,
+  buildOutOfScopeResponse,
+  resolveFollowUpQuestion,
   isBehavioralQuestion,
   isOracleCnsOutcomesQuestion,
   isTechnologyPassionQuestion,

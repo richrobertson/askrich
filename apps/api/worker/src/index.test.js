@@ -399,6 +399,40 @@ describe('Canned Response Quality Tests', () => {
       expect(typeof response).toBe('string');
       expect(response).toContain('dad joke');
     });
+
+    it('should rotate to a different joke set for follow-up requests in clean professional mode', () => {
+      const first = buildSmallTalkResponse('tell a joke', {
+        humorMode: 'clean_professional',
+        history: [],
+      });
+
+      const second = buildSmallTalkResponse('tell me another joke', {
+        humorMode: 'clean_professional',
+        history: [{ role: 'assistant', content: first }],
+      });
+
+      expect(typeof first).toBe('string');
+      expect(typeof second).toBe('string');
+      expect(second).not.toBe(first);
+      expect(second).toContain('Want another one?');
+    });
+
+    it('should rotate to a different joke set for follow-up requests in standard mode', () => {
+      const first = buildSmallTalkResponse('tell a joke', {
+        humorMode: 'standard',
+        history: [],
+      });
+
+      const second = buildSmallTalkResponse('tell me another joke', {
+        humorMode: 'standard',
+        history: [{ role: 'assistant', content: first }],
+      });
+
+      expect(typeof first).toBe('string');
+      expect(typeof second).toBe('string');
+      expect(second).not.toBe(first);
+      expect(second).toContain('Want another one?');
+    });
   });
 
   describe('Sensitive Contact Handling', () => {

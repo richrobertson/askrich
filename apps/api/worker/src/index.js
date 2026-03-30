@@ -803,7 +803,10 @@ async function handleLocalChat(request) {
 
   const effectiveQuestion = resolved.effectiveQuestion;
 
-  const smallTalkResponse = buildSmallTalkResponse(effectiveQuestion, { humorMode });
+  const smallTalkResponse = buildSmallTalkResponse(effectiveQuestion, {
+    humorMode,
+    history: payload?.history,
+  });
   if (smallTalkResponse) {
     return json(
       {
@@ -947,7 +950,10 @@ async function handleOpenAiChat(request, env) {
     return json({ success: false, error: "Question must be at least 3 characters" }, 400);
   }
 
-  const smallTalkResponse = buildSmallTalkResponse(effectiveQuestion, { humorMode });
+  const smallTalkResponse = buildSmallTalkResponse(effectiveQuestion, {
+    humorMode,
+    history: payload?.history,
+  });
   if (smallTalkResponse) {
     return json(
       {
@@ -1278,24 +1284,65 @@ function tokenize(text) {
 function buildSmallTalkResponse(question, options = {}) {
   const q = normalizeIntentText(question);
   const humorMode = normalizeHumorMode(options?.humorMode);
+  const history = options?.history;
   if (!q) {
     return null;
   }
 
   if (isJokeQuery(q)) {
+    const jokeSets =
+      humorMode === "clean_professional"
+        ? [
+            {
+              intro: "Absolutely. Here is one senior cloud engineer joke and one dad joke:",
+              cloud: "I said our Kubernetes cluster was self-healing, so finance asked if it could also fix the AWS bill.",
+              dad: "I would tell you a UDP joke, but you might not get it.",
+            },
+            {
+              intro: "Absolutely. Here is another senior cloud engineer joke and one dad joke:",
+              cloud: "Our incident review said uptime was strong, but the strongest signal was that no one paged the coffee machine.",
+              dad: "I told my team I know a joke about recursion, but first I need to tell you a joke about recursion.",
+            },
+            {
+              intro: "Absolutely. Here is a fresh senior cloud engineer joke and one dad joke:",
+              cloud: "We called the migration zero-downtime, then celebrated the only outage as a typo in the status page.",
+              dad: "I only know 25 letters of the alphabet. I do not know y.",
+            },
+          ]
+        : [
+            {
+              intro: "Sure. Here is one cloud engineer joke and one dad joke:",
+              cloud: "We finally hit five nines, then someone changed one Terraform variable.",
+              dad: "Why do programmers prefer dark mode? Because light attracts bugs.",
+            },
+            {
+              intro: "Sure. Here is another cloud engineer joke and one dad joke:",
+              cloud: "Our SLO was perfect until the dashboard itself needed a maintenance window.",
+              dad: "Why did the developer go broke? Because they used up all their cache.",
+            },
+            {
+              intro: "Sure. Here is a fresh cloud engineer joke and one dad joke:",
+              cloud: "I said the rollout was canary-safe, then the canary opened a Sev-2 ticket.",
+              dad: "I would make a joke about time travel, but you did not like it.",
+            },
+          ];
+
+    const priorJokeCount = countAssistantJokeResponses(history);
+    const selectedJokeSet = jokeSets[priorJokeCount % jokeSets.length];
+
     if (humorMode === "clean_professional") {
       return [
-        "Absolutely. Here is one senior cloud engineer joke and one dad joke:",
-        "- Senior cloud engineer joke: I said our Kubernetes cluster was self-healing, so finance asked if it could also fix the AWS bill.",
-        "- Dad joke: I would tell you a UDP joke, but you might not get it.",
+        selectedJokeSet.intro,
+        `- Senior cloud engineer joke: ${selectedJokeSet.cloud}`,
+        `- Dad joke: ${selectedJokeSet.dad}`,
         "Want another one?",
       ].join("\n");
     }
 
     return [
-      "Sure. Here is one cloud engineer joke and one dad joke:",
-      "- Cloud engineer joke: We finally hit five nines, then someone changed one Terraform variable.",
-      "- Dad joke: Why do programmers prefer dark mode? Because light attracts bugs.",
+      selectedJokeSet.intro,
+      `- Cloud engineer joke: ${selectedJokeSet.cloud}`,
+      `- Dad joke: ${selectedJokeSet.dad}`,
       "Want another one?",
     ].join("\n");
   }
@@ -1326,6 +1373,27 @@ function buildSmallTalkResponse(question, options = {}) {
   }
 
   return null;
+}
+
+function countAssistantJokeResponses(history) {
+  const normalizedHistory = normalizeConversationHistory(history);
+  let count = 0;
+
+  for (const item of normalizedHistory) {
+    if (item.role !== "assistant") {
+      continue;
+    }
+
+    const lower = String(item.content || "").toLowerCase();
+    const hasJokeMarkers =
+      lower.includes("dad joke") &&
+      (lower.includes("cloud engineer joke") || lower.includes("senior cloud engineer joke"));
+    if (hasJokeMarkers) {
+      count += 1;
+    }
+  }
+
+  return count;
 }
 
 function buildAmbiguousAffirmationResponse() {

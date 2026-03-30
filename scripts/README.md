@@ -114,6 +114,26 @@ Conversation bank:
   - pre-deploy checks
   - post-deploy smoke validation
 
+## Performance and Scaling
+
+### [load_test_chat.sh](load_test_chat.sh)
+
+Run a lightweight concurrent load test against `POST /api/chat` and print latency/error summary metrics.
+
+```bash
+bash scripts/load_test_chat.sh \
+  --url http://127.0.0.1:8787/api/chat \
+  --requests 200 \
+  --concurrency 20 \
+  --top-k 5
+```
+
+Outputs:
+
+- total requests, 2xx count, non-2xx count
+- average latency
+- p50/p95/p99 latency estimates
+
 ## Repository Security Rollout
 
 ### [rollout_security_baseline.sh](rollout_security_baseline.sh)

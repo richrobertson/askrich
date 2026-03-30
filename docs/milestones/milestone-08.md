@@ -1,6 +1,6 @@
 # Milestone 08: Advanced Optimization and Scalability
 
-**Status: Planned (post-M7)**
+**Status: Implemented (baseline) with ongoing optimization tracking**
 
 ## Goals
 
@@ -8,6 +8,27 @@
 - Optimize the RAG pipeline for speed and accuracy across retrieval, prompt, and generation
 - Scale to support 10x+ question volume without quality degradation or cost explosion
 - Build advanced semantic understanding for better answer relevance
+
+## Implementation Summary (2026-03-30)
+
+Milestone 8 baseline implementation is complete and running in the worker/runtime path.
+
+### Completed in code
+
+- Added local-mode response caching for common stateless questions with configurable TTL and feature flag (`CHAT_CACHE_ENABLED`, `CHAT_CACHE_TTL_SECONDS`, optional `CHAT_CACHE_KV`).
+- Implemented query expansion rules for common recruiter phrasing and acronym expansion.
+- Implemented intent-aware retrieval boosts (profiles, education, technology, cloud/platform, projects, career transition).
+- Implemented multi-stage ranking flow:
+   - stage 1 lexical + expansion-token matching
+   - stage 2 intent metadata boosting
+   - stage 3 phrase-overlap reranking for top window
+- Kept deterministic answer routing quality paths intact and regression-tested.
+
+### Completed in operations/docs
+
+- Added load-test harness for concurrent chat traffic simulation.
+- Added performance profiling guide and scaling runbook.
+- Added implementation completion report for Milestone 8.
 
 ## Scope
 
@@ -236,5 +257,7 @@ After M8, Ask Rich transitions to steady-state operations:
 
 - [Milestone 7: Analytics and Insights](milestone-07.md)
 - [Milestone 6: Operations and Feedback](milestone-06.md)
-- [Performance Profiling Guide](../performance/PROFILING.md) (planned)
-- [Scaling Guide](../operations/SCALING.md) (planned)
+- [Milestone 8 Completion](../MILESTONE_8_COMPLETION.md)
+- [Milestone 9: Maintenance and Future Vision](milestone-09.md)
+- [Performance Profiling Guide](../performance/PROFILING.md)
+- [Scaling Guide](../operations/SCALING.md)

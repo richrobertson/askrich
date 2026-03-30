@@ -25,7 +25,7 @@ Technologies used earlier in career include:
 - VB.NET and ASP.NET
 - SharePoint Services and .NET Compact Framework
 - Windows Forms and WPF
-- Team Foundation Server (TFS)
+- Enterprise delivery tooling and version-control workflows
 - InfoPath and Microsoft Access
 - Hyper-V and System Center Virtual Machine Manager
 - Apigee proxies and Microsoft SQL Server

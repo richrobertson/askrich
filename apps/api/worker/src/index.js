@@ -386,7 +386,7 @@ const CORPUS = [
     id: 'profile-technologies-historical',
     title: 'Historical Technologies',
     source_url: 'https://www.myrobertson.com',
-    text: 'Past technology experience includes VB.NET, SharePoint Services, .NET Compact Framework, ASP.NET, WPF, Windows Forms, InfoPath, Microsoft Access, Team Foundation Server (TFS), Hyper-V, System Center Virtual Machine Manager, Apigee, Cosmos Scope scripts, and FitNesse.',
+    text: 'Past technology experience includes VB.NET, SharePoint Services, .NET Compact Framework, ASP.NET, WPF, Windows Forms, InfoPath, Microsoft Access, enterprise delivery tooling and version-control workflows, Hyper-V, System Center Virtual Machine Manager, Apigee, Cosmos Scope scripts, and FitNesse.',
   },
   {
     id: 'profile-technologies-enterprise',

@@ -300,7 +300,6 @@ const JOKE_SIGNALS = [
   "senior cloud engineer joke",
   "funny",
 ];
-
 const AFFIRMATION_SIGNALS = new Set([
   "yes",
   "y",

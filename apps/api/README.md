@@ -2,6 +2,8 @@
 
 FastAPI-based local development API for Ask Rich, plus a Cloudflare Worker edge entrypoint under [worker/](worker/).
 
+**Breadcrumbs:** [Repository Home](../../README.md) > [apps](../) > [api](README.md)
+
 ## Current implementation
 
 This API currently provides:
@@ -19,6 +21,7 @@ This API currently provides:
   - `CHAT_BACKEND_MODE=upstream`: proxy to a configured upstream API (`UPSTREAM_API_BASE`)
   - `CHAT_BACKEND_MODE=local`: serve responses from the worker's built-in corpus
 - Environment-specific Worker deployment config in [worker/wrangler.toml](worker/wrangler.toml)
+- Worker implementation guide: [worker/README.md](worker/README.md)
 
 ## Project Structure
 

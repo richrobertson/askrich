@@ -2,6 +2,8 @@
 
 Recruiter-facing web chat experience for Ask Rich.
 
+**Breadcrumbs:** [Repository Home](../../README.md) > [apps](../) > [web](README.md)
+
 ## Current implementation
 
 - Recruiter-focused chat UI with conversation panel
@@ -47,5 +49,6 @@ The widget opens a recruiter-focused chat panel and calls `POST /api/chat` on th
 
 - [Repository README](../../README.md)
 - [API README](../api/README.md)
+- [Worker README](../api/worker/README.md)
 - [Scripts README](../../scripts/README.md)
 - [Cloudflare deployment docs](../../docs/deployment/cloudflare.md)

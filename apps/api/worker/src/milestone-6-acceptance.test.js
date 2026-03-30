@@ -72,12 +72,12 @@ describe('Acceptance: User Question & Answer Flow', () => {
 
       // Event structure: immutable record of question
       const questionEvent = {
-        eventId: 'q_1234567_abc123',    // Stable identifier for feedback/linking
-        type: 'question',                 // Event type
-        timestamp,                        // When question was asked
-        clientId,                         // Hashed client identifier
-        question: userQuestion,           // Sanitized question text
-        topK: 5,                         // Retrieval parameter
+        eventId: 'q_1234567_abc123', // Stable identifier for feedback/linking
+        type: 'question', // Event type
+        timestamp, // When question was asked
+        clientId, // Hashed client identifier
+        question: userQuestion, // Sanitized question text
+        topK: 5, // Retrieval parameter
         humorMode: 'clean_professional', // Response style
       };
 
@@ -97,15 +97,15 @@ describe('Acceptance: User Question & Answer Flow', () => {
 
       // Event structure: answer linked to question
       const answerEvent = {
-        eventId: 'a_1234568_def456',               // Unique answer ID
-        type: 'answer',                             // Event type
-        timestamp: new Date().toISOString(),        // When answer was generated
-        questionEventId,                            // Link back to question
-        clientId: 'a1b2c3d4',                    // Same client
-        answer: answerText,                         // Truncated answer text
-        citationCount: 2,                           // Number of sources used
-        durationMs: 234,                            // Latency (response time)
-        backendMode: 'upstream',                    // Source: local vs. upstream
+        eventId: 'a_1234568_def456', // Unique answer ID
+        type: 'answer', // Event type
+        timestamp: new Date().toISOString(), // When answer was generated
+        questionEventId, // Link back to question
+        clientId: 'a1b2c3d4', // Same client
+        answer: answerText, // Truncated answer text
+        citationCount: 2, // Number of sources used
+        durationMs: 234, // Latency (response time)
+        backendMode: 'upstream', // Source: local vs. upstream
       };
 
       // Assertions: answer properly linked to question
@@ -151,8 +151,8 @@ describe('Acceptance: User Question & Answer Flow', () => {
       }));
 
       expect(events.length).toBe(3);
-      expect(events.every(e => e.clientId === clientId)).toBe(true);
-      expect(events.every(e => e.type === 'question')).toBe(true);
+      expect(events.every((e) => e.clientId === clientId)).toBe(true);
+      expect(events.every((e) => e.type === 'question')).toBe(true);
     });
 
     it('should maintain separate event records per question', () => {
@@ -161,7 +161,7 @@ describe('Acceptance: User Question & Answer Flow', () => {
         { id: 'q_2', text: 'Q2', answer: 'a_2' },
       ];
 
-      questions.forEach(q => {
+      questions.forEach((q) => {
         expect(q.id).toMatch(/^q_/);
         expect(q.answer).toMatch(/^a_/);
       });
@@ -238,8 +238,8 @@ describe('Acceptance: User Feedback Flow', () => {
         { answerId: 'a_1', sentiment: 'helpful' },
       ];
 
-      const helpfulCount = feedbacks.filter(f => f.sentiment === 'helpful').length;
-      const unhelpfulCount = feedbacks.filter(f => f.sentiment === 'unhelpful').length;
+      const helpfulCount = feedbacks.filter((f) => f.sentiment === 'helpful').length;
+      const unhelpfulCount = feedbacks.filter((f) => f.sentiment === 'unhelpful').length;
 
       expect(helpfulCount).toBe(3);
       expect(unhelpfulCount).toBe(1);
@@ -264,7 +264,7 @@ describe('Acceptance: Rate Limiting Protection', () => {
         { time: 3000, allowed: true }, // 50 mins later
       ];
 
-      requests.forEach(r => {
+      requests.forEach((r) => {
         expect(r.allowed).toBe(true);
       });
     });
@@ -277,7 +277,7 @@ describe('Acceptance: Rate Limiting Protection', () => {
         allowed: i < limit,
       }));
 
-      requests.forEach(r => {
+      requests.forEach((r) => {
         expect(r.allowed).toBe(true);
       });
       expect(requests.length).toBe(30);
@@ -292,7 +292,7 @@ describe('Acceptance: Rate Limiting Protection', () => {
         allowed: i < 30, // First 30 allowed, rest denied
       }));
 
-      const denied = requests.filter(r => !r.allowed);
+      const denied = requests.filter((r) => !r.allowed);
       expect(denied.length).toBeGreaterThan(0);
     });
 
@@ -434,7 +434,7 @@ describe('Acceptance: Data Retention & Compliance', () => {
         { name: 'extended', days: 180 },
       ];
 
-      configs.forEach(cfg => {
+      configs.forEach((cfg) => {
         expect(cfg.days).toBeGreaterThan(0);
         expect(cfg.name).toBeDefined();
       });
@@ -502,7 +502,7 @@ describe('Acceptance: Operational Workflows', () => {
       const totalFeedback = weeklyFeedback.reduce((sum, f) => sum + f.count, 0);
       expect(totalFeedback).toBe(1000);
 
-      const helpfulPct = weeklyFeedback.find(f => f.sentiment === 'helpful').percentage;
+      const helpfulPct = weeklyFeedback.find((f) => f.sentiment === 'helpful').percentage;
       expect(helpfulPct).toBeGreaterThan(70);
     });
 
@@ -513,7 +513,7 @@ describe('Acceptance: Operational Workflows', () => {
         { answerId: 'a_3', helpfulRate: 0.32 }, // Low!
       ];
 
-      const lowQuality = answerQuality.filter(a => a.helpfulRate < 0.5);
+      const lowQuality = answerQuality.filter((a) => a.helpfulRate < 0.5);
       expect(lowQuality.length).toBe(1);
       expect(lowQuality[0].answerId).toBe('a_3');
     });
@@ -620,17 +620,17 @@ describe('Acceptance: Complete User Journey', () => {
 
     // Verify session recording
     expect(session.events.length).toBe(4);
-    expect(session.events.filter(e => e.type === 'question').length).toBe(2);
-    expect(session.events.filter(e => e.type === 'answer').length).toBe(1);
-    expect(session.events.filter(e => e.type === 'feedback').length).toBe(1);
+    expect(session.events.filter((e) => e.type === 'question').length).toBe(2);
+    expect(session.events.filter((e) => e.type === 'answer').length).toBe(1);
+    expect(session.events.filter((e) => e.type === 'feedback').length).toBe(1);
 
     // Verify event relationships
-    const feedback = session.events.find(e => e.type === 'feedback');
+    const feedback = session.events.find((e) => e.type === 'feedback');
     expect(feedback.questionEventId).toBe(q1.eventId);
     expect(feedback.answerEventId).toBe(a1.eventId);
 
     // Verify all events have client ID
-    session.events.forEach(e => {
+    session.events.forEach((e) => {
       expect(e.clientId).toBe(session.clientId);
     });
   });
@@ -644,21 +644,21 @@ describe('Acceptance: Complete User Journey', () => {
     ];
 
     // Verify referential integrity
-    const questions = records.filter(r => r.type === 'question');
-    const answers = records.filter(r => r.type === 'answer');
-    const feedbacks = records.filter(r => r.type === 'feedback');
+    const questions = records.filter((r) => r.type === 'question');
+    const answers = records.filter((r) => r.type === 'answer');
+    const feedbacks = records.filter((r) => r.type === 'feedback');
 
     expect(questions.length).toBe(1);
     expect(answers.length).toBe(1);
     expect(feedbacks.length).toBe(1);
 
-    answers.forEach(a => {
-      const linkedQuestion = questions.find(q => q.eventId === a.questionEventId);
+    answers.forEach((a) => {
+      const linkedQuestion = questions.find((q) => q.eventId === a.questionEventId);
       expect(linkedQuestion).toBeDefined();
     });
 
-    feedbacks.forEach(f => {
-      const linkedQuestion = questions.find(q => q.eventId === f.questionEventId);
+    feedbacks.forEach((f) => {
+      const linkedQuestion = questions.find((q) => q.eventId === f.questionEventId);
       expect(linkedQuestion).toBeDefined();
     });
   });

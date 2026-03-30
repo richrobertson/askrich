@@ -84,8 +84,8 @@ class MockKVStore {
     const ndjson = this.storage.get(`events:${dateKey}`) || '';
     return ndjson
       .split('\n')
-      .filter(line => line.trim())
-      .map(line => JSON.parse(line));
+      .filter((line) => line.trim())
+      .map((line) => JSON.parse(line));
   }
 }
 
@@ -454,7 +454,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
       if (stored) {
         const record = JSON.parse(stored);
         const hourAgo = now + 60 * 60 * 1000 + 1000 - 60 * 60 * 1000;
-        const filtered = record.requests.filter(t => t > hourAgo);
+        const filtered = record.requests.filter((t) => t > hourAgo);
         expect(filtered.length).toBeLessThan(5);
       }
 
@@ -489,7 +489,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
         'What is your experience?',
         { top_k: 5, humor_mode: 'clean_professional' },
         disabledEnv,
-        kv,
+        kv
       );
 
       expect(eventId).toBe('q_test_123456');
@@ -504,7 +504,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
         'What is your experience?',
         { top_k: 5, humor_mode: 'clean_professional' },
         env,
-        kv,
+        kv
       );
 
       const records = kv.getRecords(new Date().toISOString().split('T')[0]);
@@ -521,14 +521,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
 
     it('should truncate long questions for safety', async () => {
       const longQuestion = 'a'.repeat(3000);
-      await recordQuestionEvent(
-        'q_test_long',
-        'client-1',
-        longQuestion,
-        {},
-        env,
-        kv,
-      );
+      await recordQuestionEvent('q_test_long', 'client-1', longQuestion, {}, env, kv);
 
       const records = kv.getRecords(new Date().toISOString().split('T')[0]);
       const record = records[0];
@@ -538,14 +531,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
     });
 
     it('should set 90-day TTL on events', async () => {
-      await recordQuestionEvent(
-        'q_test_ttl',
-        'client-1',
-        'Test question',
-        {},
-        env,
-        kv,
-      );
+      await recordQuestionEvent('q_test_ttl', 'client-1', 'Test question', {}, env, kv);
 
       const putCall = kv.putCalls[0];
       expect(putCall.options.expirationTtl).toBe(90 * 24 * 60 * 60);
@@ -582,7 +568,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
         'Test question',
         {},
         failEnv,
-        failingKV,
+        failingKV
       );
 
       expect(eventId).toBe('q_test_fail');
@@ -601,14 +587,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
     });
 
     it('should handle missing payload fields', async () => {
-      await recordQuestionEvent(
-        'q_test_empty',
-        'client-1',
-        'Test',
-        {},
-        env,
-        kv,
-      );
+      await recordQuestionEvent('q_test_empty', 'client-1', 'Test', {}, env, kv);
 
       const records = kv.getRecords(new Date().toISOString().split('T')[0]);
       const record = records[0];
@@ -634,7 +613,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
         100,
         'local',
         disabledEnv,
-        kv,
+        kv
       );
 
       expect(eventId).toBe('a_test_123456');
@@ -654,7 +633,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
         250,
         'upstream',
         env,
-        kv,
+        kv
       );
 
       const records = kv.getRecords(new Date().toISOString().split('T')[0]);
@@ -682,7 +661,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
         100,
         'local',
         env,
-        kv,
+        kv
       );
 
       const records = kv.getRecords(new Date().toISOString().split('T')[0]);
@@ -703,7 +682,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
         100,
         'local',
         env,
-        kv,
+        kv
       );
 
       const records = kv.getRecords(new Date().toISOString().split('T')[0]);
@@ -723,7 +702,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
         100,
         'local',
         env,
-        kv,
+        kv
       );
 
       const putCall = kv.putCalls[0];
@@ -741,7 +720,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
         100,
         'local',
         env,
-        kv,
+        kv
       );
 
       const records = kv.getRecords(new Date().toISOString().split('T')[0]);
@@ -758,7 +737,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
         100,
         'local',
         env,
-        kv,
+        kv
       );
 
       const records = kv.getRecords(new Date().toISOString().split('T')[0]);
@@ -775,7 +754,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
         100,
         'local',
         env,
-        kv,
+        kv
       );
 
       const records = kv.getRecords(new Date().toISOString().split('T')[0]);
@@ -792,7 +771,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
         567,
         'local',
         env,
-        kv,
+        kv
       );
 
       const records = kv.getRecords(new Date().toISOString().split('T')[0]);
@@ -813,11 +792,11 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
         100,
         'local',
         env,
-        kv,
+        kv
       );
 
       const records = kv.getRecords(new Date().toISOString().split('T')[0]);
-      const answer = records.find(r => r.type === 'answer');
+      const answer = records.find((r) => r.type === 'answer');
 
       expect(answer.questionEventId).toBe(questionId);
     });
@@ -857,7 +836,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
         100,
         'local',
         failEnv,
-        failingKV,
+        failingKV
       );
 
       expect(eventId).toBe('a_test_fail');
@@ -881,7 +860,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
         'What is your experience?',
         { top_k: 5, humor_mode: 'clean_professional' },
         env,
-        kv,
+        kv
       );
 
       // Record answer
@@ -894,7 +873,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
         150,
         'upstream',
         env,
-        kv,
+        kv
       );
 
       const dateKey = new Date().toISOString().split('T')[0];
@@ -924,8 +903,8 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
 
       const records = kv.getRecords(dateKey);
       expect(records.length).toBe(4);
-      expect(records.filter(r => r.type === 'question').length).toBe(2);
-      expect(records.filter(r => r.type === 'answer').length).toBe(2);
+      expect(records.filter((r) => r.type === 'question').length).toBe(2);
+      expect(records.filter((r) => r.type === 'answer').length).toBe(2);
     });
 
     it('should track different clients separately', async () => {
@@ -988,7 +967,17 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
     });
 
     it('should handle zero latency', async () => {
-      await recordAnswerEvent('a_zero_latency', 'q_test', 'client-1', 'Fast!', [], 0, 'local', env, kv);
+      await recordAnswerEvent(
+        'a_zero_latency',
+        'q_test',
+        'client-1',
+        'Fast!',
+        [],
+        0,
+        'local',
+        env,
+        kv
+      );
 
       const records = kv.getRecords(new Date().toISOString().split('T')[0]);
       expect(records[0].durationMs).toBe(0);
@@ -996,7 +985,17 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
 
     it('should handle very high latency value', async () => {
       const highLatency = 999999;
-      await recordAnswerEvent('a_high_latency', 'q_test', 'client-1', 'Slow...', [], highLatency, 'local', env, kv);
+      await recordAnswerEvent(
+        'a_high_latency',
+        'q_test',
+        'client-1',
+        'Slow...',
+        [],
+        highLatency,
+        'local',
+        env,
+        kv
+      );
 
       const records = kv.getRecords(new Date().toISOString().split('T')[0]);
       expect(records[0].durationMs).toBe(highLatency);
@@ -1011,7 +1010,17 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
 
     it('should handle special chars in citations', async () => {
       const citations = ['path/to/file.md', 'another-file_v2.txt', 'doc with spaces.md'];
-      await recordAnswerEvent('a_special_citations', 'q_test', 'client-1', 'Answer', citations, 100, 'local', env, kv);
+      await recordAnswerEvent(
+        'a_special_citations',
+        'q_test',
+        'client-1',
+        'Answer',
+        citations,
+        100,
+        'local',
+        env,
+        kv
+      );
 
       const records = kv.getRecords(new Date().toISOString().split('T')[0]);
       expect(records[0].citationCount).toBe(3);

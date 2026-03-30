@@ -2,6 +2,8 @@
 
 Automation helpers for ingestion, testing, and deployment.
 
+**Breadcrumbs:** [Repository Home](../README.md) > [scripts](README.md)
+
 ## Implemented Scripts
 
 ### [ingest_all.py](ingest_all.py)
@@ -166,5 +168,7 @@ Then commits, pushes a branch, and opens a PR per repository.
 
 - [Repository README](../README.md)
 - [API README](../apps/api/README.md)
+- [Worker README](../apps/api/worker/README.md)
 - [Web README](../apps/web/README.md)
+- [Analytics README](../docs/analytics/README.md)
 - [Testing docs](../docs/testing/CANNED_RESPONSES.md)

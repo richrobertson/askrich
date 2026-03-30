@@ -1395,7 +1395,7 @@ function classifyQuestionIntent(questionLower) {
     return "cloud_platform";
   }
 
-  const technologySignals = ["technology", "tech", "java", "python", "c#", "scala", "stack"];
+  const technologySignals = ["technology", "tech", "java", "python", "c", "csharp", "scala", "stack"];
   if (includesAny(questionLower, technologySignals)) {
     return "technology";
   }
@@ -1487,8 +1487,7 @@ function rankCorpus(question) {
     }
 
     const intentBoost = getIntentDocBoost(intent, doc);
-    const phraseBoost = computePhraseOverlapScore(questionLower, `${doc.title} ${doc.text}`);
-    const score = lexicalScore + intentBoost + phraseBoost;
+    const score = lexicalScore + intentBoost;
     return { ...doc, score };
   })
     .filter((doc) => doc.score > 0)
@@ -2647,4 +2646,5 @@ export {
   rankCorpus,
   clipSentence,
   formatStarAnswer,
+  getChatCacheTtlSeconds,
 };

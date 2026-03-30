@@ -57,6 +57,7 @@
  *   ✓ All answers: Stay concise (<600-800 chars)
  */
 
+import worker from '../src/index.js';
 import { describe, it, expect } from 'vitest';
 import {
   CORPUS,
@@ -81,6 +82,7 @@ import {
   rankCorpus,
   clipSentence,
   formatStarAnswer,
+  getChatCacheTtlSeconds,
 } from '../src/index.js';
 
 describe('Canned Response Quality Tests', () => {
@@ -631,6 +633,139 @@ describe('Canned Response Quality Tests', () => {
 
       expect(answer.toLowerCase()).toMatch(/technology|tech|stack|java|kubernetes/);
       expect(answer).not.toContain('LinkedIn');
+    });
+  });
+
+  describe('Local Cache Behavior', () => {
+    function makeMockKv(options = {}) {
+      const store = new Map();
+      const state = {
+        getCalls: 0,
+        putCalls: 0,
+        lastPutTtl: null,
+      };
+
+      return {
+        state,
+        async get(key) {
+          state.getCalls += 1;
+          if (options.throwOnGet) {
+            throw new Error('kv get failure');
+          }
+          return store.has(key) ? store.get(key) : null;
+        },
+        async put(key, value, opts = {}) {
+          state.putCalls += 1;
+          state.lastPutTtl = opts.expirationTtl;
+          if (options.throwOnPut) {
+            throw new Error('kv put failure');
+          }
+          store.set(key, value);
+        },
+      };
+    }
+
+    function buildChatRequest(payload) {
+      return new Request('https://example.com/api/chat', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    }
+
+    it('should cache stateless local responses and hit cache on repeat', async () => {
+      const kv = makeMockKv();
+      const env = {
+        CHAT_BACKEND_MODE: 'local',
+        CHAT_CACHE_ENABLED: 'true',
+        CHAT_CACHE_TTL_SECONDS: '300',
+        CHAT_CACHE_KV: kv,
+      };
+
+      const payload = {
+        question: 'what measurable outcomes from oracle cns migration',
+        top_k: 5,
+        history: [],
+      };
+
+      const first = await worker.fetch(buildChatRequest(payload), env);
+      const firstJson = await first.json();
+      expect(first.status).toBe(200);
+      expect(kv.state.getCalls).toBe(1);
+      expect(kv.state.putCalls).toBe(1);
+
+      const second = await worker.fetch(buildChatRequest(payload), env);
+      const secondJson = await second.json();
+      expect(second.status).toBe(200);
+      expect(kv.state.getCalls).toBe(2);
+      expect(kv.state.putCalls).toBe(1);
+      expect(secondJson.data.answer).toBe(firstJson.data.answer);
+    });
+
+    it('should bypass cache when history is present', async () => {
+      const kv = makeMockKv();
+      const env = {
+        CHAT_BACKEND_MODE: 'local',
+        CHAT_CACHE_ENABLED: 'true',
+        CHAT_CACHE_KV: kv,
+      };
+
+      const payload = {
+        question: 'what measurable outcomes from oracle cns migration',
+        top_k: 5,
+        history: [{ role: 'user', content: 'hello' }],
+      };
+
+      const response = await worker.fetch(buildChatRequest(payload), env);
+      expect(response.status).toBe(200);
+      expect(kv.state.getCalls).toBe(0);
+      expect(kv.state.putCalls).toBe(0);
+    });
+
+    it('should disable cache when CHAT_CACHE_ENABLED is false', async () => {
+      const kv = makeMockKv();
+      const env = {
+        CHAT_BACKEND_MODE: 'local',
+        CHAT_CACHE_ENABLED: 'false',
+        CHAT_CACHE_KV: kv,
+      };
+
+      const payload = {
+        question: 'what measurable outcomes from oracle cns migration',
+        top_k: 5,
+        history: [],
+      };
+
+      const response = await worker.fetch(buildChatRequest(payload), env);
+      expect(response.status).toBe(200);
+      expect(kv.state.getCalls).toBe(0);
+      expect(kv.state.putCalls).toBe(0);
+    });
+
+    it('should tolerate KV cache get/put failures', async () => {
+      const kv = makeMockKv({ throwOnGet: true, throwOnPut: true });
+      const env = {
+        CHAT_BACKEND_MODE: 'local',
+        CHAT_CACHE_ENABLED: 'true',
+        CHAT_CACHE_KV: kv,
+      };
+
+      const payload = {
+        question: 'what measurable outcomes from oracle cns migration',
+        top_k: 5,
+        history: [],
+      };
+
+      const response = await worker.fetch(buildChatRequest(payload), env);
+      const body = await response.json();
+      expect(response.status).toBe(200);
+      expect(body.success).toBe(true);
+    });
+
+    it('should clamp cache TTL bounds', () => {
+      expect(getChatCacheTtlSeconds({ CHAT_CACHE_TTL_SECONDS: '5' })).toBe(30);
+      expect(getChatCacheTtlSeconds({ CHAT_CACHE_TTL_SECONDS: '999999' })).toBe(3600);
+      expect(getChatCacheTtlSeconds({ CHAT_CACHE_TTL_SECONDS: 'abc' })).toBe(300);
     });
   });
 });

@@ -94,15 +94,33 @@ seq 1 "$REQUESTS" > "$REQ_FILE"
 export URL TOP_K QUESTION HUMOR_MODE
 
 cat "$REQ_FILE" | xargs -I{} -P "$CONCURRENCY" bash -c '
+  request_id="$1"
+  tmp_dir="$2"
+  out_file="$tmp_dir/result_${request_id}.tsv"
+
   start=$(python3 - <<"PY"
 import time
 print(int(time.time() * 1000))
 PY
 )
 
+  payload=$(python3 - <<"PY"
+import json
+import os
+
+payload = {
+  "question": os.environ["QUESTION"],
+  "top_k": int(os.environ["TOP_K"]),
+  "history": [],
+  "humor_mode": os.environ["HUMOR_MODE"],
+}
+print(json.dumps(payload))
+PY
+)
+
   code=$(curl -sS -o /dev/null -w "%{http_code}" "$URL" \
     -H "content-type: application/json" \
-    --data "{\"question\":\"$QUESTION\",\"top_k\":$TOP_K,\"history\":[],\"humor_mode\":\"$HUMOR_MODE\"}" || echo "000")
+    --data "$payload" || echo "000")
 
   end=$(python3 - <<"PY"
 import time
@@ -111,17 +129,32 @@ PY
 )
 
   elapsed=$((end - start))
-  echo -e "$code\t$elapsed"
-' >> "$RES_FILE"
+  printf "%s\t%s\n" "$code" "$elapsed" > "$out_file"
+' _ {} "$TMP_DIR"
+
+find "$TMP_DIR" -name 'result_*.tsv' -type f -print0 | xargs -0 cat > "$RES_FILE"
 
 TOTAL=$(wc -l < "$RES_FILE" | tr -d ' ')
 OK=$(awk -F '\t' '$1 ~ /^2/ {c++} END {print c+0}' "$RES_FILE")
 ERR=$((TOTAL - OK))
 
-P50=$(awk -F '\t' '{print $2}' "$RES_FILE" | sort -n | awk 'NR==int((NR+1)*0.50){print $1}')
-P95=$(awk -F '\t' '{print $2}' "$RES_FILE" | sort -n | awk 'NR==int((NR+1)*0.95){print $1}')
-P99=$(awk -F '\t' '{print $2}' "$RES_FILE" | sort -n | awk 'NR==int((NR+1)*0.99){print $1}')
 AVG=$(awk -F '\t' '{s+=$2} END {if (NR>0) printf "%.2f", s/NR; else print "0"}' "$RES_FILE")
+
+P50="n/a"
+P95="n/a"
+P99="n/a"
+if [[ "$TOTAL" -gt 0 ]]; then
+  LATENCIES_FILE="$TMP_DIR/latencies.txt"
+  awk -F '\t' '{print $2}' "$RES_FILE" | sort -n > "$LATENCIES_FILE"
+
+  P50_INDEX=$(( (TOTAL * 50 + 99) / 100 ))
+  P95_INDEX=$(( (TOTAL * 95 + 99) / 100 ))
+  P99_INDEX=$(( (TOTAL * 99 + 99) / 100 ))
+
+  P50=$(awk -v n="$P50_INDEX" 'NR==n {print $1; exit}' "$LATENCIES_FILE")
+  P95=$(awk -v n="$P95_INDEX" 'NR==n {print $1; exit}' "$LATENCIES_FILE")
+  P99=$(awk -v n="$P99_INDEX" 'NR==n {print $1; exit}' "$LATENCIES_FILE")
+fi
 
 echo "Load test summary"
 echo "  URL: $URL"

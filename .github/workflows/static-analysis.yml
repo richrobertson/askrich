@@ -4,9 +4,25 @@ on:
   push:
     branches:
       - main
+    paths:
+      - '.github/workflows/static-analysis.yml'
+      - 'apps/api/**'
+      - 'scripts/**'
+      - '.bandit'
   pull_request:
     branches:
       - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+    paths:
+      - '.github/workflows/static-analysis.yml'
+      - 'apps/api/**'
+      - 'scripts/**'
+      - '.bandit'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -21,7 +37,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
@@ -34,3 +50,25 @@ jobs:
 
       - name: Bandit security scan
         run: bandit -c .bandit -r apps/api scripts -ll -ii
+
+  worker-js-static-analysis:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api/worker
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/api/worker/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run worker static analysis
+        run: npm run static:analysis

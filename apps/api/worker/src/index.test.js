@@ -165,7 +165,9 @@ describe('Canned Response Quality Tests', () => {
       expect(isTechnologyPassionQuestion('describe your tech expertise and passion')).toBe(true);
       expect(isTechnologyPassionQuestion('what technologies and tools do you use')).toBe(true);
       expect(isTechnologyPassionQuestion('how do you approach technology')).toBe(true);
-      expect(isTechnologyPassionQuestion('technologies you used in the oracle project')).toBe(false);
+      expect(isTechnologyPassionQuestion('technologies you used in the oracle project')).toBe(
+        false
+      );
       expect(isTechnologyPassionQuestion('what is your education')).toBe(false);
       expect(isTechnologyPassionQuestion('Oracle CNS outcomes')).toBe(false);
     });
@@ -175,7 +177,9 @@ describe('Canned Response Quality Tests', () => {
       expect(isShortFactualQuestion('what is your educational background')).toBe(true);
       expect(isShortFactualQuestion('what is your tech stack')).toBe(true);
       expect(isShortFactualQuestion('did rich do an internship')).toBe(true);
-      expect(isShortFactualQuestion('tell me about a time you had to convince stakeholders')).toBe(false);
+      expect(isShortFactualQuestion('tell me about a time you had to convince stakeholders')).toBe(
+        false
+      );
       expect(isShortFactualQuestion('how did you lead the oracle migration')).toBe(false);
     });
   });
@@ -301,7 +305,9 @@ describe('Canned Response Quality Tests', () => {
     });
 
     it('should not false-positive on in-scope words containing age substring', () => {
-      const response = buildOutOfScopeResponse('how do you manage migration risk in distributed systems?');
+      const response = buildOutOfScopeResponse(
+        'how do you manage migration risk in distributed systems?'
+      );
       expect(response).toBeNull();
     });
 
@@ -322,7 +328,9 @@ describe('Canned Response Quality Tests', () => {
       ]);
 
       expect(resolved.needsClarification).toBe(false);
-      expect(resolved.effectiveQuestion.toLowerCase()).toContain('summarize his closest api-related experience');
+      expect(resolved.effectiveQuestion.toLowerCase()).toContain(
+        'summarize his closest api-related experience'
+      );
     });
 
     it('should use prior user question when yes has no explicit assistant follow-up', () => {
@@ -332,7 +340,9 @@ describe('Canned Response Quality Tests', () => {
       ]);
 
       expect(resolved.needsClarification).toBe(false);
-      expect(resolved.effectiveQuestion).toBe('What measurable outcomes did Rich deliver at Oracle?');
+      expect(resolved.effectiveQuestion).toBe(
+        'What measurable outcomes did Rich deliver at Oracle?'
+      );
     });
 
     it('should ask for clarification when yes has no usable history', () => {
@@ -364,7 +374,7 @@ describe('Canned Response Quality Tests', () => {
     it('should default to clean/professional tone for greetings', () => {
       const response = buildSmallTalkResponse('hello');
 
-      expect(response).toContain('Hello. I can help with Rich\'s experience');
+      expect(response).toContain("Hello. I can help with Rich's experience");
       expect(response).not.toContain('👋');
     });
 
@@ -455,7 +465,9 @@ describe('Canned Response Quality Tests', () => {
       };
       const profileLines = lines.filter((line) => {
         const hosts = extractHosts(line);
-        const hasGitHubHost = hosts.some((host) => host === 'github.com' || host === 'www.github.com');
+        const hasGitHubHost = hosts.some(
+          (host) => host === 'github.com' || host === 'www.github.com'
+        );
         const hasLinkedInHost = hosts.some(
           (host) => host === 'linkedin.com' || host === 'www.linkedin.com'
         );
@@ -536,8 +548,13 @@ describe('Canned Response Quality Tests', () => {
 
   describe('Behavioral Answer Quality', () => {
     it('should produce a focused behavioral answer', () => {
-      const mockDocs = CORPUS.filter((doc) => doc.id.includes('oracle') || doc.id.includes('java17'));
-      const answer = buildBehavioralAnswer('tell me about a time you had to convince stakeholders', mockDocs);
+      const mockDocs = CORPUS.filter(
+        (doc) => doc.id.includes('oracle') || doc.id.includes('java17')
+      );
+      const answer = buildBehavioralAnswer(
+        'tell me about a time you had to convince stakeholders',
+        mockDocs
+      );
 
       expect(answer).toBeTruthy();
       expect(answer.length).toBeGreaterThan(50);
@@ -779,7 +796,7 @@ describe('Canned Response Quality Tests', () => {
         }),
         {
           CHAT_BACKEND_MODE: 'openai',
-        },
+        }
       );
 
       const body = await response.json();
@@ -798,7 +815,7 @@ describe('Canned Response Quality Tests', () => {
         }),
         {
           CHAT_BACKEND_MODE: 'openai',
-        },
+        }
       );
 
       const body = await response.json();
@@ -815,7 +832,7 @@ describe('Canned Response Quality Tests', () => {
           history: [],
           humor_mode: 'clean_professional',
         }),
-        { CHAT_BACKEND_MODE: 'openai', RATE_LIMIT_ENABLED: 'false' },
+        { CHAT_BACKEND_MODE: 'openai', RATE_LIMIT_ENABLED: 'false' }
       );
 
       const body = await response.json();

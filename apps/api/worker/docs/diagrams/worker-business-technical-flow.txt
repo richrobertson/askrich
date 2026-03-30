@@ -1,0 +1,9 @@
+Business Logic + Technical Implementation (Temporary ASCII)
+
+/api/chat request
+  -> validation
+  -> rate limiting
+  -> business logic + retrieval
+  -> response
+  -> best-effort telemetry + KV persistence
+  -> enforced by CI quality gates

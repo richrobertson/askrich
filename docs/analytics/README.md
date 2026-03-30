@@ -2,6 +2,8 @@
 
 Milestone 7 analytics infrastructure for Ask Rich.
 
+**Breadcrumbs:** [Repository Home](../../README.md) > [docs](../) > [analytics](README.md)
+
 ## components
 
 - **[SCHEMA.md](SCHEMA.md)** — Event data model, metrics, and storage format
@@ -82,3 +84,10 @@ See [SCHEMA.md](SCHEMA.md) for detailed format.
 - Multi-variant sophisticated bandit testing
 - User journey mapping
 - Knowledge graph extraction from feedback
+
+## Crosslinks
+
+- [Repository README](../../README.md)
+- [API README](../../apps/api/README.md)
+- [Worker README](../../apps/api/worker/README.md)
+- [Scripts README](../../scripts/README.md)

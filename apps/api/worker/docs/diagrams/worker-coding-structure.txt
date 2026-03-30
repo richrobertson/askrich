@@ -1,0 +1,12 @@
+AskRich Worker Coding Structure (Temporary ASCII)
+
+src/index.js -> http-response.js
+      |
+      v
+ event-logging.js (barrel)
+   |        |
+   v        v
+event-policy.js   event-identifiers.js
+   |
+   v
+rate-limit.js -> event-store.js

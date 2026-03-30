@@ -2,6 +2,16 @@
 
 **Ask Rich** is a recruiter-facing, retrieval-first chatbot for Rich Robertson’s personal website.
 
+**Breadcrumbs:** [Repository Home](README.md)
+
+## Quick navigation
+
+- [API Overview](apps/api/README.md)
+- [Worker Guide](apps/api/worker/README.md)
+- [Web App Guide](apps/web/README.md)
+- [Scripts Guide](scripts/README.md)
+- [Analytics Module](docs/analytics/README.md)
+
 ## Why this project exists
 
 Recruiters and hiring managers often need fast, specific answers about a candidate’s impact, technical depth, and role fit. Resume bullets alone are too compressed, while freeform chatbots can drift away from factual evidence.

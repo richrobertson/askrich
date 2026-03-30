@@ -70,8 +70,8 @@ class MockKVStore {
     const ndjson = this.storage.get(`events:${dateKey}`) || '';
     return ndjson
       .split('\n')
-      .filter(line => line.trim())
-      .map(line => JSON.parse(line));
+      .filter((line) => line.trim())
+      .map((line) => JSON.parse(line));
   }
 }
 
@@ -434,7 +434,7 @@ describe('Milestone 6 Integration: Feedback API', () => {
       };
 
       // Store all
-      const ndjson = [question, answer, feedback].map(e => JSON.stringify(e)).join('\n');
+      const ndjson = [question, answer, feedback].map((e) => JSON.stringify(e)).join('\n');
       await kv.put(`events:${dateKey}`, ndjson, { expirationTtl: 90 * 24 * 60 * 60 });
 
       const records = kv.getRecords(dateKey);
@@ -457,14 +457,14 @@ describe('Milestone 6 Integration: Feedback API', () => {
         { eventId: 'f_4', type: 'feedback', sentiment: 'neutral' },
       ];
 
-      const ndjson = feedbacks.map(f => JSON.stringify(f)).join('\n');
+      const ndjson = feedbacks.map((f) => JSON.stringify(f)).join('\n');
       await kv.put(`events:${dateKey}`, ndjson, { expirationTtl: 90 * 24 * 60 * 60 });
 
       const records = kv.getRecords(dateKey);
 
-      const helpful = records.filter(r => r.sentiment === 'helpful').length;
-      const unhelpful = records.filter(r => r.sentiment === 'unhelpful').length;
-      const neutral = records.filter(r => r.sentiment === 'neutral').length;
+      const helpful = records.filter((r) => r.sentiment === 'helpful').length;
+      const unhelpful = records.filter((r) => r.sentiment === 'unhelpful').length;
+      const neutral = records.filter((r) => r.sentiment === 'neutral').length;
 
       expect(helpful).toBe(2);
       expect(unhelpful).toBe(1);
@@ -492,11 +492,11 @@ describe('Milestone 6 Integration: Feedback API', () => {
         },
       ];
 
-      const ndjson = feedbacks.map(f => JSON.stringify(f)).join('\n');
+      const ndjson = feedbacks.map((f) => JSON.stringify(f)).join('\n');
       await kv.put(`events:${dateKey}`, ndjson, { expirationTtl: 90 * 24 * 60 * 60 });
 
       const records = kv.getRecords(dateKey);
-      const relatedFeedback = records.filter(r => r.questionEventId === 'q_main');
+      const relatedFeedback = records.filter((r) => r.questionEventId === 'q_main');
 
       expect(relatedFeedback.length).toBe(2);
     });
@@ -509,7 +509,7 @@ describe('Milestone 6 Integration: Feedback API', () => {
         { eventId: 'f_2', sentiment: 'unhelpful', optionalNote: 'Not helpful' },
       ];
 
-      const ndjson = feedbacks.map(f => JSON.stringify(f)).join('\n');
+      const ndjson = feedbacks.map((f) => JSON.stringify(f)).join('\n');
       await kv.put(`events:${dateKey}`, ndjson, { expirationTtl: 90 * 24 * 60 * 60 });
 
       const records = kv.getRecords(dateKey);
@@ -538,8 +538,7 @@ describe('Milestone 6 Integration: Feedback API', () => {
     });
 
     it('should truncate optional notes containing PII', () => {
-      const sensitiveNote =
-        'Call me at 555-1234 or email test@example.com, my SSN is 123-45-6789';
+      const sensitiveNote = 'Call me at 555-1234 or email test@example.com, my SSN is 123-45-6789';
 
       // Implementation should truncate before PII patterns hit storage
       const truncated = sensitiveNote.substring(0, 500);
@@ -578,7 +577,7 @@ describe('Milestone 6 Integration: Feedback API', () => {
         sentiment: i % 2 === 0 ? 'helpful' : 'unhelpful',
       }));
 
-      const ndjson = feedbacks.map(f => JSON.stringify(f)).join('\n');
+      const ndjson = feedbacks.map((f) => JSON.stringify(f)).join('\n');
       await kv.put(`events:${dateKey}`, ndjson, { expirationTtl: 90 * 24 * 60 * 60 });
 
       const records = kv.getRecords(dateKey);
@@ -594,11 +593,11 @@ describe('Milestone 6 Integration: Feedback API', () => {
         { eventId: 'f_3', clientId: 'c3d4e5f6' },
       ];
 
-      const ndjson = feedbacks.map(f => JSON.stringify(f)).join('\n');
+      const ndjson = feedbacks.map((f) => JSON.stringify(f)).join('\n');
       await kv.put(`events:${dateKey}`, ndjson, { expirationTtl: 90 * 24 * 60 * 60 });
 
       const records = kv.getRecords(dateKey);
-      const clients = new Set(records.map(r => r.clientId));
+      const clients = new Set(records.map((r) => r.clientId));
 
       expect(clients.size).toBe(3);
     });

@@ -2,6 +2,8 @@
   const SCRIPT = document.currentScript;
   const API_BASE = (SCRIPT && SCRIPT.dataset.apiBase) || "https://api.myrobertson.com";
   const TITLE = (SCRIPT && SCRIPT.dataset.title) || "Ask Rich";
+  const conversationHistory = [];
+  const MAX_CONVERSATION_HISTORY = 20;
 
   const launcher = document.createElement("button");
   launcher.type = "button";
@@ -89,7 +91,56 @@
   send.style.color = "#ffffff";
   send.style.cursor = "pointer";
 
-  function appendMessage(role, text) {
+  function pushHistory(role, content) {
+    conversationHistory.push({ role, content: String(content || "") });
+    if (conversationHistory.length > MAX_CONVERSATION_HISTORY) {
+      conversationHistory.splice(0, conversationHistory.length - MAX_CONVERSATION_HISTORY);
+    }
+  }
+
+  async function submitFeedback(eventIds, sentiment, controls) {
+    const endpoint = API_BASE.replace(/\/$/, "") + "/api/feedback";
+    const status = controls.status;
+    const helpfulBtn = controls.helpfulBtn;
+    const unhelpfulBtn = controls.unhelpfulBtn;
+
+    helpfulBtn.disabled = true;
+    unhelpfulBtn.disabled = true;
+    status.textContent = "Sending...";
+
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          questionEventId: eventIds.questionEventId,
+          answerEventId: eventIds.answerEventId,
+          sentiment,
+          optionalNote: "",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Feedback request failed");
+      }
+
+      if (sentiment === "helpful") {
+        helpfulBtn.style.background = "#0f766e";
+        helpfulBtn.style.color = "#ffffff";
+      } else {
+        unhelpfulBtn.style.background = "#b91c1c";
+        unhelpfulBtn.style.color = "#ffffff";
+      }
+
+      status.textContent = "Thanks for your feedback.";
+    } catch (_error) {
+      helpfulBtn.disabled = false;
+      unhelpfulBtn.disabled = false;
+      status.textContent = "Could not submit feedback.";
+    }
+  }
+
+  function appendMessage(role, text, eventIds) {
     const msg = document.createElement("div");
     msg.style.margin = "0 0 10px";
     msg.style.padding = "10px";
@@ -100,6 +151,59 @@
     const roleLabel = document.createElement("strong");
     roleLabel.textContent = role + ": ";
     msg.append(roleLabel, document.createTextNode(text));
+
+    if (
+      role === "Ask Rich" &&
+      eventIds &&
+      eventIds.questionEventId &&
+      eventIds.answerEventId
+    ) {
+      const controls = document.createElement("div");
+      controls.style.marginTop = "8px";
+      controls.style.paddingTop = "8px";
+      controls.style.borderTop = "1px dashed #cbd5e1";
+      controls.style.display = "flex";
+      controls.style.gap = "6px";
+      controls.style.alignItems = "center";
+
+      const prompt = document.createElement("span");
+      prompt.textContent = "Was this helpful?";
+      prompt.style.fontSize = "12px";
+      prompt.style.color = "#475569";
+
+      const helpfulBtn = document.createElement("button");
+      helpfulBtn.type = "button";
+      helpfulBtn.textContent = "Yes";
+      helpfulBtn.style.border = "1px solid #cbd5e1";
+      helpfulBtn.style.background = "#ffffff";
+      helpfulBtn.style.borderRadius = "6px";
+      helpfulBtn.style.padding = "4px 8px";
+      helpfulBtn.style.cursor = "pointer";
+
+      const unhelpfulBtn = document.createElement("button");
+      unhelpfulBtn.type = "button";
+      unhelpfulBtn.textContent = "No";
+      unhelpfulBtn.style.border = "1px solid #cbd5e1";
+      unhelpfulBtn.style.background = "#ffffff";
+      unhelpfulBtn.style.borderRadius = "6px";
+      unhelpfulBtn.style.padding = "4px 8px";
+      unhelpfulBtn.style.cursor = "pointer";
+
+      const status = document.createElement("span");
+      status.style.fontSize = "12px";
+      status.style.color = "#64748b";
+
+      helpfulBtn.addEventListener("click", function () {
+        submitFeedback(eventIds, "helpful", { status, helpfulBtn, unhelpfulBtn });
+      });
+      unhelpfulBtn.addEventListener("click", function () {
+        submitFeedback(eventIds, "unhelpful", { status, helpfulBtn, unhelpfulBtn });
+      });
+
+      controls.append(prompt, helpfulBtn, unhelpfulBtn, status);
+      msg.append(controls);
+    }
+
     body.append(msg);
     body.scrollTop = body.scrollHeight;
   }
@@ -108,7 +212,7 @@
     const response = await fetch(API_BASE.replace(/\/$/, "") + "/api/chat", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ question, top_k: 5 }),
+      body: JSON.stringify({ question, top_k: 5, history: conversationHistory }),
     });
 
     const payload = await response.json().catch(() => ({}));
@@ -116,7 +220,11 @@
       throw new Error(payload.error || payload.detail || "Request failed");
     }
 
-    return payload.data && payload.data.answer ? payload.data.answer : "No answer returned.";
+    return {
+      answer: payload.data && payload.data.answer ? payload.data.answer : "No answer returned.",
+      questionEventId: response.headers.get("X-Question-Event-ID") || "",
+      answerEventId: response.headers.get("X-Answer-Event-ID") || "",
+    };
   }
 
   launcher.addEventListener("click", function () {
@@ -152,13 +260,18 @@
     }
 
     appendMessage("You", question);
+    pushHistory("user", question);
     input.value = "";
     send.disabled = true;
     send.textContent = "...";
 
     try {
-      const answer = await sendQuestion(question);
-      appendMessage("Ask Rich", answer);
+      const result = await sendQuestion(question);
+      appendMessage("Ask Rich", result.answer, {
+        questionEventId: result.questionEventId,
+        answerEventId: result.answerEventId,
+      });
+      pushHistory("assistant", result.answer);
     } catch (error) {
       appendMessage("Ask Rich", "Sorry, I could not fetch a response right now.");
       if (window && window.console && error) {

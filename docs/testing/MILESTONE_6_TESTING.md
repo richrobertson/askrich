@@ -17,7 +17,7 @@ npm test
 npm run test:coverage
 
 # Watch mode (for development)
-npm test:watch
+npm run test:watch
 
 # Interactive UI dashboard
 npm run test:ui
@@ -263,7 +263,7 @@ Files intentionally excluded:
 npm test
 
 # Run tests in watch mode (auto-reload on changes)
-npm test:watch
+npm run test:watch
 
 # Run specific test file
 npm test -- milestone-6.test.js

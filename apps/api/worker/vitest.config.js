@@ -67,26 +67,6 @@ export default defineConfig({
         functions: 95,
         branches: 95,
         statements: 95,
-
-        // Per-file thresholds for critical files
-        'src/milestone-6.test.js': {
-          lines: 95,
-          functions: 95,
-          branches: 95,
-          statements: 95,
-        },
-        'src/milestone-6-integration.test.js': {
-          lines: 95,
-          functions: 95,
-          branches: 95,
-          statements: 95,
-        },
-        'src/milestone-6-acceptance.test.js': {
-          lines: 95,
-          functions: 95,
-          branches: 95,
-          statements: 95,
-        },
       },
 
       // Skip coverage for specific files

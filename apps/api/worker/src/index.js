@@ -160,7 +160,7 @@ const CORPUS = [
     id: "profile-public-links",
     title: "Public Profiles",
     source_url: "https://www.linkedin.com/in/royrobertson",
-    text: "Public profile links: GitHub https://github.com/richrobertson, LinkedIn https://www.linkedin.com/in/royrobertson, and Facebook https://www.facebook.com/rich.r.robertson/. These can be shared when recruiters ask for social profiles, portfolio links, or professional profile URLs.",
+    text: "Public profile links: GitHub https://github.com/richrobertson and LinkedIn https://www.linkedin.com/in/royrobertson. These can be shared when recruiters ask for social profiles, portfolio links, or professional profile URLs.",
   },
   {
     id: "profile-technologies-current",
@@ -245,10 +245,9 @@ const CORPUS = [
 const PROFILE_LINKS = {
   github: "https://github.com/richrobertson",
   linkedin: "https://www.linkedin.com/in/royrobertson",
-  facebook: "https://www.facebook.com/rich.r.robertson/",
 };
 
-const PROFILE_PLATFORM_ORDER = ["linkedin", "github", "facebook"];
+const PROFILE_PLATFORM_ORDER = ["linkedin", "github"];
 
 const GREETING_SIGNALS = new Set([
   "hi",
@@ -292,6 +291,24 @@ const WHO_ARE_YOU_SIGNALS = new Set([
   "what do you do",
 ]);
 
+const OUT_OF_SCOPE_PERSONAL_SIGNALS = [
+  "favorite color",
+  "favourite color",
+  "favorite food",
+  "favourite food",
+  "favorite movie",
+  "favourite movie",
+  "favorite song",
+  "favourite song",
+  "zodiac",
+  "astrology",
+  "horoscope",
+  "birthday",
+  "age",
+  "religion",
+  "politics",
+];
+
 function getBackendMode(env) {
   return String(env.CHAT_BACKEND_MODE || "local").trim().toLowerCase();
 }
@@ -312,6 +329,21 @@ async function handleLocalChat(request) {
         success: true,
         data: {
           answer: smallTalkResponse,
+          citations: [],
+          retrieved_chunks: 0,
+        },
+      },
+      200,
+    );
+  }
+
+  const outOfScopeResponse = buildOutOfScopeResponse(question);
+  if (outOfScopeResponse) {
+    return json(
+      {
+        success: true,
+        data: {
+          answer: outOfScopeResponse,
           citations: [],
           retrieved_chunks: 0,
         },
@@ -373,7 +405,7 @@ async function handleLocalChat(request) {
         success: true,
         data: {
           answer:
-            "I do not have enough evidence in the deployed corpus to answer confidently yet. Try asking about profile links (GitHub/LinkedIn/Facebook), education and degrees, technologies used, Oracle migration, Java modernization, control planes, or Starbucks platform work.",
+            "I do not have enough evidence in the deployed corpus to answer confidently yet. Try asking about profile links (GitHub/LinkedIn), education and degrees, technologies used, Oracle migration, Java modernization, control planes, or Starbucks platform work.",
           citations: [],
           retrieved_chunks: 0,
         },
@@ -423,6 +455,21 @@ async function handleOpenAiChat(request, env) {
         success: true,
         data: {
           answer: smallTalkResponse,
+          citations: [],
+          retrieved_chunks: 0,
+        },
+      },
+      200,
+    );
+  }
+
+  const outOfScopeResponse = buildOutOfScopeResponse(question);
+  if (outOfScopeResponse) {
+    return json(
+      {
+        success: true,
+        data: {
+          answer: outOfScopeResponse,
           citations: [],
           retrieved_chunks: 0,
         },
@@ -499,7 +546,7 @@ async function handleOpenAiChat(request, env) {
         success: true,
         data: {
           answer:
-            "I do not have enough evidence in the deployed corpus to answer confidently yet. Try asking about profile links (GitHub/LinkedIn/Facebook), education and degrees, technologies used, Oracle migration, Java modernization, control planes, or Starbucks platform work.",
+            "I do not have enough evidence in the deployed corpus to answer confidently yet. Try asking about profile links (GitHub/LinkedIn), education and degrees, technologies used, Oracle migration, Java modernization, control planes, or Starbucks platform work.",
           citations: [],
           retrieved_chunks: 0,
         },
@@ -766,6 +813,27 @@ function buildSmallTalkResponse(question) {
   return null;
 }
 
+function buildOutOfScopeResponse(question) {
+  const q = normalizeIntentText(question);
+  if (!q) {
+    return null;
+  }
+
+  const isOutOfScopePersonal = OUT_OF_SCOPE_PERSONAL_SIGNALS.some((signal) => q.includes(signal));
+  if (!isOutOfScopePersonal) {
+    return null;
+  }
+
+  return [
+    "I do not have evidence for personal-preference questions like that.",
+    "I can help with role-relevant details about Rich instead:",
+    "- leadership and delivery outcomes",
+    "- architecture and technology depth",
+    "- project impact and interview examples",
+    "Which area should I focus on?",
+  ].join("\n");
+}
+
 function normalizeIntentText(text) {
   return String(text || "")
     .toLowerCase()
@@ -795,7 +863,6 @@ function isProfileLinksQuery(question) {
   const platformSignals = [
     "github",
     "linkedin",
-    "facebook",
   ];
   const linkSignals = [
     "link",
@@ -903,17 +970,12 @@ function getRequestedProfiles(question) {
   if (q.includes("github") || q.includes("git hub")) {
     requested.push("github");
   }
-  if (q.includes("facebook")) {
-    requested.push("facebook");
-  }
-
   return requested;
 }
 
 function toProfileLabel(profile) {
   if (profile === "linkedin") return "LinkedIn";
   if (profile === "github") return "GitHub";
-  if (profile === "facebook") return "Facebook";
   return profile;
 }
 
@@ -954,7 +1016,7 @@ function buildProfileResponse({
     return [
       "LinkedIn is Rich's primary contact point:",
       `- LinkedIn: ${PROFILE_LINKS.linkedin}`,
-      "If you want additional profile links (for example GitHub or Facebook), ask and I can share those too.",
+      "If you want Rich's GitHub profile as well, just ask.",
     ].join("\n");
   }
 
@@ -962,7 +1024,7 @@ function buildProfileResponse({
     return [
       "I can share specific profile links. LinkedIn is the primary contact point:",
       `- LinkedIn: ${PROFILE_LINKS.linkedin}`,
-      "If you want GitHub or Facebook as well, ask for those directly.",
+      "If you want Rich's GitHub profile as well, just ask.",
     ].join("\n");
   }
 
@@ -1207,7 +1269,6 @@ function buildAnswer(question, rankedDocs) {
   const profileSignals = [
     "github",
     "linkedin",
-    "facebook",
     "profile",
     "profiles",
     "social",
@@ -1255,7 +1316,6 @@ function buildAnswer(question, rankedDocs) {
   const isProfileQuery = includesAny(q, profileSignals);
   const includesLinkedIn = q.includes("linkedin");
   const includesGitHub = q.includes("github");
-  const includesFacebook = q.includes("facebook");
   const isEducationQuery = includesAny(q, educationSignals);
   const isTechnologyQuery = includesAny(q, technologySignals);
   const isCloudPlatformQuery = includesAny(q, cloudPlatformSignals);
@@ -1270,9 +1330,6 @@ function buildAnswer(question, rankedDocs) {
     }
     if (includesGitHub) {
       profileDetails.push(`GitHub ${PROFILE_LINKS.github}`);
-    }
-    if (includesFacebook) {
-      profileDetails.push(`Facebook ${PROFILE_LINKS.facebook}`);
     }
 
     const details = profileDetails.length

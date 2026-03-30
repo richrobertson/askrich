@@ -217,25 +217,56 @@ function appendMessage(role, text, citations = [], eventIds = {}) {
   }
 }
 
+function isLikelyProductionHost() {
+  const host = String(window.location.hostname || "").toLowerCase();
+  return host === "myrobertson.com" || host === "www.myrobertson.com";
+}
+
+function isLocalApiBase(base) {
+  const normalized = String(base || "").toLowerCase();
+  return normalized.includes("127.0.0.1") || normalized.includes("localhost");
+}
+
 function getApiBase() {
-  const fallback = "http://127.0.0.1:8000";
+  const localFallback = "http://127.0.0.1:8000";
+  const productionFallback = "https://api.myrobertson.com";
   let stored = null;
   try {
     stored = localStorage.getItem("askrich.apiBase");
   } catch (_error) {
     stored = null;
   }
-  return normalizeApiBase(stored || fallback);
+
+  const normalizedStored = normalizeApiBase(stored || localFallback);
+  if (isLikelyProductionHost() && isLocalApiBase(normalizedStored)) {
+    return productionFallback;
+  }
+
+  return normalizedStored;
 }
 
 function initApiBase() {
   const base = getApiBase();
   els.apiBase.value = base;
+  try {
+    localStorage.setItem("askrich.apiBase", base);
+  } catch (_error) {
+    // Keep working even if storage cannot be written.
+  }
+
   // Persist on 'input' event so localStorage always stays in sync with the field value
   els.apiBase.addEventListener("input", () => {
     const trimmed = normalizeApiBase(els.apiBase.value);
+    const persisted = isLikelyProductionHost() && isLocalApiBase(trimmed)
+      ? "https://api.myrobertson.com"
+      : trimmed || "http://127.0.0.1:8000";
+
+    if (persisted !== trimmed) {
+      els.apiBase.value = persisted;
+    }
+
     try {
-      localStorage.setItem("askrich.apiBase", trimmed || "http://127.0.0.1:8000");
+      localStorage.setItem("askrich.apiBase", persisted);
     } catch (_error) {
       // Keep working even if storage cannot be written.
     }

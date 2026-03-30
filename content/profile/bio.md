@@ -4,7 +4,7 @@ title: Rich Robertson Bio
 type: profile
 summary: Senior software engineer focused on backend systems, cloud platforms, modernization programs, and engineering leadership.
 tags: [profile, bio, backend, distributed-systems, cloud, leadership]
-updated: "2026-03-29"
+updated: "2026-03-30"
 ---
 
 ## Bio
@@ -13,17 +13,21 @@ Rich (Roy) Robertson is a senior software engineer with 15+ years of experience 
 
 He is strongest in roles that require both architecture judgment and day-to-day execution: taking ambiguous goals, shaping a pragmatic technical plan, and driving delivery with measurable outcomes.
 
+His career path moved from Microsoft .NET consulting, application lifecycle management, and delivery tooling into cloud/API consulting, and then into high-scale backend and distributed-systems platform work.
+
 ## What he is known for
 
 - Modernization and migration programs where reliability, compliance, and speed all matter.
 - Cloud and platform engineering across Kubernetes, Terraform, and API-centric architectures.
 - Leadership through influence: coaching engineers, improving engineering standards, and aligning stakeholders around practical tradeoffs.
+- Earlier delivery-tooling and release-engineering work that strengthened later reliability and operability judgment.
 
 ## Representative impact
 
 - **Oracle (Senior Software Engineer):** Led major migration/modernization efforts including CNS migration patterns in OCI and RQS modernization across 32 data centers (Java 8 -> 17 and AMD -> ARM), including initiatives that reduced security/compliance issues.
 - **Starbucks (Engineer Lead):** Helped lead backend API platforms supporting high-scale customer workflows and enabled architecture transitions for rewards/commerce systems.
-- **Consulting (Slalom / Avanade):** Delivered enterprise software and platform solutions across retail, healthcare, and financial domains, with recurring ownership in architecture, delivery quality, and team enablement.
+- **Slalom (Senior Consultant):** Delivered Microsoft cloud data-pipeline work and Starbucks rewards APIs, creating the bridge into later platform engineering roles.
+- **Avanade (Senior Consultant / Delivery Tools Lead / Configuration Manager):** Delivered enterprise software, ALM enablement, release engineering, and application modernization across retail, healthcare, and financial domains.
 
 ## Career transition context
 
@@ -68,3 +72,4 @@ These projects reflect ongoing execution in infrastructure as code, private clou
 - Purdue University — BS in Computer & Information Technology (2007)
 - MCPD (Enterprise Application Developer)
 - MCTS (Team Foundation Server — Configuration and Development)
+- Visual Studio ALM Ranger (FY12, FY13)

@@ -4,7 +4,7 @@ title: Leadership and Ownership
 type: skill
 summary: Operates with end-to-end ownership, balancing technical depth, delivery execution, and stakeholder alignment.
 tags: [leadership, ownership, delivery, collaboration]
-updated: "2026-03-28"
+updated: "2026-03-30"
 ---
 
 ## Overview
@@ -15,3 +15,5 @@ Key signals:
 - Drives difficult migration/modernization work with clear risk management.
 - Communicates tradeoffs across engineering and non-engineering stakeholders.
 - Maintains focus on measurable outcomes and long-term maintainability.
+- Uses tooling, release processes, and team enablement to improve delivery systems, not just codebases.
+- Has trained and influenced large groups, including 300+ development leads in ALM and delivery-tooling practices.

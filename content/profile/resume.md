@@ -4,12 +4,14 @@ title: Rich Robertson Resume (Normalized)
 type: resume
 summary: Resume-style summary of experience, strengths, and representative project outcomes.
 tags: [profile, resume, experience]
-updated: "2026-03-29"
+updated: "2026-03-30"
 ---
 
 ## Summary
 
 Senior Software Engineer with 15+ years of experience across backend systems, distributed systems, cloud/platform engineering, APIs, Kubernetes, Terraform, and migration/modernization programs.
+
+The career arc includes an earlier foundation in Microsoft .NET consulting, ALM, release engineering, and application modernization, followed by a bridge through cloud/API consulting before later platform leadership roles at Starbucks and Oracle.
 
 ## LinkedIn Profile Snapshot
 
@@ -42,6 +44,7 @@ Senior Software Engineer with 15+ years of experience across backend systems, di
 
 - MCPD: Enterprise Application Developer
 - MCTS: Team Foundation Server - Configuration and Development
+- Visual Studio ALM Ranger (FY12, FY13)
 
 ## Historical Resume Addendum (2010)
 
@@ -160,11 +163,21 @@ The following items were merged from the 2010 resume archive to preserve earlier
 - Built REST APIs used by thousands of Starbucks licensee locations enabling customers to earn and redeem Stars for products.
 - Project work focused on Microsoft Azure cloud services, ASP.NET web services, Apigee proxies, and Microsoft SQL Server databases.
 
+**Bridge-Era Significance**
+- This role bridged earlier enterprise consulting into later high-scale platform work by combining cloud data-pipeline delivery with customer-facing API engineering.
+- It established direct continuity into later Starbucks backend platform leadership.
+
 ### Avanade Senior Consultant & Delivery Tools Lead (6/2007 – 8/2014)
 **Strategic Consulting & ALM Leadership**
 - Joint venture between Microsoft and Accenture; consulted on projects at several Fortune 500 companies in banking, retail, and healthcare industries.
 - Initiated, planned, and executed Application Lifecycle Management (ALM) tools training course certifying over 300 development team leads across global delivery centers in India and Philippines.
 - Led teams on multiple high-impact client engagements delivering complex enterprise solutions.
+
+**2011-2014 Delivery Tools and Configuration Management**
+- Implemented continuous delivery and release pipeline practices for a Fortune 100 big-data sales targeting and forecasting application.
+- Designed automated packaging and deployment flows across websites, SQL environments, and dynamically provisioned cloud-based virtual machines.
+- Built dashboards that exposed environment status and configuration details to improve communication across large-scale teams.
+- Enabled automated acceptance testing to maintain a minimum quality standard for deployed code.
 
 **Cardinal Health Nuclear Pharmacy Management Application**
 - Led team of developers tasked with developing nuclear medicine pharmacy management application.
@@ -211,6 +224,7 @@ The following items were merged from the 2010 resume archive to preserve earlier
 - Operates effectively in ambiguous modernization and migration contexts.
 - Balances long-term architecture quality with short-term delivery constraints.
 - Communicates tradeoffs clearly across engineering and stakeholder groups.
+- Uses delivery tooling, rollout visibility, and training programs to raise team effectiveness, not just individual output.
 
 ## Examples of Technical Work (GitHub)
 

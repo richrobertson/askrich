@@ -1,6 +1,10 @@
 name = "askrich-web"
 compatibility_date = "2026-03-28"
 
+[observability.logs]
+enabled = true
+invocation_logs = true
+
 [assets]
 directory = "."
 

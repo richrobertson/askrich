@@ -479,7 +479,20 @@ async function handleOpenAiChat(request, env) {
     );
   }
 
-  const ranked = rankCorpus(question).slice(0, topK);
+  // Only surface career-break/gap content when the question explicitly asks about it.
+  const careerBreakSignals = [
+    "gap", "break", "career break", "work gap", "time off", "leave", "unemployed",
+    "rif", "layoff", "laid off", "reduction in force", "transition", "between jobs",
+    "what have you been doing", "since oracle", "after oracle", "adversity",
+  ];
+  const questionLower = String(question).toLowerCase();
+  const isCareerBreakQuery = careerBreakSignals.some((s) => questionLower.includes(s));
+  const SUPPRESSED_UNLESS_ASKED = new Set(["profile-career-transition-rif"]);
+
+  const ranked = rankCorpus(question)
+    .slice(0, topK)
+    .filter((doc) => isCareerBreakQuery || !SUPPRESSED_UNLESS_ASKED.has(doc.id));
+
   if (!ranked.length) {
     return json(
       {

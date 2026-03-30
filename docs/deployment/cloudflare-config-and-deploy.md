@@ -33,6 +33,7 @@ For each environment, provision separate:
 - Worker deployment target
 - Vectorize index
 - D1 database
+- KV namespace (plus preview namespace)
 - Secret set
 
 Suggested default naming convention:
@@ -60,7 +61,15 @@ npx wrangler whoami
 - `askrich-dev-index`, `askrich-staging-index`, `askrich-prod-index`
 - `askrich-dev-db`, `askrich-staging-db`, `askrich-prod-db`
 
-4. Store runtime secrets per environment:
+4. Provision KV namespaces for event logging:
+
+```bash
+scripts/provision_kv_namespaces.sh
+```
+
+This script creates a namespace and preview namespace for each environment (`dev`, `staging`, `prod`) and prints IDs to copy into `apps/api/worker/wrangler.toml` under each `[[env.<name>.kv_namespaces]]` block.
+
+5. Store runtime secrets per environment:
 
 ```bash
 npx wrangler secret put UPSTREAM_AUTH_TOKEN --config apps/api/worker/wrangler.toml --env dev

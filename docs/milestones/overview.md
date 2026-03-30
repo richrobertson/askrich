@@ -131,9 +131,35 @@ Last updated: 2026-03-30
 - A/B testing framework for retrieval strategies
 - Domain-specific insights and performance reporting
 
-**Status**: Planned
+**Status**: Implemented
 
 **Non-goals**
 - Real-time predictive modeling
 - User profiling or personalized answers
 - Complex multi-armed bandit testing
+
+## Milestone 8 — Advanced optimization and scalability
+
+[Details](milestone-08.md)
+
+**Scope**
+- Drive measurable quality improvements using M7 analytics and testing
+- Optimize RAG pipeline for speed and accuracy
+- Scale to support 10x+ question volume
+- Advanced semantic understanding for better relevance
+
+**Deliverables**
+- Performance-optimized retrieval pipeline with caching
+- Advanced query intent detection and routing
+- Multi-stage ranking and re-ranking implementation
+- Corpus optimization and coverage gap closure
+- Infrastructure scaling for high concurrency
+- Cost analysis and optimization strategies
+
+**Status**: Planned
+
+**Non-goals**
+- Multi-language support
+- Custom model training
+- Advanced MLOps and model retraining pipelines
+- Real-time personalization

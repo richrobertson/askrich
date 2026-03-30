@@ -14,13 +14,16 @@ RATE_LIMIT_ENABLED = "true"
 EVENT_LOGGING_ENABLED = "true"
 RATE_LIMIT_QPS_HOUR = "30"
 RATE_LIMIT_BURST_SECONDS = "1"
+EVENT_TTL_DAYS = "90"
 
 [env.dev]
 name = "askrich-dev-api"
 
 [[env.dev.kv_namespaces]]
 binding = "EVENTS_KV"
-id = "dev-askrich-events"
+# Replace with real KV namespace ID from: wrangler kv namespace create "askrich-events-dev"
+id = "00000000000000000000000000000000"
+preview_id = "00000000000000000000000000000000"
 
 [env.dev.vars]
 UPSTREAM_API_BASE = "http://127.0.0.1:8000"
@@ -29,13 +32,16 @@ RATE_LIMIT_ENABLED = "true"
 EVENT_LOGGING_ENABLED = "true"
 RATE_LIMIT_QPS_HOUR = "30"
 RATE_LIMIT_BURST_SECONDS = "1"
+EVENT_TTL_DAYS = "90"
 
 [env.staging]
 name = "askrich-staging-api"
 
 [[env.staging.kv_namespaces]]
 binding = "EVENTS_KV"
-id = "staging-askrich-events"
+# Replace with real KV namespace ID from: wrangler kv namespace create "askrich-events-staging"
+id = "00000000000000000000000000000000"
+preview_id = "00000000000000000000000000000000"
 
 [env.staging.vars]
 UPSTREAM_API_BASE = "https://staging-api.myrobertson.com"
@@ -44,13 +50,16 @@ RATE_LIMIT_ENABLED = "true"
 EVENT_LOGGING_ENABLED = "true"
 RATE_LIMIT_QPS_HOUR = "30"
 RATE_LIMIT_BURST_SECONDS = "1"
+EVENT_TTL_DAYS = "90"
 
 [env.prod]
 name = "askrich-prod-api"
 
 [[env.prod.kv_namespaces]]
 binding = "EVENTS_KV"
-id = "prod-askrich-events"
+# Replace with real KV namespace ID from: wrangler kv namespace create "askrich-events-prod"
+id = "00000000000000000000000000000000"
+preview_id = "00000000000000000000000000000000"
 
 [env.prod.vars]
 UPSTREAM_API_BASE = "https://api.myrobertson.com"
@@ -61,3 +70,4 @@ RATE_LIMIT_ENABLED = "true"
 EVENT_LOGGING_ENABLED = "true"
 RATE_LIMIT_QPS_HOUR = "30"
 RATE_LIMIT_BURST_SECONDS = "1"
+EVENT_TTL_DAYS = "90"

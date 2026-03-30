@@ -276,8 +276,8 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
 
       // Should not contain the full IP
       expect(clientId).not.toContain('203.0.113.42');
-      // Should only contain truncated prefix
-      expect(clientId).toMatch(/^\d{1,10}_\d+$/);
+      // Should be a one-way hex hash
+      expect(clientId).toMatch(/^[0-9a-f]{8}$/i);
     });
 
     it('should handle missing headers gracefully', () => {
@@ -289,7 +289,7 @@ describe('Milestone 6: Rate Limiting & Event Recording', () => {
 
       const clientId = getClientId(req);
       expect(clientId).toBeDefined();
-      expect(clientId).toMatch(/^([0-9a-z]+_\d+|unknown_\d+)$/i);
+      expect(clientId).toMatch(/^[0-9a-f]{8}$/i);
     });
   });
 

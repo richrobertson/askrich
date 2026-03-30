@@ -6,8 +6,8 @@
 
 **Question Events**
 - Timestamp (ISO 8601 UTC)
-- Sanitized question text (max 2000 characters, PII redacted)
-- Client identifier (hashed IP + origin, not raw IP)
+- Question text truncated to max 2000 characters
+- Client identifier (one-way hash of IP + origin + user-agent)
 - Request parameters: top_k, humor_mode, tone note
 
 **Answer Events**
@@ -27,7 +27,7 @@
 
 ### What We Don't Store
 
-- Raw IP addresses (hashed for client identity only)
+- Raw IP addresses (only a one-way hash is stored)
 - User authentication credentials
 - Personal contact information (emails, phone numbers)
 - Conversation user agents or detailed browser fingerprints
@@ -87,9 +87,9 @@ wrangler deploy --secret EVENT_TTL_DAYS=180
 
 ## Redaction and Deletion
 
-### PII Redaction at Write Time
+### PII Redaction at Write Time (Planned)
 
-The Worker automatically redacts sensitive patterns before storing:
+As of Milestone 6, the Worker truncates question text but does not yet apply pattern-based redaction in the write path. The following illustrates planned redaction rules:
 
 ```javascript
 // Question redaction rules:
@@ -106,7 +106,7 @@ function redactQuestion(text) {
 }
 ```
 
-**Future Improvement**: Implement ML-based PII detection (M7 analytics phase).
+**Future Improvement**: Wire pattern-based and ML-assisted PII detection into runtime writes (M7 analytics phase).
 
 ### Manual Deletion
 
@@ -186,7 +186,7 @@ Every Monday, maintainer reviews:
 **Per-Client Rate Limits:**
 - 30 questions per hour
 - 1-second minimum between submissions
-- Client identified by: IP + origin header fingerprint
+- Client identified by: one-way hash of IP + origin + user-agent
 
 **Rate Limit Response:**
 
@@ -202,11 +202,11 @@ Content-Type: application/json
 }
 ```
 
-### Lenient Enforcement
+### Enforcement Behavior
 
-- Limits are **soft**: requests are **counted but allowed** to execute
-- Prevents abuse while allowing short bursts
-- Suitable for human recruiters; malicious bots will self-throttle
+- Limits are enforced: requests over threshold return `429`
+- `Retry-After` indicates when the client can retry
+- Requests are still recorded for operational visibility
 
 ### Monitoring and Alerts
 
@@ -251,13 +251,14 @@ EVENT_TTL_DAYS = "90"
 
 [[kv_namespaces]]
 binding = "EVENTS_KV"
-id = "prod-askrich-events"
+id = "<REAL_KV_NAMESPACE_ID>"
+preview_id = "<REAL_PREVIEW_NAMESPACE_ID>"
 ```
 
 ### Environment-Specific Overrides
 
 ```bash
-# Staging: More lenient rate limiting
+# Staging: higher threshold for load testing
 wrangler deploy --env staging -c <(echo 'RATE_LIMIT_QPS_HOUR = "100"')
 
 # Testing: Disable event logging to avoid pollution

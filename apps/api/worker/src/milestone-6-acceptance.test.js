@@ -238,12 +238,12 @@ describe('Acceptance: User Feedback Flow', () => {
         { answerId: 'a_1', sentiment: 'helpful' },
       ];
 
-      const helpsfulCount = feedbacks.filter(f => f.sentiment === 'helpful').length;
+      const helpfulCount = feedbacks.filter(f => f.sentiment === 'helpful').length;
       const unhelpfulCount = feedbacks.filter(f => f.sentiment === 'unhelpful').length;
 
-      expect(helpsfulCount).toBe(3);
+      expect(helpfulCount).toBe(3);
       expect(unhelpfulCount).toBe(1);
-      expect(helpsfulCount / feedbacks.length).toBeGreaterThan(0.5);
+      expect(helpfulCount / feedbacks.length).toBeGreaterThan(0.5);
     });
   });
 });

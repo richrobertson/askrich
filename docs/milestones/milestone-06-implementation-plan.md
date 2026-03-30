@@ -7,18 +7,18 @@
 Each event record shares a base structure optimized for edge storage and lightweight querying:
 
 ```
-Event ID: UUID v5 (namespace + content deterministic)
+Event ID: Prefix + timestamp + random suffix (e.g., q_1711800000000_ab12cd)
 Timestamp: ISO 8601 UTC
-Client Identity: Hybrid model (IP + origin fingerprint)
+Client Identity: One-way hash of IP + origin + user-agent
 ```
 
 #### Question Event Schema
 ```json
 {
-  "eventId": "q_uuid",
+  "eventId": "q_1711800000000_ab12cd",
   "type": "question",
   "timestamp": "2026-03-30T12:34:56Z",
-  "clientId": "hash(ip+origin)",
+  "clientId": "f1a2b3c4",
   "question": "sanitized question text (max 2000 chars)",
   "questionHash": "sha256(normalized_question)",
   "topK": 5,
@@ -30,11 +30,11 @@ Client Identity: Hybrid model (IP + origin fingerprint)
 #### Answer Event Schema
 ```json
 {
-  "eventId": "a_uuid",
+  "eventId": "a_1711800000250_e3f456",
   "type": "answer",
   "timestamp": "2026-03-30T12:34:56Z",
-  "questionEventId": "q_uuid",
-  "clientId": "hash(ip+origin)",
+  "questionEventId": "q_1711800000000_ab12cd",
+  "clientId": "f1a2b3c4",
   "answer": "response text",
   "citationCount": 3,
   "retrievedChunks": 5,
@@ -47,12 +47,12 @@ Client Identity: Hybrid model (IP + origin fingerprint)
 #### Feedback Event Schema
 ```json
 {
-  "eventId": "f_uuid",
+  "eventId": "f_1711800000300_987abc",
   "type": "feedback",
   "timestamp": "2026-03-30T12:34:56Z",
-  "questionEventId": "q_uuid",
-  "answerEventId": "a_uuid",
-  "clientId": "hash(ip+origin)",
+  "questionEventId": "q_1711800000000_ab12cd",
+  "answerEventId": "a_1711800000250_e3f456",
+  "clientId": "f1a2b3c4",
   "sentiment": "helpful|unhelpful",
   "optionalNote": "max 500 chars"
 }
@@ -69,7 +69,7 @@ Client Identity: Hybrid model (IP + origin fingerprint)
 - 30 questions per hour per client
 - 1 second minimum between submissions per client
 - 429 response with `Retry-After: 60` header
-- Graceful degradation: count towards limit but execute (lenient mode)
+- Enforced block on limit breach: return 429 with Retry-After
 
 ### Storage
 
@@ -87,7 +87,7 @@ Client Identity: Hybrid model (IP + origin fingerprint)
 
 ### Phase 1: Worker-side Rate Limiting & Event Recording (Priority 1)
 1. Add rate limiting middleware to Worker (IP + time-based)
-2. Generate stable event IDs (UUIDs) for Q/A pairs
+2. Generate stable format event IDs (prefix + timestamp + random)
 3. Record question events to KV
 4. Record answer events with question reference
 5. Return event IDs in response headers

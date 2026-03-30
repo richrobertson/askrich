@@ -84,14 +84,14 @@
 
 ### Completed deliverables
 
-- ✅ **Rate limiting layer**: Cloudflare Worker middleware with configurable per-client limits (30 questions/hour, 1-second burst). Lenient enforcement (count and record, but allow execution).
-- ✅ **Client identity strategy**: Hybrid model using CF-Connecting-IP + origin header fingerprinting (no raw IP storage). Hashed for privacy.
+- ✅ **Rate limiting layer**: Cloudflare Worker middleware with configurable per-client limits (30 questions/hour, 1-second burst). Enforced with `429` + `Retry-After` when exceeded.
+- ✅ **Client identity strategy**: One-way hash derived from IP/origin/user-agent request context (no raw IP storage).
 - ✅ **Question event recording**: Questions logged to Cloudflare KV daily partitions (NDJSON format) with stable event IDs, timestamps, and request metadata.
 - ✅ **Answer event recording**: Responses linked to questions via event IDs, including latency, backend mode, and citation count.
-- ✅ **Stable event identifiers**: UUID-style event IDs (q_*, a_*, f_*) returned in response headers (X-Question-Event-ID, X-Answer-Event-ID).
+- ✅ **Stable event identifiers**: Prefix/timestamp/random event IDs (`q_*`, `a_*`, `f_*`) returned in response headers (`X-Question-Event-ID`, `X-Answer-Event-ID`).
 - ✅ **Feedback API**: New `/api/feedback` POST endpoint for recording thumbs up/down with optional user notes.
 - ✅ **Feedback UI controls**: Web interface buttons ("👍 Yes", "👎 No") on assistant messages with client-side submission and visual feedback.
-- ✅ **Privacy and retention policy**: Comprehensive operational guide with 90-day default TTL, PII redaction rules, GDPR compliance notes, and access boundaries.
+- ✅ **Privacy and retention policy**: Comprehensive operational guide with 90-day default TTL, documented redaction roadmap, GDPR compliance notes, and access boundaries.
 - ✅ **Feedback review workflow**: Triage template, escalation triggers, and SLA definitions for operational response.
 
 ### Configuration
@@ -102,7 +102,7 @@
 - `EVENT_LOGGING_ENABLED` feature toggle
 
 **Environment status:**
-- Dev: Full logging and lenient limits (ready for local testing)
+- Dev: Full logging and enforced limits (ready for local testing)
 - Staging: Full logging with standard limits (ready for pre-prod validation)
 - Prod: Full logging and strict limits (ready for public deployment)
 

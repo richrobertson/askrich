@@ -360,6 +360,7 @@ async function submitFeedback(messageCard, eventIds, sentiment) {
   });
   if (statusEl) {
     statusEl.textContent = "Sending...";
+    statusEl.style.color = "";
   }
 
   try {
@@ -395,6 +396,7 @@ async function submitFeedback(messageCard, eventIds, sentiment) {
 
     if (statusEl) {
       statusEl.textContent = "Thanks for your feedback!";
+      statusEl.style.color = "";
     }
 
     pushEvent("feedback_submitted", { sentiment, answerEventId: eventIds.answerEventId });

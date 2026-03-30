@@ -33,8 +33,18 @@ function generateEventId(type, _content) {
  * Build a privacy-preserving client key from request headers.
  *
  * Uses IP header precedence (`cf-connecting-ip`, `x-forwarded-for`,
- * `x-real-ip`), truncates the IP prefix, and combines with origin length.
+ * `x-real-ip`) and returns a one-way hash of IP + origin + user-agent.
  */
+function hashString(input) {
+  // FNV-1a 32-bit hash (deterministic, fast, non-reversible for this use case)
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < input.length; i += 1) {
+    hash ^= input.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(16).padStart(8, "0");
+}
+
 function getClientId(request) {
   let ip = request.headers.get("cf-connecting-ip") || 
            request.headers.get("x-forwarded-for") || 
@@ -44,8 +54,15 @@ function getClientId(request) {
   ip = ip.split(",")[0].trim();
   
   const origin = request.headers.get("origin") || "";
-  
-  return `${ip.substring(0, 10)}_${origin.length}`;
+  const userAgent = request.headers.get("user-agent") || "";
+
+  return hashString(`${ip}|${origin}|${userAgent}`);
+}
+
+function getEventTtlSeconds(env) {
+  const raw = parseInt(String(env.EVENT_TTL_DAYS || "90"), 10);
+  const days = Number.isFinite(raw) && raw > 0 ? raw : 90;
+  return days * 24 * 60 * 60;
 }
 
 /**
@@ -104,7 +121,7 @@ async function checkRateLimit(clientId, env, kv) {
     }
   }
 
-  // Record this request (lenient: count but allow)
+  // Record this request in the sliding window state.
   recentRequests.push(now);
   try {
     await kv.put(rateKey, JSON.stringify({ requests: recentRequests }), { 
@@ -148,7 +165,7 @@ async function recordQuestionEvent(eventId, clientId, question, payload, env, kv
     }
 
     const ndjson = existing + (existing ? "\n" : "") + JSON.stringify(event);
-    await kv.put(kvKey, ndjson, { expirationTtl: 90 * 24 * 60 * 60 }); // 90 days
+    await kv.put(kvKey, ndjson, { expirationTtl: getEventTtlSeconds(env) });
   } catch (_e) {
     // Fail silently; event recording is non-critical
   }
@@ -189,7 +206,7 @@ async function recordAnswerEvent(eventId, questionEventId, clientId, answer, cit
     }
 
     const ndjson = existing + (existing ? "\n" : "") + JSON.stringify(event);
-    await kv.put(kvKey, ndjson, { expirationTtl: 90 * 24 * 60 * 60 });
+    await kv.put(kvKey, ndjson, { expirationTtl: getEventTtlSeconds(env) });
   } catch (_e) {
     // Fail silently
   }
@@ -225,9 +242,8 @@ export default {
       const clientId = getClientId(request);
       const kv = env.EVENTS_KV;
       
-      // Check rate limit (non-blocking: count but allow)
+      // Check rate limit and return 429 when exceeded.
       const rateCheckResult = await checkRateLimit(clientId, env, kv);
-      let rateLimitResetTime = null;
       if (!rateCheckResult.allowed) {
         // Return 429 with retry guidance
         const response = withCors(
@@ -384,6 +400,7 @@ export default {
           }
 
           const headers = new Headers(result.headers);
+          headers.set("cache-control", "no-store");
           headers.set("X-Question-Event-ID", questionEventId);
           headers.set("X-Answer-Event-ID", answerEventId);
           
@@ -427,6 +444,7 @@ export default {
         }
 
         const headers = new Headers(result.headers);
+        headers.set("cache-control", "no-store");
         headers.set("X-Question-Event-ID", questionEventId);
         headers.set("X-Answer-Event-ID", answerEventId);
         
@@ -472,13 +490,23 @@ export default {
       const clientId = getClientId(request);
       const kv = env.EVENTS_KV;
 
+      const questionEventId = String(feedbackPayload.questionEventId || "").trim();
+      const answerEventId = String(feedbackPayload.answerEventId || "").trim();
+      if (!/^q_[a-z0-9_]+$/i.test(questionEventId) || !/^a_[a-z0-9_]+$/i.test(answerEventId)) {
+        return withCors(
+          json({ success: false, error: "Invalid questionEventId or answerEventId" }, 400),
+          request,
+          env,
+        );
+      }
+
       try {
         const event = {
           eventId: feedbackEventId,
           type: "feedback",
           timestamp: new Date().toISOString(),
-          questionEventId: feedbackPayload.questionEventId || "",
-          answerEventId: feedbackPayload.answerEventId || "",
+          questionEventId,
+          answerEventId,
           clientId,
           sentiment: ["helpful", "unhelpful"].includes(feedbackPayload.sentiment)
             ? feedbackPayload.sentiment
@@ -497,7 +525,7 @@ export default {
         }
 
         const ndjson = existing + (existing ? "\n" : "") + JSON.stringify(event);
-        await kv.put(kvKey, ndjson, { expirationTtl: 90 * 24 * 60 * 60 });
+        await kv.put(kvKey, ndjson, { expirationTtl: getEventTtlSeconds(env) });
       } catch (_e) {
         // Fail silently; feedback recording is non-critical
       }
@@ -2363,6 +2391,11 @@ function withCors(response, request, env) {
 
 // Export functions for testing
 export {
+  generateEventId,
+  getClientId,
+  checkRateLimit,
+  recordQuestionEvent,
+  recordAnswerEvent,
   CORPUS,
   buildAnswer,
   buildBehavioralAnswer,

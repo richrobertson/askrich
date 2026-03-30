@@ -9,7 +9,7 @@
  *
  * RUNNING TESTS WITH COVERAGE:
  *   npm run test:coverage              # Run tests and generate coverage report
- *   npm run test:coverage:html         # Open HTML coverage report
+ *   # Then open coverage/index.html in your browser for the HTML report
  *
  * COVERAGE REPORTS GENERATED:
  *   - coverage/index.html              # Interactive HTML report

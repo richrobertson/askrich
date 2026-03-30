@@ -1,8 +1,9 @@
 """Retrieval-aware chat service for the /api/chat endpoint."""
 
 import re
-from typing import Any
+from typing import Any, TypedDict
 
+from langgraph.graph import END, START, StateGraph
 from app.models.api import ChatCitation, ChatFilters
 from app.rag.embeddings import EmbeddingClient
 from app.rag.model import ModelClient
@@ -42,6 +43,20 @@ DEFAULT_INSTRUCTIONS = (
 class ChatService:
     """Coordinates retrieval, prompt assembly, answering, and citations."""
 
+    class ChatGraphState(TypedDict, total=False):
+        question: str
+        top_k: int
+        filters: ChatFilters | None
+        tone: str | None
+        query_embedding: list[float]
+        raw_results: list[dict[str, Any]]
+        filtered_results: list[dict[str, Any]]
+        selected_results: list[dict[str, Any]]
+        bounded_evidence: list[dict[str, Any]]
+        answer_text: str
+        citations: list[ChatCitation]
+        retrieved_chunks: int
+
     def __init__(
         self,
         embedding_client: EmbeddingClient,
@@ -53,6 +68,7 @@ class ChatService:
         self.vector_store = vector_store
         self.model_client = model_client
         self.max_evidence_chars = max(400, max_evidence_chars)
+        self._graph = self._build_graph()
 
     def answer(
         self,
@@ -61,27 +77,83 @@ class ChatService:
         filters: ChatFilters | None = None,
         tone: str | None = None,
     ) -> dict[str, Any]:
-        query_embedding = self.embedding_client.embed_text(question)
-        raw_results = self.vector_store.similarity_search(query_embedding, k=max(top_k * 3, top_k))
-        filtered_results = self._apply_filters(raw_results, filters)
-        selected = filtered_results[:top_k]
-        bounded_evidence = self._bound_evidence(selected)
-
-        answer_text = self.model_client.generate_answer(
-            question=question,
-            evidence_snippets=bounded_evidence,
-            instructions=DEFAULT_INSTRUCTIONS,
-            tone=tone,
-        )
-        answer_text = self._postprocess_answer(question, answer_text)
-
-        citations = self._build_citations(bounded_evidence)
+        state: ChatService.ChatGraphState = {
+            "question": question,
+            "top_k": top_k,
+            "filters": filters,
+            "tone": tone,
+        }
+        output = self._graph.invoke(state)
 
         return {
-            "answer": answer_text,
-            "citations": citations,
+            "answer": output.get("answer_text", ""),
+            "citations": output.get("citations", []),
+            "retrieved_chunks": output.get("retrieved_chunks", 0),
+        }
+
+    def _build_graph(self):
+        builder = StateGraph(ChatService.ChatGraphState)
+        builder.add_node("retrieve", self._retrieve_node)
+        builder.add_node("filter_and_select", self._filter_and_select_node)
+        builder.add_node("bound_evidence", self._bound_evidence_node)
+        builder.add_node("generate", self._generate_node)
+        builder.add_node("postprocess", self._postprocess_node)
+        builder.add_node("build_citations", self._build_citations_node)
+
+        builder.add_edge(START, "retrieve")
+        builder.add_edge("retrieve", "filter_and_select")
+        builder.add_edge("filter_and_select", "bound_evidence")
+        builder.add_edge("bound_evidence", "generate")
+        builder.add_edge("generate", "postprocess")
+        builder.add_edge("postprocess", "build_citations")
+        builder.add_edge("build_citations", END)
+        return builder.compile()
+
+    def _retrieve_node(self, state: ChatGraphState) -> ChatGraphState:
+        query_embedding = self.embedding_client.embed_text(state.get("question", ""))
+        top_k = max(int(state.get("top_k", 3)), 1)
+        raw_results = self.vector_store.similarity_search(query_embedding, k=max(top_k * 3, top_k))
+        return {
+            "query_embedding": query_embedding,
+            "raw_results": raw_results,
+        }
+
+    def _filter_and_select_node(self, state: ChatGraphState) -> ChatGraphState:
+        raw_results = state.get("raw_results", [])
+        filters = state.get("filters")
+        top_k = max(int(state.get("top_k", 3)), 1)
+
+        filtered_results = self._apply_filters(raw_results, filters)
+        selected = filtered_results[:top_k]
+        return {
+            "filtered_results": filtered_results,
+            "selected_results": selected,
             "retrieved_chunks": len(selected),
         }
+
+    def _bound_evidence_node(self, state: ChatGraphState) -> ChatGraphState:
+        selected = state.get("selected_results", [])
+        return {"bounded_evidence": self._bound_evidence(selected)}
+
+    def _generate_node(self, state: ChatGraphState) -> ChatGraphState:
+        answer_text = self.model_client.generate_answer(
+            question=state.get("question", ""),
+            evidence_snippets=state.get("bounded_evidence", []),
+            instructions=DEFAULT_INSTRUCTIONS,
+            tone=state.get("tone"),
+        )
+        return {"answer_text": answer_text}
+
+    def _postprocess_node(self, state: ChatGraphState) -> ChatGraphState:
+        return {
+            "answer_text": self._postprocess_answer(
+                state.get("question", ""),
+                state.get("answer_text", ""),
+            )
+        }
+
+    def _build_citations_node(self, state: ChatGraphState) -> ChatGraphState:
+        return {"citations": self._build_citations(state.get("bounded_evidence", []))}
 
     def _postprocess_answer(self, question: str, answer_text: str) -> str:
         normalized = self._strip_chat_preamble(answer_text)

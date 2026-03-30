@@ -24,13 +24,17 @@ if env_path.exists():
 class Settings:
     """Application settings loaded from environment."""
 
+    app_env: str = os.getenv("APP_ENV", os.getenv("ENVIRONMENT", "dev")).strip().lower()
+
     # LLM Provider (abstract)
     # Default to local extractive fallback; set LLM_PROVIDER + LLM_API_BASE + LLM_MODEL
     # to enable an external LLM (e.g. Ollama, OpenAI-compatible). See .env.example.
-    llm_provider: str = os.getenv("LLM_PROVIDER", "")
-    llm_api_base: str = os.getenv("LLM_API_BASE", "")
+    llm_provider: str = os.getenv("LLM_PROVIDER", "openai" if app_env == "prod" else "")
+    llm_api_base: str = os.getenv(
+        "LLM_API_BASE", "https://api.openai.com/v1" if app_env == "prod" else ""
+    )
     llm_api_key: str = os.getenv("LLM_API_KEY", "")
-    llm_model: str = os.getenv("LLM_MODEL", "")
+    llm_model: str = os.getenv("LLM_MODEL", "gpt-5.4" if app_env == "prod" else "")
     llm_temperature: float = float(os.getenv("LLM_TEMPERATURE", "0.0"))
 
     # Embedding Provider (abstract)

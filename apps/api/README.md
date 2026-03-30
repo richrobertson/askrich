@@ -10,6 +10,7 @@ This API currently provides:
 - Health check endpoint (`/health`)
 - Ingestion endpoint (`/ingest`) with environment gate
 - `/api/chat` retrieval-aware endpoint
+- LangGraph-based chat orchestration pipeline for `/api/chat`
 - Retrieval over Chroma (`top_k` + optional metadata filters)
 - Provider-agnostic embedding and model adapter contracts
 - Local deterministic fallback adapters for smoke testing (`hash` embeddings + extractive answerer)
@@ -89,10 +90,11 @@ See [scripts/README.md](../../scripts/README.md) for ingestion and smoke testing
 
 Settings are loaded from environment variables (with defaults):
 
-- `LLM_PROVIDER` (default: `""`)
-- `LLM_API_BASE` (default: `""`)
+- `APP_ENV` (default: `dev`; when `prod`, default LLM config becomes OpenAI + `gpt-5.4` if `LLM_*` values are not explicitly set)
+- `LLM_PROVIDER` (default: `""`, or `openai` when `APP_ENV=prod`)
+- `LLM_API_BASE` (default: `""`, or `https://api.openai.com/v1` when `APP_ENV=prod`)
 - `LLM_API_KEY` (default: `""`)
-- `LLM_MODEL` (default: `""`)
+- `LLM_MODEL` (default: `""`, or `gpt-5.4` when `APP_ENV=prod`)
 - `EMBEDDING_PROVIDER` (default: `""`)
 - `EMBEDDING_API_BASE` (default: `""`)
 - `EMBEDDING_API_KEY` (default: `""`)

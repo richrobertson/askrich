@@ -63,6 +63,8 @@ import {
   buildAnswer,
   buildBehavioralAnswer,
   buildProfileResponse,
+  buildOutOfScopeResponse,
+  resolveFollowUpQuestion,
   isBehavioralQuestion,
   isOracleCnsOutcomesQuestion,
   isTechnologyPassionQuestion,
@@ -270,7 +272,55 @@ describe('Canned Response Quality Tests', () => {
 
       expect(result).toContain('LinkedIn');
       expect(result).toContain('GitHub');
-      expect(result).toContain('Facebook');
+      expect(result).not.toContain('Facebook');
+    });
+  });
+
+  describe('Out-of-Scope Prompt Handling', () => {
+    it('should redirect personal-preference questions to role-relevant topics', () => {
+      const response = buildOutOfScopeResponse('what is your favorite color?');
+
+      expect(response).toContain('do not have evidence for personal-preference questions');
+      expect(response).toContain('leadership and delivery outcomes');
+      expect(response).toContain('architecture and technology depth');
+      expect(response).toContain('Which area should I focus on?');
+    });
+
+    it('should return null for in-scope professional questions', () => {
+      const response = buildOutOfScopeResponse('what outcomes did rich deliver at oracle');
+      expect(response).toBeNull();
+    });
+  });
+
+  describe('Affirmation Follow-up Resolution', () => {
+    it('should convert yes into the assistant follow-up intent when available', () => {
+      const resolved = resolveFollowUpQuestion('yes', [
+        {
+          role: 'assistant',
+          content:
+            "I don't see direct GraphQL evidence yet. Want me to summarize his closest API-related experience?",
+        },
+      ]);
+
+      expect(resolved.needsClarification).toBe(false);
+      expect(resolved.effectiveQuestion.toLowerCase()).toContain('summarize his closest api-related experience');
+    });
+
+    it('should use prior user question when yes has no explicit assistant follow-up', () => {
+      const resolved = resolveFollowUpQuestion('yes', [
+        { role: 'user', content: 'What measurable outcomes did Rich deliver at Oracle?' },
+        { role: 'assistant', content: 'Rich improved reliability and delivery confidence.' },
+      ]);
+
+      expect(resolved.needsClarification).toBe(false);
+      expect(resolved.effectiveQuestion).toBe('What measurable outcomes did Rich deliver at Oracle?');
+    });
+
+    it('should ask for clarification when yes has no usable history', () => {
+      const resolved = resolveFollowUpQuestion('yes', []);
+
+      expect(resolved.needsClarification).toBe(true);
+      expect(resolved.effectiveQuestion).toBe('yes');
     });
   });
 

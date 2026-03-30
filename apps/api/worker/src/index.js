@@ -612,7 +612,7 @@ function buildProfileResponse({
 }) {
   if (isSensitiveContactRequest) {
     return [
-      "I do not share private contact details such as personal phone numbers or email addresses here.",
+      "I do not share private contact details in this chat.",
       "The best way to reach Rich is LinkedIn:",
       `- LinkedIn: ${PROFILE_LINKS.linkedin}`,
       "If you send a brief note there with role details and your preferred follow-up channel, he can respond appropriately.",
@@ -696,6 +696,11 @@ function isOracleCnsOutcomesQuestion(questionLower) {
     "delivered",
     "achieve",
     "achieved",
+    "perform",
+    "performance",
+    "help",
+    "improve",
+    "improved",
   ];
 
   return includesAny(questionLower, oracleSignals) && includesAny(questionLower, outcomeSignals);
@@ -738,6 +743,8 @@ function isTechnologyPassionQuestion(questionLower) {
     "passion",
     "experience with",
     "how do you",
+    "do you use",
+    "use",
   ];
 
   // Exclude specific project/problem questions (these want project-focused answers)
@@ -873,7 +880,7 @@ function buildAnswer(question, rankedDocs) {
       "Rich has broad technology expertise across modern cloud platforms and distributed systems:",
       "- Cloud & orchestration: Kubernetes, Terraform, OCI migration architecture, control-plane patterns",
       "- Distributed systems: Microservices, asynchronous messaging, eventual consistency patterns",
-      "- Backend platforms: Java, C#, Python, Scala across ASP.NET, SharePoint, enterprise middleware",
+      "- backend platforms: Java, C#, Python, Scala across ASP.NET, SharePoint, enterprise middleware",
       "- Data & analytics: Stream processing, event sourcing, distributed tracing",
       "Rich's strength is translating platform technology into reliable business outcomes.",
     ].join("\n");

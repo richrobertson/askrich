@@ -63,10 +63,10 @@ A freeform chatbot without retrieval would be harder to trust for hiring decisio
 Natural-language system instructions remain the primary behavior layer.
 TOON-style blocks are used for structured context/config where helpful (e.g., role, tone, output constraints), but TOON is **not** a replacement for nuanced instruction logic.
 
-## LangChain first, LangGraph later
+## LangGraph orchestration for chat workflow
 
-- **Now:** LangChain provides enough primitives for retrieval, prompt templates, and model abstraction.
-- **Later:** LangGraph may be introduced when orchestration needs become stateful/multi-step (e.g., clarifications, tool routing, workflow retries).
+- **Now:** `/api/chat` uses a LangGraph `StateGraph` to orchestrate retrieval, filtering, evidence bounding, generation, post-processing, and citation construction as explicit nodes.
+- **Why:** This keeps the request lifecycle inspectable and extensible while preserving retrieval-first grounding and existing adapter contracts.
 
 ## Why Cloudflare as hosting target
 

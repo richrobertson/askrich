@@ -1,5 +1,7 @@
 # ADR 0003: Use LangChain before LangGraph
 
+> Status update (March 30, 2026): The chat runtime has since been migrated to LangGraph orchestration. This ADR remains as historical context for the earlier milestone decision.
+
 ## Context
 
 Initial milestone focus is reliable retrieval and answer generation with citations.

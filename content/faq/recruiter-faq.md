@@ -5,7 +5,7 @@ type: faq
 summary: Common recruiter questions and concise answers about Rich Robertson’s background, strengths, and role fit.
 audience: recruiter
 tags: [faq, recruiter, hiring]
-updated: "2026-03-29"
+updated: "2026-03-30"
 ---
 
 ## What kinds of roles is Rich best suited for?
@@ -23,6 +23,14 @@ Yes. At Oracle, Rich led migration patterns for customer-facing services with em
 ## Has Rich done modernization beyond simple version upgrades?
 
 Yes. Rich led modernization work spanning runtime upgrades, platform transitions, dependency rationalization, and security/compliance improvements across large-scale deployments.
+
+## Does Rich have experience with release engineering and delivery tooling?
+
+Yes. Before the later platform-focused roles, Rich led ALM enablement, release pipeline work, deployment automation, and configuration-management efforts. That included training more than 300 development team leads, automating packaging and deployment flows, and improving environment visibility across enterprise delivery teams.
+
+## What did Rich do between earlier Microsoft consulting and later platform roles?
+
+He had a meaningful bridge period. At Slalom, he worked on Microsoft cloud/data-pipeline delivery and Starbucks rewards APIs for licensee locations. That period connected his earlier enterprise consulting experience to later high-scale backend and platform leadership roles.
 
 ## Can Rich lead while still being hands-on?
 

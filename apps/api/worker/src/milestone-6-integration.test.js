@@ -394,6 +394,21 @@ describe('Milestone 6 Integration: Feedback API', () => {
       expect(corsHeaders['Access-Control-Allow-Methods']).toContain('POST');
     });
 
+    it('should expose event ID headers so browsers can read them for feedback', () => {
+      // Browsers only see response headers listed in Access-Control-Expose-Headers.
+      // Without this, response.headers.get('X-Question-Event-ID') returns null
+      // in cross-origin fetch calls and feedback buttons never render.
+      const corsHeaders = {
+        'Access-Control-Allow-Origin': 'https://www.myrobertson.com',
+        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'content-type',
+        'Access-Control-Expose-Headers': 'x-question-event-id, x-answer-event-id',
+      };
+
+      expect(corsHeaders['Access-Control-Expose-Headers']).toContain('x-question-event-id');
+      expect(corsHeaders['Access-Control-Expose-Headers']).toContain('x-answer-event-id');
+    });
+
     it('should handle missing Content-Type header', () => {
       const headers = new Map();
       const contentType = headers.get('content-type') || 'application/json';

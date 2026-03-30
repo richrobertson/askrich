@@ -579,7 +579,7 @@ async function handleOpenAiChat(request, env) {
           {
             role: "system",
             content:
-              "You are Ask Rich, the recruiter-facing assistant for Rich Robertson. Never identify yourself as ChatGPT or another generic assistant. Rich always refers to Rich Robertson in this chat, never the Python library named rich. Use only the provided evidence; if evidence is insufficient, state that clearly. Do not invent projects, employers, dates, or personal details. Format output as: line 1 = one-sentence summary, then up to 4 bullet lines each starting with '- '. No headings, no numbered lists, no inline citation markers like [1].",
+              "You are Ask Rich, a friendly recruiter-facing assistant for Rich Robertson. Never identify yourself as ChatGPT or any other AI. Rich always refers to Rich Robertson, never the Python library. Use only the provided evidence; if insufficient, say so. Do not invent projects, employers, dates, or personal details.\n\nFormat rules (follow exactly):\n1. One short summary sentence (under 20 words).\n2. Up to 3 bullet points. Each bullet is a SHORT noun phrase or verb phrase — NOT a full sentence. Under 10 words each.\n3. End with exactly one conversational follow-up question (under 15 words) that offers to go deeper on a specific aspect. No inline citation markers like [1].",
           },
           {
             role: "user",
@@ -604,7 +604,7 @@ async function handleOpenAiChat(request, env) {
     return json({ success: false, error: "OpenAI returned no answer text" }, 502);
   }
 
-  const normalizedAnswer = formatRecruiterAnswer(answer, 1200);
+  const normalizedAnswer = formatRecruiterAnswer(answer, 800);
 
   return json(
     {
@@ -665,12 +665,26 @@ function formatRecruiterAnswer(answer, maxChars) {
     const sentences = lines[0].split(/(?<=[.!?])\s+/).filter(Boolean);
     if (sentences.length > 2) {
       const summary = sentences[0];
-      const bullets = sentences
-        .slice(1, 5)
-        .map((sentence) => `- ${sentence.replace(/^[-*]\s*/, "")}`);
-      text = [summary, ...bullets].join("\n");
+      // Last sentence is likely the follow-up question if it ends with ?
+      const rest = sentences.slice(1);
+      const followUp = rest.at(-1)?.endsWith("?") ? rest.at(-1) : null;
+      const bulletSentences = followUp ? rest.slice(0, -1) : rest;
+      const bullets = bulletSentences
+        .slice(0, 3)
+        .map((s) => `- ${s.replace(/^[-*]\s*/, "")}`);
+      text = [summary, ...bullets, ...(followUp ? [followUp] : [])].join("\n");
     }
   }
+
+  // Trim any bullet lines that are still very long (>100 chars) to keep things punchy.
+  const formattedLines = text.split("\n").map((line) => {
+    if (line.startsWith("- ") && line.length > 100) {
+      // Truncate to nearest word boundary before 100 chars.
+      return `${line.slice(0, 97).replace(/\s+\S*$/, "")}...`;
+    }
+    return line;
+  });
+  text = formattedLines.join("\n");
 
   return clipPreserveFormatting(text, maxChars);
 }

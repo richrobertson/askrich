@@ -85,6 +85,13 @@ import {
   getChatCacheTtlSeconds,
 } from '../src/index.js';
 
+const buildChatRequest = (payload) =>
+  new Request('https://example.com/api/chat', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
 describe('Canned Response Quality Tests', () => {
   describe('Question Intent Detection', () => {
     it('should detect greeting and small-talk queries', () => {
@@ -665,14 +672,6 @@ describe('Canned Response Quality Tests', () => {
       };
     }
 
-    function buildChatRequest(payload) {
-      return new Request('https://example.com/api/chat', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-    }
-
     it('should cache stateless local responses and hit cache on repeat', async () => {
       const kv = makeMockKv();
       const env = {
@@ -770,14 +769,6 @@ describe('Canned Response Quality Tests', () => {
   });
 
   describe('OpenAI mode small-talk routing', () => {
-    function buildChatRequest(payload) {
-      return new Request('https://example.com/api/chat', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-    }
-
     it('should answer "hi" in openai mode without min-length rejection', async () => {
       const response = await worker.fetch(
         buildChatRequest({
@@ -816,28 +807,23 @@ describe('Canned Response Quality Tests', () => {
       expect(body.error).toContain('at least 3 characters');
     });
 
-    it('should route short greeting through top-level /api/chat in openai mode', async () => {
+    it('should set question/answer event headers for short greeting in openai mode', async () => {
       const response = await worker.fetch(
-        new Request('https://example.com/api/chat', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({
-            question: 'hi',
-            top_k: 5,
-            history: [],
-            humor_mode: 'clean_professional',
-          }),
+        buildChatRequest({
+          question: 'hi',
+          top_k: 5,
+          history: [],
+          humor_mode: 'clean_professional',
         }),
-        {
-          CHAT_BACKEND_MODE: 'openai',
-          RATE_LIMIT_ENABLED: 'false',
-        },
+        { CHAT_BACKEND_MODE: 'openai', RATE_LIMIT_ENABLED: 'false' },
       );
 
       const body = await response.json();
       expect(response.status).toBe(200);
       expect(body.success).toBe(true);
       expect(body.data.answer).toContain('Hello.');
+      expect(response.headers.get('X-Question-Event-ID')).toMatch(/^q_/);
+      expect(response.headers.get('X-Answer-Event-ID')).toMatch(/^a_/);
     });
   });
 });

@@ -14,6 +14,9 @@ const telemetry = {
   events: [],
 };
 
+const conversationHistory = [];
+const MAX_CONVERSATION_HISTORY = 20;
+
 let isRequestInFlight = false;
 
 const MAX_TELEMETRY_LATENCIES = 100;
@@ -171,6 +174,10 @@ function appendMessage(role, text, citations = []) {
 
   els.messages.append(card);
   els.messages.scrollTop = els.messages.scrollHeight;
+
+  if (role === "user" || role === "assistant") {
+    pushCapped(conversationHistory, { role, content: String(text || "") }, MAX_CONVERSATION_HISTORY);
+  }
 }
 
 function getApiBase() {
@@ -229,6 +236,7 @@ async function askQuestion(question) {
   const body = {
     question,
     top_k: parseTopK(),
+    history: conversationHistory,
   };
 
   const tone = (els.tone.value || "").trim();

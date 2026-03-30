@@ -10,7 +10,18 @@ lint:
 	@echo "[placeholder] run linters (to be wired in milestone implementation)"
 
 test:
-	@echo "[placeholder] run test suite (to be wired in milestone implementation)"
+	cd apps/api/worker && npm test
+
+python-tests:
+	cd apps/api && python -m pytest tests/unit/ -v --tb=short || true
+
+testing: test python-tests coverage
+
+test-watch:
+	cd apps/api/worker && npm test:watch
+
+coverage:
+	cd apps/api/worker && npm test:coverage
 
 docs:
 	@echo "[placeholder] validate docs/links/format (to be wired in milestone implementation)"

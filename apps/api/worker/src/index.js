@@ -1,47 +1,218 @@
 /**
  * Ask Rich Cloudflare Worker: Chat API Handler
  *
- * This worker handles two modes:
- * 1. UPSTREAM mode: Proxies requests to a retrieval-backed API (e.g., FastAPI server)
- * 2. LOCAL mode: Serves canned responses from hardcoded CORPUS and rules
+ * Runtime modes:
+ * - `upstream`: proxy chat requests to an upstream API
+ * - `openai`: call OpenAI directly
+ * - `local`: answer from the in-repo corpus and routing rules
  *
- * QUALITY ASSURANCE:
- *   The local mode contains hardcoded response paths for specific question types.
- *   These are extensively tested to ensure focused, concise, and safe answers.
- *
- *   Test suites (see docs/testing/CANNED_RESPONSES.md):
- *     - scripts/test_canned_responses.py: Specification validation
- *     - scripts/test_canned_responses_integration.py: Live worker response validation
- *     - src/index.test.js: JavaScript unit tests (40+ assertions)
- *
- *   Response quality guarantees:
- *     - Oracle CNS outcomes questions → focused metrics (not profile link noise)
- *     - Profile queries → profile links only (no project details)
- *     - Education queries → degree info (no unrelated content)
- *     - Sensitive contact → refuse PII, redirect to LinkedIn
- *     - All fallback answers → stay under 600-800 characters
- *
- * KEY FUNCTIONS:
- *   - buildAnswer(): Routes questions based on intent (behavioral, outcomes, education, etc.)
- *   - buildProfileResponse(): Handles profile/contact queries
- *   - buildBehavioralAnswer(): Returns STAR-formatted answers for behavioral questions
- *   - rankCorpus(): Token-based relevance ranking of CORPUS documents
- *   - isOracleCnsOutcomesQuestion(): Intent detection for Oracle outcomes
- *
- * DOCUMENTATION & CROSSLINKS:
- *   - docs/testing/CANNED_RESPONSES.md: Complete testing guide
- *   - docs/architecture.md: System design overview
- *   - README.md: Quality assurance section
- *   - apps/api/worker/package.json: Test dependencies
- *
- * ENVIRONMENT:
- *   - CHAT_BACKEND_MODE: "upstream", "openai", or "local" (defaults to "local")
- *   - UPSTREAM_API_BASE: Base URL for upstream (e.g., http://127.0.0.1:8000)
- *   - OPENAI_API_KEY: API key for direct OpenAI mode
- *   - OPENAI_API_BASE: Optional OpenAI base URL (defaults to https://api.openai.com/v1)
- *   - OPENAI_MODEL: Optional model for direct OpenAI mode (defaults to gpt-5.4)
- *   - ALLOWED_ORIGINS: CORS whitelist (comma-separated)
+ * Quality checks are covered by tests in `docs/testing/CANNED_RESPONSES.md`.
+ * Key env vars: `CHAT_BACKEND_MODE`, `UPSTREAM_API_BASE`, `OPENAI_*`,
+ * `ALLOWED_ORIGINS`, `RATE_LIMIT_*`, and `EVENT_LOGGING_ENABLED`.
  */
+
+/**
+ * Milestone 6: Rate Limiting and Event Recording
+ *
+ * - Rate limits are per client (`30/hour` + `1s` burst guard).
+ * - Events are written as daily NDJSON records in KV with a 90-day TTL.
+ * - Question/answer/feedback event IDs are used to link the request lifecycle.
+ */
+
+/**
+ * Create an event ID for question/answer/feedback linkage.
+ * Format: `<typePrefix>_<timestampMs>_<random6>`.
+ */
+function generateEventId(type, _content) {
+  const timestamp = Date.now().toString();
+  const baseId = `${type.charAt(0)}_${timestamp}_${Math.random().toString(36).substring(2, 8)}`;
+  return baseId;
+}
+
+/**
+ * Build a privacy-preserving client key from request headers.
+ *
+ * Uses IP header precedence (`cf-connecting-ip`, `x-forwarded-for`,
+ * `x-real-ip`) and returns a one-way hash of IP + origin + user-agent.
+ */
+function hashString(input) {
+  // FNV-1a 32-bit hash (deterministic, fast, non-reversible for this use case)
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < input.length; i += 1) {
+    hash ^= input.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(16).padStart(8, "0");
+}
+
+function getClientId(request) {
+  let ip = request.headers.get("cf-connecting-ip") || 
+           request.headers.get("x-forwarded-for") || 
+           request.headers.get("x-real-ip") || 
+           "unknown";
+  
+  ip = ip.split(",")[0].trim();
+  
+  const origin = request.headers.get("origin") || "";
+  const userAgent = request.headers.get("user-agent") || "";
+
+  return hashString(`${ip}|${origin}|${userAgent}`);
+}
+
+function getEventTtlSeconds(env) {
+  const raw = parseInt(String(env.EVENT_TTL_DAYS || "90"), 10);
+  const days = Number.isFinite(raw) && raw > 0 ? raw : 90;
+  return days * 24 * 60 * 60;
+}
+
+/**
+ * Enforce per-client rate limits backed by KV sliding window state.
+ *
+ * Returns `{ allowed: false, resetTime }` when either:
+ * - hourly quota (`RATE_LIMIT_QPS_HOUR`, default 30) is exceeded, or
+ * - burst interval (`RATE_LIMIT_BURST_SECONDS`, default 1) is violated.
+ */
+async function checkRateLimit(clientId, env, kv) {
+  // Feature flag: allow disabling rate limiting in development
+  if (env.RATE_LIMIT_ENABLED !== "true") {
+    return { allowed: true };
+  }
+
+  // Get current time and rate limit key
+  const now = Date.now();
+  const rateKey = `ratelimit:${clientId}`;
+  
+  // Retrieve existing rate limit record for this client
+  // Returns null if first request or record expired
+  let record = {};
+  try {
+    const stored = await kv.get(rateKey);
+    if (stored) {
+      record = JSON.parse(stored);
+    }
+  } catch (_e) {
+    // If KV is unavailable, fail open (allow request)
+    // Ensures graceful degradation when storage fails
+    return { allowed: true };
+  }
+
+  // Calculate sliding window: requests from last 60 minutes
+  // Removes timestamps older than 1 hour for hourly limit check
+  const hourAgo = now - (60 * 60 * 1000);
+  const recentRequests = (record.requests || []).filter(t => t > hourAgo);
+  
+  // Check hourly rate limit (default 30 questions/hour)
+  // Config: RATE_LIMIT_QPS_HOUR (questions per hour, misnaming but intentional)
+  const qpsHour = parseInt(env.RATE_LIMIT_QPS_HOUR || "30", 10);
+  if (recentRequests.length >= qpsHour) {
+    // Client has hit hourly limit
+    // Calculate when limit will reset (when oldest request ages out)
+    const resetTime = Math.ceil((recentRequests[0] + 60 * 60 * 1000 - now) / 1000);
+    return { allowed: false, resetTime };
+  }
+
+  // Check burst protection (minimum 1 second between requests)
+  const burstSeconds = parseInt(env.RATE_LIMIT_BURST_SECONDS || "1", 10);
+  if (recentRequests.length > 0) {
+    const lastRequest = recentRequests[recentRequests.length - 1];
+    if (now - lastRequest < (burstSeconds * 1000)) {
+      const resetTime = Math.ceil((burstSeconds * 1000 - (now - lastRequest)) / 1000);
+      return { allowed: false, resetTime };
+    }
+  }
+
+  // Record this request in the sliding window state.
+  recentRequests.push(now);
+  try {
+    await kv.put(rateKey, JSON.stringify({ requests: recentRequests }), { 
+      expirationTtl: 24 * 60 * 60 // 24 hours to keep old timestamps
+    });
+  } catch (_e) {
+    // If recording fails, still allow the request
+  }
+
+  return { allowed: true };
+}
+
+/**
+ * Record a question event to KV store
+ */
+async function recordQuestionEvent(eventId, clientId, question, payload, env, kv) {
+  if (env.EVENT_LOGGING_ENABLED !== "true") {
+    return eventId;
+  }
+
+  try {
+    const event = {
+      eventId,
+      type: "question",
+      timestamp: new Date().toISOString(),
+      clientId,
+      question: question.substring(0, 2000), // Truncate for safety
+      topK: payload?.top_k || 5,
+      humorMode: payload?.humor_mode || "clean_professional",
+    };
+
+    const dateKey = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+    const kvKey = `events:${dateKey}`;
+    
+    // Append to daily NDJSON record
+    let existing = "";
+    try {
+      existing = await kv.get(kvKey) || "";
+    } catch (_e) {
+      // OK if KV is empty
+    }
+
+    const ndjson = existing + (existing ? "\n" : "") + JSON.stringify(event);
+    await kv.put(kvKey, ndjson, { expirationTtl: getEventTtlSeconds(env) });
+  } catch (_e) {
+    // Fail silently; event recording is non-critical
+  }
+
+  return eventId;
+}
+
+/**
+ * Record an answer event to KV store
+ */
+async function recordAnswerEvent(eventId, questionEventId, clientId, answer, citations, latencyMs, backendMode, env, kv) {
+  if (env.EVENT_LOGGING_ENABLED !== "true") {
+    return eventId;
+  }
+
+  try {
+    const event = {
+      eventId,
+      type: "answer",
+      timestamp: new Date().toISOString(),
+      questionEventId,
+      clientId,
+      answer: answer.substring(0, 4000), // Truncate for safety
+      citationCount: (citations || []).length,
+      answerHash: answer.substring(0, 20), // Only store prefix for deduping
+      durationMs: latencyMs || 0,
+      backendMode: backendMode || "local",
+    };
+
+    const dateKey = new Date().toISOString().split("T")[0];
+    const kvKey = `events:${dateKey}`;
+    
+    let existing = "";
+    try {
+      existing = await kv.get(kvKey) || "";
+    } catch (_e) {
+      // OK if KV is empty
+    }
+
+    const ndjson = existing + (existing ? "\n" : "") + JSON.stringify(event);
+    await kv.put(kvKey, ndjson, { expirationTtl: getEventTtlSeconds(env) });
+  } catch (_e) {
+    // Fail silently
+  }
+
+  return eventId;
+}
 
 export default {
   async fetch(request, env) {
@@ -66,71 +237,304 @@ export default {
         return withCors(json({ success: false, error: "Origin not allowed" }, 403), request, env);
       }
 
+      // M6: Generate event ID and check rate limits
+      const questionEventId = generateEventId("question", `${Date.now()}`);
+      const clientId = getClientId(request);
+      const kv = env.EVENTS_KV;
+      
+      // Check rate limit and return 429 when exceeded.
+      const rateCheckResult = await checkRateLimit(clientId, env, kv);
+      if (!rateCheckResult.allowed) {
+        // Return 429 with retry guidance
+        const response = withCors(
+          json(
+            {
+              success: false,
+              error: "Rate limit exceeded. Please try again soon.",
+              eventId: questionEventId,
+            },
+            429,
+          ),
+          request,
+          env,
+        );
+        response.headers.set("Retry-After", String(rateCheckResult.resetTime || 60));
+        return response;
+      }
+
+      // Get request body for logging
+      const requestText = await request.text();
+      let payload = {};
+      try {
+        payload = JSON.parse(requestText);
+      } catch (_error) {
+        return withCors(json({ success: false, error: "Invalid JSON payload" }, 400), request, env);
+      }
+
+      const question = String(payload?.question || "").trim();
+      
+      // M6: Record question event
+      await recordQuestionEvent(questionEventId, clientId, question, payload, env, kv);
+
+      // Continue with normal chat handling
       const backendMode = getBackendMode(env);
-      if (backendMode === "upstream") {
-        if (!env.UPSTREAM_API_BASE) {
+      const startTime = Date.now();
+      let answerEventId = generateEventId("answer", `${Date.now()}`);
+      let responseJson = null;
+
+      try {
+        if (backendMode === "upstream") {
+          if (!env.UPSTREAM_API_BASE) {
+            return withCors(
+              json(
+                {
+                  success: false,
+                  error: "UPSTREAM_API_BASE is not configured for upstream mode",
+                  eventId: questionEventId,
+                },
+                500,
+              ),
+              request,
+              env,
+            );
+          }
+
+          const upstreamPath = normalizeUpstreamPath(env.UPSTREAM_CHAT_PATH || "/api/chat");
+          const upstreamUrl = `${env.UPSTREAM_API_BASE.replace(/\/$/, "")}${upstreamPath}`;
+          const upstreamHeaders = {
+            "content-type": "application/json",
+          };
+          if (env.UPSTREAM_AUTH_TOKEN) {
+            upstreamHeaders["authorization"] = `Bearer ${env.UPSTREAM_AUTH_TOKEN}`;
+          }
+          let upstreamResponse;
+
+          try {
+            upstreamResponse = await fetch(upstreamUrl, {
+              method: "POST",
+              headers: upstreamHeaders,
+              body: requestText,
+            });
+          } catch (_error) {
+            return withCors(
+              json(
+                {
+                  success: false,
+                  error: "Upstream chat service unavailable",
+                  eventId: questionEventId,
+                },
+                502,
+              ),
+              request,
+              env,
+            );
+          }
+
+          const latencyMs = Date.now() - startTime;
+          const upstreamBody = await upstreamResponse.text();
+          
+          // Parse to get answer for event logging
+          try {
+            responseJson = JSON.parse(upstreamBody);
+            if (responseJson.data?.answer) {
+              await recordAnswerEvent(
+                answerEventId,
+                questionEventId,
+                clientId,
+                responseJson.data.answer,
+                responseJson.data.citations || [],
+                latencyMs,
+                "upstream",
+                env,
+                kv,
+              );
+            }
+          } catch (_e) {
+            // Ignore parse errors for logging
+          }
+
+          const responseHeaders = new Headers(upstreamResponse.headers);
+          responseHeaders.set("cache-control", "no-store");
+          responseHeaders.set("X-Question-Event-ID", questionEventId);
+          responseHeaders.set("X-Answer-Event-ID", answerEventId);
+
+          const corsResponse = withCors(
+            new Response(upstreamBody, {
+              status: upstreamResponse.status,
+              statusText: upstreamResponse.statusText,
+              headers: responseHeaders,
+            }),
+            request,
+            env,
+          );
+          return corsResponse;
+        }
+
+        if (backendMode === "openai") {
+          const result = await handleOpenAiChat(new Request(request.url, {
+            method: request.method,
+            headers: request.headers,
+            body: requestText,
+          }), env);
+          
+          const latencyMs = Date.now() - startTime;
+          const body = await result.text();
+          
+          try {
+            responseJson = JSON.parse(body);
+            if (responseJson.data?.answer) {
+              await recordAnswerEvent(
+                answerEventId,
+                questionEventId,
+                clientId,
+                responseJson.data.answer,
+                responseJson.data.citations || [],
+                latencyMs,
+                "openai",
+                env,
+                kv,
+              );
+            }
+          } catch (_e) {
+            // Ignore parse errors
+          }
+
+          const headers = new Headers(result.headers);
+          headers.set("cache-control", "no-store");
+          headers.set("X-Question-Event-ID", questionEventId);
+          headers.set("X-Answer-Event-ID", answerEventId);
+          
           return withCors(
-            json(
-              {
-                success: false,
-                error: "UPSTREAM_API_BASE is not configured for upstream mode",
-              },
-              500,
-            ),
+            new Response(body, {
+              status: result.status,
+              statusText: result.statusText,
+              headers,
+            }),
             request,
             env,
           );
         }
 
-        const upstreamPath = normalizeUpstreamPath(env.UPSTREAM_CHAT_PATH || "/api/chat");
-        const upstreamUrl = `${env.UPSTREAM_API_BASE.replace(/\/$/, "")}${upstreamPath}`;
-        const upstreamHeaders = {
-          "content-type": "application/json",
-        };
-        if (env.UPSTREAM_AUTH_TOKEN) {
-          upstreamHeaders["authorization"] = `Bearer ${env.UPSTREAM_AUTH_TOKEN}`;
-        }
-        let upstreamResponse;
+        const result = await handleLocalChat(new Request(request.url, {
+          method: request.method,
+          headers: request.headers,
+          body: requestText,
+        }));
 
+        const latencyMs = Date.now() - startTime;
+        const body = await result.text();
+        
         try {
-          upstreamResponse = await fetch(upstreamUrl, {
-            method: "POST",
-            headers: upstreamHeaders,
-            body: await request.text(),
-          });
-        } catch (_error) {
-          return withCors(
-            json(
-              {
-                success: false,
-                error: "Upstream chat service unavailable",
-              },
-              502,
-            ),
-            request,
-            env,
-          );
+          responseJson = JSON.parse(body);
+          if (responseJson.data?.answer) {
+            await recordAnswerEvent(
+              answerEventId,
+              questionEventId,
+              clientId,
+              responseJson.data.answer,
+              responseJson.data.citations || [],
+              latencyMs,
+              "local",
+              env,
+              kv,
+            );
+          }
+        } catch (_e) {
+          // Ignore parse errors
         }
 
-        const responseHeaders = new Headers(upstreamResponse.headers);
-        responseHeaders.set("cache-control", "no-store");
-
+        const headers = new Headers(result.headers);
+        headers.set("cache-control", "no-store");
+        headers.set("X-Question-Event-ID", questionEventId);
+        headers.set("X-Answer-Event-ID", answerEventId);
+        
         return withCors(
-          new Response(upstreamResponse.body, {
-            status: upstreamResponse.status,
-            statusText: upstreamResponse.statusText,
-            headers: responseHeaders,
+          new Response(body, {
+            status: result.status,
+            statusText: result.statusText,
+            headers,
           }),
+          request,
+          env,
+        );
+      } catch (error) {
+        return withCors(
+          json(
+            {
+              success: false,
+              error: String(error?.message || "Server error"),
+              eventId: questionEventId,
+            },
+            500,
+          ),
+          request,
+          env,
+        );
+      }
+    }
+
+    if (url.pathname === "/api/feedback" && request.method === "POST") {
+      if (!isAllowedOrigin(request, env)) {
+        return withCors(json({ success: false, error: "Origin not allowed" }, 403), request, env);
+      }
+
+      // M6: Handle feedback submission
+      let feedbackPayload = {};
+      try {
+        feedbackPayload = await request.json();
+      } catch (_error) {
+        return withCors(json({ success: false, error: "Invalid JSON payload" }, 400), request, env);
+      }
+
+      const feedbackEventId = generateEventId("feedback", `${Date.now()}`);
+      const clientId = getClientId(request);
+      const kv = env.EVENTS_KV;
+
+      const questionEventId = String(feedbackPayload.questionEventId || "").trim();
+      const answerEventId = String(feedbackPayload.answerEventId || "").trim();
+      if (!/^q_[a-z0-9_]+$/i.test(questionEventId) || !/^a_[a-z0-9_]+$/i.test(answerEventId)) {
+        return withCors(
+          json({ success: false, error: "Invalid questionEventId or answerEventId" }, 400),
           request,
           env,
         );
       }
 
-      if (backendMode === "openai") {
-        return withCors(await handleOpenAiChat(request, env), request, env);
+      try {
+        const event = {
+          eventId: feedbackEventId,
+          type: "feedback",
+          timestamp: new Date().toISOString(),
+          questionEventId,
+          answerEventId,
+          clientId,
+          sentiment: ["helpful", "unhelpful"].includes(feedbackPayload.sentiment)
+            ? feedbackPayload.sentiment
+            : "neutral",
+          optionalNote: String(feedbackPayload.optionalNote || "").substring(0, 500),
+        };
+
+        const dateKey = new Date().toISOString().split("T")[0];
+        const kvKey = `events:${dateKey}`;
+        
+        let existing = "";
+        try {
+          existing = await kv.get(kvKey) || "";
+        } catch (_e) {
+          // OK if KV is empty
+        }
+
+        const ndjson = existing + (existing ? "\n" : "") + JSON.stringify(event);
+        await kv.put(kvKey, ndjson, { expirationTtl: getEventTtlSeconds(env) });
+      } catch (_e) {
+        // Fail silently; feedback recording is non-critical
       }
 
-      return withCors(await handleLocalChat(request), request, env);
+      return withCors(
+        json({ success: true, eventId: feedbackEventId }, 201),
+        request,
+        env,
+      );
     }
 
     return withCors(json({ success: false, error: "Not found" }, 404), request, env);
@@ -362,6 +766,12 @@ const CAREER_BREAK_QUERY_SIGNALS = [
   "adversity",
 ];
 
+/**
+ * Determine which chat backend mode to use.
+ *
+ * Normalizes `CHAT_BACKEND_MODE` to a lowercase string and defaults to
+ * `local` when unset.
+ */
 function getBackendMode(env) {
   return String(env.CHAT_BACKEND_MODE || "local").trim().toLowerCase();
 }
@@ -937,9 +1347,20 @@ function resolveFollowUpQuestion(question, history) {
   }
 
   const normalizedHistory = normalizeConversationHistory(history);
+  
+  // Check for pending intent (e.g., "want me to X?" or "want another one?")
   const pendingIntent = extractAssistantPendingIntent(normalizedHistory);
   if (pendingIntent) {
     return { effectiveQuestion: pendingIntent, needsClarification: false };
+  }
+
+  // Check if assistant asked "want another X?" pattern - if so, repeat prior question
+  const assistantAskedForAnother = doesAssistantAskForAnother(normalizedHistory);
+  if (assistantAskedForAnother) {
+    const fallbackUserQuestion = extractPriorUserQuestion(normalizedHistory);
+    if (fallbackUserQuestion) {
+      return { effectiveQuestion: fallbackUserQuestion, needsClarification: false };
+    }
   }
 
   const fallbackUserQuestion = extractPriorUserQuestion(normalizedHistory);
@@ -1005,7 +1426,13 @@ function extractIntentFromAssistantQuestionLine(questionLine) {
   }
 
   const lower = text.toLowerCase();
-  const prefixes = ["want me to ", "would you like me to "];
+  
+  // Handle "Want another one?" or "Want another X?" - extract from prior question
+  if (lower.includes("want another")) {
+    return ""; // Return empty to signal caller should use prior question
+  }
+  
+  const prefixes = ["want me to ", "would you like me to ", "want to "];
   for (const prefix of prefixes) {
     const start = lower.indexOf(prefix);
     if (start < 0) {
@@ -1021,6 +1448,25 @@ function extractIntentFromAssistantQuestionLine(questionLine) {
   }
 
   return "";
+}
+
+/**
+ * Check if the most recent assistant message asks "want another" or similar
+ * This is a signal that a yes/no affirmation should repeat the prior question
+ */
+function doesAssistantAskForAnother(history) {
+  for (let i = history.length - 1; i >= 0; i -= 1) {
+    const item = history[i];
+    if (item.role !== "assistant") {
+      continue;
+    }
+
+    const lower = String(item.content || "").toLowerCase();
+    return lower.includes("want another") || 
+           lower.includes("another one") ||
+           lower.includes("want more");
+  }
+  return false;
 }
 
 function extractAssistantPendingIntent(history) {
@@ -1847,6 +2293,12 @@ function toFirstPerson(text) {
   return result;
 }
 
+/**
+ * Normalize upstream chat path configuration.
+ *
+ * Ensures a usable path by trimming whitespace, defaulting to `/api/chat`,
+ * and enforcing a leading slash.
+ */
 function normalizeUpstreamPath(path) {
   if (!path || typeof path !== "string") {
     return "/api/chat";
@@ -1860,6 +2312,9 @@ function normalizeUpstreamPath(path) {
   return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
 }
 
+/**
+ * Create a JSON response with UTF-8 content type.
+ */
 function json(payload, status = 200) {
   return new Response(JSON.stringify(payload), {
     status,
@@ -1869,6 +2324,12 @@ function json(payload, status = 200) {
   });
 }
 
+/**
+ * Validate request origin against configured allowlist.
+ *
+ * If no Origin header is present, request is allowed. If an Origin header is
+ * present and allowlist is empty, request is denied.
+ */
 function isAllowedOrigin(request, env) {
   const origin = request.headers.get("origin");
   const allowed = parseAllowedOrigins(env.ALLOWED_ORIGINS);
@@ -1884,6 +2345,9 @@ function isAllowedOrigin(request, env) {
   return allowed.has(origin);
 }
 
+/**
+ * Parse comma-separated origins into a Set for fast lookup.
+ */
 function parseAllowedOrigins(value) {
   const origins = new Set();
   if (!value || typeof value !== "string") {
@@ -1899,6 +2363,9 @@ function parseAllowedOrigins(value) {
   return origins;
 }
 
+/**
+ * Apply CORS headers to a response based on request origin and allowlist.
+ */
 function withCors(response, request, env) {
   const headers = new Headers(response.headers);
   const origin = request.headers.get("origin");
@@ -1924,6 +2391,11 @@ function withCors(response, request, env) {
 
 // Export functions for testing
 export {
+  generateEventId,
+  getClientId,
+  checkRateLimit,
+  recordQuestionEvent,
+  recordAnswerEvent,
   CORPUS,
   buildAnswer,
   buildBehavioralAnswer,

@@ -1,6 +1,6 @@
 # Milestone 06: Usage Controls and Feedback Signals
 
-**Status: Planned**
+**Status: Implemented**
 
 ## Goals
 
@@ -80,7 +80,57 @@
 5. Add a feedback API contract and web UI controls for thumbs up/down submission.
 6. Document retention boundaries, privacy constraints, and operational review workflow.
 
+## Implementation summary
+
+### Completed deliverables
+
+- ✅ **Rate limiting layer**: Cloudflare Worker middleware with configurable per-client limits (30 questions/hour, 1-second burst). Enforced with `429` + `Retry-After` when exceeded.
+- ✅ **Client identity strategy**: One-way hash derived from IP/origin/user-agent request context (no raw IP storage).
+- ✅ **Question event recording**: Questions logged to Cloudflare KV daily partitions (NDJSON format) with stable event IDs, timestamps, and request metadata.
+- ✅ **Answer event recording**: Responses linked to questions via event IDs, including latency, backend mode, and citation count.
+- ✅ **Stable event identifiers**: Prefix/timestamp/random event IDs (`q_*`, `a_*`, `f_*`) returned in response headers (`X-Question-Event-ID`, `X-Answer-Event-ID`).
+- ✅ **Feedback API**: New `/api/feedback` POST endpoint for recording thumbs up/down with optional user notes.
+- ✅ **Feedback UI controls**: Web interface buttons ("👍 Yes", "👎 No") on assistant messages with client-side submission and visual feedback.
+- ✅ **Privacy and retention policy**: Comprehensive operational guide with 90-day default TTL, documented redaction roadmap, GDPR compliance notes, and access boundaries.
+- ✅ **Feedback review workflow**: Triage template, escalation triggers, and SLA definitions for operational response.
+
+### Configuration
+
+**wrangler.toml additions:**
+- `EVENTS_KV` KV namespace binding (per environment)
+- `RATE_LIMIT_ENABLED`, `RATE_LIMIT_QPS_HOUR`, `RATE_LIMIT_BURST_SECONDS` flags
+- `EVENT_LOGGING_ENABLED` feature toggle
+
+**Environment status:**
+- Dev: Full logging and enforced limits (ready for local testing)
+- Staging: Full logging with standard limits (ready for pre-prod validation)
+- Prod: Full logging and strict limits (ready for public deployment)
+
+### Documentation
+
+- `docs/MILESTONE_6_OPERATIONS.md` — Comprehensive operational guide, privacy policy, feedback workflow, compliance notes
+- `docs/milestones/milestone-06-implementation-plan.md` — Technical design, data schemas, implementation phases
+- Inline code comments in Worker and web app detailing rate limit logic, event recording, and feedback submission flow
+
+### Testing
+
+**Local validation:**
+```bash
+# Rate limit enforcement
+for i in {1..35}; do curl -X POST http://localhost:8787/api/chat ...; done
+# Should see 429 after 30 requests
+
+# Event recording
+wrangler kv:key list # Should show events:YYYY-MM-DD
+wrangler kv:key get events:$(date +%Y-%m-%d) | head -c 500 # NDJSON preview
+
+# Feedback submission
+curl -X POST http://localhost:8787/api/feedback -H "Content-Type: application/json" \
+  -d '{"questionEventId":"q_...", "answerEventId":"a_...", "sentiment":"helpful"}'
+```
+
 ## Navigation
 
 - Overview: [Milestone Overview](overview.md)
 - Previous: [Milestone 05](milestone-05.md)
+- Next: [Milestone 07](milestone-07.md)

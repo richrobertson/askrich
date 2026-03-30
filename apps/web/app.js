@@ -126,9 +126,11 @@ function renderMetrics() {
   els.metrics.latency.textContent = String(average(telemetry.latencies));
 }
 
-function appendMessage(role, text, citations = []) {
+function appendMessage(role, text, citations = [], eventIds = {}) {
   const card = document.createElement("article");
   card.className = `message ${role}`;
+  card.dataset.questionEventId = eventIds.questionEventId || "";
+  card.dataset.answerEventId = eventIds.answerEventId || "";
 
   const roleEl = document.createElement("strong");
   roleEl.className = "role";
@@ -173,6 +175,38 @@ function appendMessage(role, text, citations = []) {
 
     details.append(summary, list);
     card.append(details);
+  }
+
+  // M6: Add feedback controls for assistant messages
+  if (role === "assistant" && eventIds.questionEventId && eventIds.answerEventId) {
+    const feedbackDiv = document.createElement("div");
+    feedbackDiv.className = "feedback-controls";
+
+    const prompt = document.createElement("span");
+    prompt.className = "feedback-prompt";
+    prompt.textContent = "Was this helpful?";
+
+    const helpfulBtn = document.createElement("button");
+    helpfulBtn.type = "button";
+    helpfulBtn.className = "feedback-btn";
+    helpfulBtn.textContent = "👍 Yes";
+    helpfulBtn.dataset.sentiment = "helpful";
+
+    const unhelpfulBtn = document.createElement("button");
+    unhelpfulBtn.type = "button";
+    unhelpfulBtn.className = "feedback-btn unhelpful-btn";
+    unhelpfulBtn.textContent = "👎 No";
+    unhelpfulBtn.dataset.sentiment = "unhelpful";
+
+    const status = document.createElement("span");
+    status.className = "feedback-status";
+
+    feedbackDiv.append(prompt, helpfulBtn, unhelpfulBtn, status);
+    card.append(feedbackDiv);
+
+    // Attach event listeners for feedback submission
+    helpfulBtn.addEventListener("click", () => submitFeedback(card, eventIds, "helpful"));
+    unhelpfulBtn.addEventListener("click", () => submitFeedback(card, eventIds, "unhelpful"));
   }
 
   els.messages.append(card);
@@ -297,11 +331,89 @@ async function askQuestion(question) {
     throw new Error(message);
   }
 
+  // M6: Extract event IDs from response headers
+  const questionEventId = response.headers.get("X-Question-Event-ID") || "";
+  const answerEventId = response.headers.get("X-Answer-Event-ID") || "";
+
   return {
     answer: json.data?.answer || "",
     citations: json.data?.citations || [],
     retrievedChunks: json.data?.retrieved_chunks || 0,
+    questionEventId,
+    answerEventId,
   };
+}
+
+/**
+ * M6: Submit feedback for an answer
+ */
+async function submitFeedback(messageCard, eventIds, sentiment) {
+  const base = normalizeApiBase(els.apiBase.value);
+  const endpoint = `${base}/api/feedback`;
+  const statusEl = messageCard.querySelector(".feedback-status");
+  const buttons = messageCard.querySelectorAll(".feedback-btn");
+
+  // Disable buttons and show pending status
+  buttons.forEach(btn => {
+    btn.disabled = true;
+    btn.style.opacity = "0.6";
+  });
+  if (statusEl) {
+    statusEl.textContent = "Sending...";
+    statusEl.style.color = "";
+  }
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        questionEventId: eventIds.questionEventId,
+        answerEventId: eventIds.answerEventId,
+        sentiment,
+        optionalNote: "",
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Feedback submission failed: ${response.status}`);
+    }
+
+    // Update button states and status
+    buttons.forEach(btn => {
+      if (btn.dataset.sentiment === sentiment) {
+        btn.classList.add("selected");
+        if (sentiment === "unhelpful") {
+          btn.classList.add("unhelpful");
+        }
+      } else {
+        btn.disabled = true;
+        btn.style.opacity = "0.3";
+      }
+    });
+
+    if (statusEl) {
+      statusEl.textContent = "Thanks for your feedback!";
+      statusEl.style.color = "";
+    }
+
+    pushEvent("feedback_submitted", { sentiment, answerEventId: eventIds.answerEventId });
+  } catch (error) {
+    // Re-enable buttons on error
+    buttons.forEach(btn => {
+      btn.disabled = false;
+      btn.style.opacity = "1";
+    });
+
+    if (statusEl) {
+      statusEl.textContent = "Could not submit feedback";
+      statusEl.style.color = "var(--danger)";
+    }
+
+    pushEvent("feedback_error", { error: error.message });
+  }
 }
 
 function setFormBusy(isBusy) {
@@ -338,7 +450,11 @@ async function onSubmit(event) {
       retrieved_chunks: result.retrievedChunks,
     });
 
-    appendMessage("assistant", result.answer, result.citations);
+    // M6: Pass event IDs to appendMessage for feedback tracking
+    appendMessage("assistant", result.answer, result.citations, {
+      questionEventId: result.questionEventId,
+      answerEventId: result.answerEventId,
+    });
   } catch (error) {
     telemetry.errors += 1;
     pushEvent("request_error", { message: error.message });

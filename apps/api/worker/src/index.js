@@ -276,6 +276,10 @@ const THANKS_SIGNALS = new Set([
 const WHO_ARE_YOU_SIGNALS = new Set([
   "who are you",
   "what are you",
+  "what is your name",
+  "what s your name",
+  "whats your name",
+  "your name",
   "what can you do",
   "help",
   "what do you do",

@@ -98,6 +98,8 @@ describe('Canned Response Quality Tests', () => {
 
       expect(isWhoAreYouQuery('who are you')).toBe(true);
       expect(isWhoAreYouQuery('what can you do')).toBe(true);
+      expect(isWhoAreYouQuery('what is your name')).toBe(true);
+      expect(isWhoAreYouQuery('whats your name')).toBe(true);
       expect(isWhoAreYouQuery('what did you do at oracle')).toBe(false);
     });
 

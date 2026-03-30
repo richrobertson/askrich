@@ -117,9 +117,6 @@ export default defineConfig({
     // Bail on first failure (set to false for full run)
     bail: 0,
 
-    // Mockable globals
-    globals: true,
-
     // Setup files (runs before all tests)
     setupFiles: [],
 

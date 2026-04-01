@@ -418,6 +418,35 @@ describe('Canned Response Quality Tests', () => {
       expect(typeof response).toBe('string');
       expect(response).toContain('dad joke');
     });
+
+    it('should provide a different clean/professional joke after a prior joke in history', () => {
+      const firstResponse = buildSmallTalkResponse('tell a joke');
+      const followUpResponse = buildSmallTalkResponse('another joke', {
+        history: [{ role: 'assistant', content: firstResponse }],
+      });
+
+      expect(followUpResponse).not.toContain(
+        'I said our Kubernetes cluster was self-healing, so finance asked if it could also fix the AWS bill.'
+      );
+      expect(followUpResponse).not.toContain('I would tell you a UDP joke, but you might not get it.');
+      expect(followUpResponse).toContain('Want another one?');
+    });
+
+    it('should provide a different standard joke after a prior joke in history', () => {
+      const firstResponse = buildSmallTalkResponse('tell a joke', { humorMode: 'standard' });
+      const followUpResponse = buildSmallTalkResponse('another joke', {
+        humorMode: 'standard',
+        history: [{ role: 'assistant', content: firstResponse }],
+      });
+
+      expect(followUpResponse).not.toContain(
+        'We finally hit five nines, then someone changed one Terraform variable.'
+      );
+      expect(followUpResponse).not.toContain(
+        'Why do programmers prefer dark mode? Because light attracts bugs.'
+      );
+      expect(followUpResponse).toContain('Want another one?');
+    });
   });
 
   describe('Sensitive Contact Handling', () => {

@@ -418,6 +418,39 @@ describe('Canned Response Quality Tests', () => {
       expect(typeof response).toBe('string');
       expect(response).toContain('dad joke');
     });
+
+    it('should provide a different clean/professional joke after a prior joke in history', () => {
+      const firstResponse = buildSmallTalkResponse('tell a joke');
+      const followUpResponse = buildSmallTalkResponse('another joke', {
+        history: [{ role: 'assistant', content: firstResponse }],
+      });
+
+      const firstJokeLines = firstResponse.split('\n').filter((line) => line.startsWith('- '));
+      const followUpJokeLines = followUpResponse
+        .split('\n')
+        .filter((line) => line.startsWith('- '));
+
+      expect(followUpResponse).not.toBe(firstResponse);
+      expect(followUpJokeLines).not.toEqual(firstJokeLines);
+      expect(followUpResponse).toContain('Want another one?');
+    });
+
+    it('should provide a different standard joke after a prior joke in history', () => {
+      const firstResponse = buildSmallTalkResponse('tell a joke', { humorMode: 'standard' });
+      const followUpResponse = buildSmallTalkResponse('another joke', {
+        humorMode: 'standard',
+        history: [{ role: 'assistant', content: firstResponse }],
+      });
+
+      const firstJokeLines = firstResponse.split('\n').filter((line) => line.startsWith('- '));
+      const followUpJokeLines = followUpResponse
+        .split('\n')
+        .filter((line) => line.startsWith('- '));
+
+      expect(followUpResponse).not.toBe(firstResponse);
+      expect(followUpJokeLines).not.toEqual(firstJokeLines);
+      expect(followUpResponse).toContain('Want another one?');
+    });
   });
 
   describe('Sensitive Contact Handling', () => {

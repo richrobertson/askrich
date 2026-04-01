@@ -508,6 +508,40 @@ const JOKE_SIGNALS = [
   'senior cloud engineer joke',
   'funny',
 ];
+
+const JOKE_RESPONSES_BY_MODE = {
+  clean_professional: {
+    intro: 'Absolutely. Here is one senior cloud engineer joke and one dad joke:',
+    cloudLabel: 'Senior cloud engineer joke',
+    dadLabel: 'Dad joke',
+    cloud: [
+      'I said our Kubernetes cluster was self-healing, so finance asked if it could also fix the AWS bill.',
+      'Our deployment was so reliable that incident response filed a missing persons report for PagerDuty.',
+      'I told the team to keep blast radius small, so they renamed production to tiny-prod and hoped for the best.',
+    ],
+    dad: [
+      'I would tell you a UDP joke, but you might not get it.',
+      'I asked the server for a joke, but it returned 503 because humor was temporarily unavailable.',
+      'Why did the developer go broke? Because they used up all their cache.',
+    ],
+  },
+  standard: {
+    intro: 'Sure. Here is one cloud engineer joke and one dad joke:',
+    cloudLabel: 'Cloud engineer joke',
+    dadLabel: 'Dad joke',
+    cloud: [
+      'We finally hit five nines, then someone changed one Terraform variable.',
+      'Our autoscaler is so optimistic it scales up before the coffee machine is online.',
+      'I said we needed immutable infrastructure, so someone laminated the runbook.',
+    ],
+    dad: [
+      'Why do programmers prefer dark mode? Because light attracts bugs.',
+      'Why did the function break up with the loop? It needed space.',
+      'I told my code a joke about recursion, but it asked me to start from the top.',
+    ],
+  },
+};
+
 const AFFIRMATION_SIGNALS = new Set([
   'yes',
   'y',
@@ -685,7 +719,10 @@ async function handleLocalChat(request, env) {
 
   const effectiveQuestion = resolved.effectiveQuestion;
 
-  const smallTalkResponse = buildSmallTalkResponse(effectiveQuestion, { humorMode });
+  const smallTalkResponse = buildSmallTalkResponse(effectiveQuestion, {
+    humorMode,
+    history: payload?.history,
+  });
   if (smallTalkResponse) {
     return json(
       {
@@ -847,7 +884,10 @@ async function handleOpenAiChat(request, env) {
 
   const effectiveQuestion = resolved.effectiveQuestion;
 
-  const smallTalkResponse = buildSmallTalkResponse(effectiveQuestion, { humorMode });
+  const smallTalkResponse = buildSmallTalkResponse(effectiveQuestion, {
+    humorMode,
+    history: payload?.history,
+  });
   if (smallTalkResponse) {
     return json(
       {
@@ -1354,21 +1394,10 @@ function buildSmallTalkResponse(question, options = {}) {
   }
 
   if (isJokeQuery(q)) {
-    if (humorMode === 'clean_professional') {
-      return [
-        'Absolutely. Here is one senior cloud engineer joke and one dad joke:',
-        '- Senior cloud engineer joke: I said our Kubernetes cluster was self-healing, so finance asked if it could also fix the AWS bill.',
-        '- Dad joke: I would tell you a UDP joke, but you might not get it.',
-        'Want another one?',
-      ].join('\n');
-    }
-
-    return [
-      'Sure. Here is one cloud engineer joke and one dad joke:',
-      '- Cloud engineer joke: We finally hit five nines, then someone changed one Terraform variable.',
-      '- Dad joke: Why do programmers prefer dark mode? Because light attracts bugs.',
-      'Want another one?',
-    ].join('\n');
+    return buildJokeResponse({
+      humorMode,
+      history: options?.history,
+    });
   }
 
   if (isGreetingQuery(q)) {
@@ -1397,6 +1426,40 @@ function buildSmallTalkResponse(question, options = {}) {
   }
 
   return null;
+}
+
+function buildJokeResponse(options = {}) {
+  const humorMode = normalizeHumorMode(options?.humorMode);
+  const modeConfig = JOKE_RESPONSES_BY_MODE[humorMode] || JOKE_RESPONSES_BY_MODE.clean_professional;
+  const normalizedHistory = normalizeConversationHistory(options?.history);
+  const previousAssistantText = normalizedHistory
+    .filter((item) => item.role === 'assistant')
+    .map((item) => normalizeIntentText(item.content))
+    .join('\n');
+
+  const cloudJoke = selectUnusedJoke(modeConfig.cloud, previousAssistantText);
+  const dadJoke = selectUnusedJoke(modeConfig.dad, previousAssistantText);
+
+  return [
+    modeConfig.intro,
+    `- ${modeConfig.cloudLabel}: ${cloudJoke}`,
+    `- ${modeConfig.dadLabel}: ${dadJoke}`,
+    'Want another one?',
+  ].join('\n');
+}
+
+function selectUnusedJoke(jokes, normalizedAssistantHistory) {
+  if (!Array.isArray(jokes) || jokes.length === 0) {
+    return '';
+  }
+
+  for (const joke of jokes) {
+    if (!normalizedAssistantHistory.includes(normalizeIntentText(joke))) {
+      return joke;
+    }
+  }
+
+  return jokes[0];
 }
 
 function buildAmbiguousAffirmationResponse() {

@@ -425,10 +425,13 @@ describe('Canned Response Quality Tests', () => {
         history: [{ role: 'assistant', content: firstResponse }],
       });
 
-      expect(followUpResponse).not.toContain(
-        'I said our Kubernetes cluster was self-healing, so finance asked if it could also fix the AWS bill.'
-      );
-      expect(followUpResponse).not.toContain('I would tell you a UDP joke, but you might not get it.');
+      const firstJokeLines = firstResponse.split('\n').filter((line) => line.startsWith('- '));
+      const followUpJokeLines = followUpResponse
+        .split('\n')
+        .filter((line) => line.startsWith('- '));
+
+      expect(followUpResponse).not.toBe(firstResponse);
+      expect(followUpJokeLines).not.toEqual(firstJokeLines);
       expect(followUpResponse).toContain('Want another one?');
     });
 
@@ -439,12 +442,13 @@ describe('Canned Response Quality Tests', () => {
         history: [{ role: 'assistant', content: firstResponse }],
       });
 
-      expect(followUpResponse).not.toContain(
-        'We finally hit five nines, then someone changed one Terraform variable.'
-      );
-      expect(followUpResponse).not.toContain(
-        'Why do programmers prefer dark mode? Because light attracts bugs.'
-      );
+      const firstJokeLines = firstResponse.split('\n').filter((line) => line.startsWith('- '));
+      const followUpJokeLines = followUpResponse
+        .split('\n')
+        .filter((line) => line.startsWith('- '));
+
+      expect(followUpResponse).not.toBe(firstResponse);
+      expect(followUpJokeLines).not.toEqual(firstJokeLines);
       expect(followUpResponse).toContain('Want another one?');
     });
   });

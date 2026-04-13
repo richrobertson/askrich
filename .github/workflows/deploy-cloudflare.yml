@@ -28,7 +28,7 @@ jobs:
       DEPLOY_ENV: ${{ github.event_name == 'push' && 'prod' || github.event.inputs.environment }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Verify Cloudflare secrets
         env:
@@ -55,7 +55,7 @@ jobs:
       DEPLOY_ENV: ${{ github.event_name == 'push' && 'prod' || github.event.inputs.environment }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Verify Cloudflare secrets
         env:

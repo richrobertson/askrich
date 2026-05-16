@@ -41,7 +41,7 @@ jobs:
           fi
 
       - name: Deploy API Worker
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v4
         with:
           command: deploy --config apps/api/worker/wrangler.toml --env ${{ env.DEPLOY_ENV }}
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -68,7 +68,7 @@ jobs:
           fi
 
       - name: Deploy Web Worker Assets
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v4
         with:
           command: deploy --config apps/web/wrangler.toml --env ${{ env.DEPLOY_ENV }}
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
